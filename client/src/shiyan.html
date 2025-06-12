@@ -1,0 +1,76 @@
+<!-- 
+overflow-y属性赋值含义以及对应的滚动条的特殊情况下的显示的情况：
+
+值	          页面滚动条行为（浏览器滚动条）	            元素滚动条行为（文本容器滚动条）
+visible	     页面滚动条会根据溢出内容自动出现	            不会生成滚动条，内容溢出直接显示
+
+hidden     	页面滚动条不会出现，内容直接被裁剪	        元素滚动条不会出现，内容溢出直接被裁剪
+
+scroll	          页面滚动条始终显示	                 元素滚动条始终显示，无论内容是否溢出
+
+auto	      页面滚动条根据内容溢出动态出现或隐藏	        元素滚动条根据内容溢出动态出现或隐藏
+
+clip	       页面滚动条不会出现，内容直接被裁剪	      元素滚动条不会出现，内容直接被裁剪，且无法访问 
+-->
+
+let start1x = value2.value[0];
+let end1x = value2.value[1];
+const jiezhi1 = await axios.get(`/api/action_data?start=${start1x}&end=${end1x}`);//data路由在有start\end参与的情况下同样进行查询
+if (jiezhi1.data.length > 0) {
+  currentPage1.value = 1;
+  start1 = start1x;
+  end1 = end1x;
+  signzhi1.value = jiezhi1.data[0][0];
+  //当点击ok的时候则对date_array进行获取
+  const resultkk = await axios.get(`/api/action_data?start=${start1}&end=${end1}`)
+  const resultxxxx = await axios.get(`/api/action?start=${start1}&end=${end1}&d_no=${signzhi1.value}&currentPage=${currentPage1.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
+  const resultxxxxx = await axios.get(`/api/action?start=${start1}&end=${end1}&d_no=${signzhi1.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
+  const resultyyy = await axios.get(`/api/action_count?start=${start1}&end=${end1}&d_no=${signzhi1.value}`);//将数组的总内容数进行获取用于total2的赋值
+  //首先判断是否成功选中了对应时间段的数据集合
+  console.log("resultyyy.data:" + resultyyy.data);
+  signzhi1.value = resultxxxxx.data[0][0];//记录编号
+  date_Array1.value = resultkk.data;//分页内容的呈现数组赋值
+  //进行时间段总数据的d_no不重复筛选
+  now_databasesArray1.value = resultxxxx.data;//进行总ok内容的赋值
+  device_array_action_page_array.value = resultxxxx.data;
+  type_array1.value = qu_repeate(date_Array1.value);//去重数组的获取
+  b1_length.value = type_array1.value.length;
+  device_array1.value = resultxxxxx.data;//赋值完毕
+  total2.value = resultyyy.data;//进行某行为数组的总长的赋值
+  b_length.value = jiezhi1.data;//进行总行为数组的总长的赋值
+
+  //折线图清空
+  //行为信息清空
+  chartOption0.value.series[0].data = [];
+  chartOption0.value.series[1].data = [];
+  chartOption0.value.series[2].data = [];
+  chartOption0.value.series[3].data = [];
+  //柱状图清空
+  //行为信息清空
+  chartOption11.value.series[0].data = [];
+  // alert(nowArray.value);
+  //在执行完数组的获取操作的时候判断时间段内合法的数据总数并集成
+  //调用填充函数
+  enough();
+  console.log("signzhi1:" + signzhi1.value);        //对signzhi1进行重新赋值
+
+  //对signzhi1进行重新赋值
+  if (b_length.value > 1) {
+    signzhi1.value = type_array1.value[0][0];
+    //将cc清为0
+    cc = 0;
+    //清空其余的选中的样式
+    const option_array: any = document.querySelectorAll(".device_list1");
+    option_array.forEach(item => {
+      item.children[0].style.color = "black";
+      item.children[0].style.backgroundColor = "white";
+    })
+  }
+
+  //对文本进行修改
+  const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
+  text_array[1].innerText = `设备编号为${signzhi1.value}的信息`;
+}
+else {
+  alert("此区间没有值");
+}

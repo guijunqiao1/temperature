@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册</title>
+</head>
+<body>
+  <div class="top_part">
+    <a href="" class="top_a">
+      <img src="https://img10.360buyimg.com/imagetools/jfs/t1/200417/36/48298/15119/663b4a97Fbd82cd18/c40b9c6fb52743b8.png" alt="">
+    </a>
+    <div style="display: inline-block;">欢迎注册</div>
+    <div class="login" style="display: inline-block;">已经有账户了?<a href="/login">去登录</a></div>
+  </div>
+  <div class="bottom_part">
+    <form action="/login">
+      手机号码:
+      <input type="text" placeholder="请输入常用手机号" class="phone">
+      验证码:
+      <input type="text" placeholder="请输入验证码" class="test"><button class="yanzheng">获取验证码</button>
+      账号名:
+      <input type="text" placeholder="请输入账号名" class="username">
+      设置密码:
+      <input type="password" placeholder="请输入密码" class="password">
+      再次确认密码:
+      <input type="password" placeholder="再次确定密码" class="password_again"> 
+      <button class="all">同意并注册</button>
+      <input type="checkbox">已阅读并同意以下协议
+      <a href="https://breg.jd.com/policies/#/registration_agreement">《京东企业用户注册协议》</a> <a href="https://breg.jd.com/policies/#/privacy_policy">《京东企业用户隐私政策》</a>
+    </form>
+  </div>
+  
+  <!-- 当前表单提交成功之后向路由发出post请求最终完成登录界面的跳转 -->
+
+
+
+  <!-- 进行脚本的设计 -->
+   <script>
+    //获取验证码标签进行获取用于修改其中的文本
+    const yazheng = document.querySelector(".yanzheng");
+    //对点击之后的其进行设计
+
+</script>
+</body>
+</html>
+<!-- 对表单元素进行样式设计 -->
+<style>
+  * {
+    margin:0;
+    padding:0;
+  }
+  /* 清除默认样式 */
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  /* 输入框 */
+  input {
+
+  }
+  /* 按钮 */
+  button {
+
+  }
+  /* 顶部总盒子 */
+  .top_part {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+  }
+  /* 顶部图标父元素及子图片元素 */
+  /* .top_a>img,
+  .top_a {
+    width: ;
+    height: ;
+  } */
+  /* 顶部图标父元素 */
+  /* .top_a {
+    position: relative;
+    left
+  } */
+  /* 单选框 */
+</style>

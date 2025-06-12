@@ -52,22 +52,7 @@ var connection; //定义数据库连接对象
       }
     }
   }, null, null, [[0, 7]]);
-})(); // 控件实际值的控制路由 
-// Router_direct.get("/direct",async(req,res)=>{
-//   const {d_no} = req.query;
-//   const [rows] = await connection.execute(`
-//   SELECT config_id,value
-//   FROM t_direct
-//   WHERE d_no = "${d_no}"
-//   `);
-//   const resultObject = rows.reduce((acc, curr) => {
-//     acc[curr.config_id] = curr.value;
-//     return acc;
-//   }, {});
-//   //格式化数据
-//   res.send(resultObject);
-// })
-//额外绑定获取所有数据的路由
+})(); //额外绑定获取所有数据的路由
 
 
 Router_direct.get("/zhiling", function _callee2(ctx) {

@@ -7,29 +7,6 @@
         :default-time="defaultTime1" />
     </div>
 
-    <!-- 进行范围内容的设备的显示 -->
-    <!-- <div id="timeTotime1" v-if="Pinia.device_sign && Pinia.Device_sign">
-      <el-dropdown v-if="a1_length > 1 && date_Array[0][0]"> -->
-    <!-- 当前框只在保底一个的情况下才出现 -->
-    <!-- <el-button type="primary">
-          传感<el-icon class="el-icon--right"><arrow-down /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div class="device_list" v-for="item in type_array">
-              <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change1(item, $event)">查看传感器设备{{ item[0] }}的变化情况</div>
-              </el-dropdown-item>
-            </div>
-          </el-dropdown-menu>
-        </template>
-</el-dropdown> -->
-    <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现 -->
-    <!-- <div class="only" style="border-radius: 5px;background-color: #409eff;"
-        v-if="a1_length === 1 && date_Array[0][0]">
-        设备编号为{{ date_Array[0][0] }}的信息</div>
-    </div> -->
-
 
 
     <!-- 用于表格信息提示的标签 -->
@@ -51,9 +28,9 @@
       <tbody>
         <tr v-for="item in device_page_array">
           <!-- <td v-if="Pinia.device_sign">{{ item[0] }}</td> -->
-          <td>{{ item[1] }} <button class="btn_modal" @click="start_block(item)">查看</button></td>
-          <td>{{ item[2] }} <button class="btn_modal" @click="start_block(item)">查看</button></td>
-          <td>{{ item[3] }} <button class="btn_modal" @click="start_block(item)">查看</button></td>
+          <td>{{ item[1] }}</td>
+          <td>{{ item[2] }} <button class="btn_modal" @click="start_block(item[2])">查看</button></td>
+          <td>{{ item[3] }} <button class="btn_modal" @click="start_block(item[3])">查看</button></td>
           <td>{{ moment(item[4]).format('YYYY-MM-DD HH:mm:ss') }}</td>
           <!-- <td>{{ item[5] }}</td> -->
         </tr>
@@ -83,77 +60,12 @@
 
 
     <ECharts :option="chartOption" style="width: 600px; height: 400px; display:block;" class="zhexian"
-      v-show="Pinia.Device_sign" />
+      v-show="Pinia.Device_sign && (xuanran_block_device === '1')" />
     <ECharts :option="chartOption1" style="width:600px; height:400px;display:none;" class="zhuzhuang"
       v-show="Pinia.Device_sign" />
 
 
 
-
-    <!-- 行为相关内容 -->
-
-    <!-- <h2 v-show="Pinia.Action_sign" class="h2_action">图书借阅情况一览</h2> -->
-
-    <!-- 查询条件 -->
-    <!-- <div class="search">
-      <label for="book_id">书号:</label>
-      <input type="text" id="book_id" v-model="book_id">
-
-
-      <label for="person">借阅人:</label>
-      <input type="text" id="person" v-model="person">
-
-
-      <label for="start_time">起始时间:</label>
-      <el-date-picker v-model="start_time" type="datetime" placeholder="Select date and time" id="start_time"
-        size="small" />
-
-
-      <button class="submit" @click="search">查询</button>
-    </div> -->
-
-
-    <!-- 用于行为表格展示的提示的标签 -->
-    <!-- <h2 class="h2" v-show="Pinia.Action_sign">箱内温度</h2> -->
-
-
-    <!-- 行为表格 -->
-    <!-- <table class="action_table" v-show="Pinia.Action_sign">
-      <thead>
-        <tr>
-          <th>{{ }}</th>
-          <th>状态</th>
-          <th>借阅人ID</th>
-          <th>录入时间</th>
-          <th>书籍存放位置</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in device_array_action_page_array">
-          <td>{{ item.d_no }}</td>
-          <td>{{ item.field1 === "1" ? "借阅" : "归还" }}</td>
-          <td>{{ item.field2 }}</td>
-          <td>{{ moment(item.c_time).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          <td>{{ item.field3 }}</td>
-        </tr>
-      </tbody>
-    </table> -->
-    <!-- 分页栏部分 -->
-    <!-- <div class="pagination-container1" v-show="Pinia.Action_sign">
-      <el-pagination v-model:current-page="currentPage1" v-model:page-size="pageSize" :total="Number(total2)"
-        layout=" prev ,pager, next" /> -->
-    <!-- 上述前者用于响应式提供当前选中的页数；第二者用于设置固定的每页中应当呈现的数据；第三者用于获取到总数，则element标签会自动进行计算用于将当前应当呈现的页数；第四者为分页标签的顺序设置；最后者表示设置当前的分页的标签的整体的大小为默认大小 -->
-    <!-- </div> -->
-
-    <!-- 设备行为图像 -->
-    <!-- <div class="change2" @click="change0($event)" v-show="Pinia.Action_sign">
-      <button id="zhexian1" class="active">折线图(默认)</button>
-      <button id="zhuzhuang1">柱状图</button>
-    </div>
-    <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
-      v-show="Pinia.Action_sign" />
-    <ECharts :option="chartOption11" style="width:600px; height:400px; display:none;" class="zhuzhuang1"
-      v-show="Pinia.Action_sign" /> -->
   </div>
 </template>
 
@@ -201,11 +113,6 @@ let yingshe_array = ref();
 // 设备数据图像配置变量
 let chartOption = ref<any>({});//折线图配置变量
 let chartOption1 = ref<any>({});//柱状图配置变量
-// 行为数据图像配置变量
-// let chartOption0 = ref<any>({});//折线图配置变量
-// let chartOption11 = ref<any>({});//柱状图配置变量
-// 设备数据切换、设备数据图像切换事件变量
-// let change1 = (value: any, value1) => { };//用于控制切换设备按钮事件的定义
 let change = (value: any) => { };//用于控制切换图像的事件的定义
 // 行为数据切换、行为数据图像切换事件变量
 // let change0 = (value: any) => { };//用于控制切换行为图像的事件的定义
@@ -227,14 +134,6 @@ let device_array: any = ref(null);//进行设备数组的定义，用于将设�
 let device_page_array: any = ref(null);//进行设备数组的定义，用于将device_array中的信息进行分页提取--用于呈现的数组
 let unit_array = ref();//设备数据单位数组
 let unitlen: any = ref(0);
-// 行为数组的变量信息
-// let device_array1: any = ref(null);
-// let device_array_action_page_array = ref();//用于行为设备的分页呈现
-
-//定义图书查询维度变量
-// const person = ref();
-// const start_time = ref();
-// const book_id = ref();
 
 
 
@@ -260,6 +159,9 @@ let update = () => { };//普通数据表更新函数
 //定义查询方法--行为模块
 // let search = (value) => { };
 
+//存储渲染块的变量
+let xuanran_block_device = ref();
+
 
 const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
 
@@ -276,18 +178,7 @@ async function start_block(value) {
   modal.style.display = "block";
   // 解析传递的value
   const value_Extension = value.split('.').pop();//补充：pop方法用于返回到最后一项
-  if (value_Extension === "txt") {//若为文本数据
-    //请求文本内容
-    const result = await axios.get(`/api/file_txt?path=${value}`);//注意value为文件名，后端自行拼接
-    console.log("提前查看传输的结果值:" + result.data);
-    //添加文本到子元素中
-    modal_child.innerHTML = `
-    <pre>
-    ${result.data}
-    </pre>
-    `;
-  }
-  else if (value_Extension === "png") {
+  if (value_Extension === "png") {
     //添加img标签对象
     const img = document.createElement("img");
     //属性赋值
@@ -470,99 +361,9 @@ function enough() {
       }
     }
   }
-  // if (Pinia.Action_sign) {
-  //   //折线图的横轴结构设计--柱状图不需要设计
-  //   time_array1 = [];
-  //   if (chartOption0 && chartOption0.value && chartOption0.value.title && chartOption11 && chartOption11.value && chartOption11.value.title) {
-  //     //行为判断
-  //     if (!signzhi1) {
-  //       chartOption0.value.title.text = `图书借阅情况`;
-  //     }
-  //     else {
-  //       chartOption0.value.title.text = `图书号为${signzhi1}的借阅情况`;
-  //     }
-  //     // 确保device_array1已初始化且有数据
-  //     if (device_array1 && device_array1.value) {
-  //       //时间轴赋值
-  //       if (device_array1.value.length === 0) {
-  //         time_array1 = [];
-  //       }
-  //       else {
-  //         for (let i = 0; i < device_array1.value.length; i++) {
-  //           time_array1.push(moment(device_array1.value[i].start_time).format('YYYY-MM-DD HH:mm'));
-  //         }
-  //       }
-  //       console.log("time_array111:" + time_array1);
-  //       //折线图(设备指标随日期变化)
-  //       chartOption0.value.xAxis.data = time_array1;
-  //       //清空数组
-  //       chartOption0.value.series[0].data = [];
-  //       chartOption11.value.series[0].data = [];
-  //       if (device_array1.value.length === 0) {
-  //         chartOption0.value.series[0].data = [];
-  //       }
-  //       else {
-  //         //行为赋值
-  //         for (let i = 0; i < device_array1.value.length; i++) {
-  //           chartOption0.value.series[0].data.push(Number(device_array1.value[i].field1));
-  //           // alert("1");
-  //         }
-  //       }
-  //       // for (let i = 0; i < device_array1.value.length; i++) {
-  //       //   chartOption0.value.series[3].data.push(device_array1.value[i][4]);
-  //       // }
-  //       //柱状图(设备生产总量,定义总和变量)
-  //       let sum11 = 0;
-  //       let sum22 = 0;
-  //       if (device_array1.value.length !== 0) {
-  //         //行为信息
-  //         for (let i = 0; i < device_array1.value.length; i++) {
-  //           if (device_array1.value[i].filed1 === "1") { sum11++; }
-  //           else if (device_array1.value[i].filed1 === "0") { sum22++; }
-  //         }
-  //       }
-  //       //行为赋值
-  //       console.log("行为成功赋值：");
-  //       console.log("sum11：" + sum11);
-  //       console.log("sum22：" + sum22);
-  //       chartOption11.value.series[0].data.push(sum11);
-  //       chartOption11.value.series[0].data.push(sum22);
-  //       //修改柱状图标题
-  //     }
-  //   }
-  // }
+
 }
 
-//用于行为模块中查询事件的函数
-// search = async (value) => {
-//   //检查内容是否合法
-//   if (typeof person.value === "number") {
-//     alert("借阅人名不能为数字");
-//     return;
-//   }
-//   else if (typeof start_time.value === "string" || typeof start_time.value === "number") {
-//     alert("起始时间只能是合法时间值");
-//     return;
-//   }
-//   console.log("person:" + person.value);
-//   console.log("book_id:" + book_id.value);
-//   console.log("start_time:" + start_time.value);
-//   const result = await axios.get(`/api/action?currentPage=${currentPage1.value}&pageSize=${pageSize}&person=${person.value}&book_id=${book_id.value}&start_time=${start_time.value}`);
-//   const result_length = await axios.get(`/api/action_count?person=${person.value}&book_id=${book_id.value}&start_time=${start_time.value}`);
-//   const result_all = await axios.get(`/api/action_count?person=${person.value}&book_id=${book_id.value}&start_time=${start_time.value}&all=yes`);
-//   device_array_action_page_array.value = result.data;
-//   total2.value = result_length.data;
-//   device_array1.value = result_all.data;
-//   console.log("device_array:" + device_array1.value);
-//   console.log("device_array_length:" + device_array1.value.length);
-
-//   if (book_id) {//当提交的书号不为空
-//     signzhi1 = book_id.value;
-//   }
-
-//   //主动重渲染图像
-//   enough();
-// }
 
 
 //自当前组件创建阶段就对currentPage变量的值进行监视，若发生了修改，则结合上currentPage变量对databases_array赋值(模版为jiezhi_array)
@@ -581,6 +382,9 @@ onMounted(async () => {
   update();
   const result = await axios.get("/api/yingshe");
   yingshe_array.value = result.data;
+  //渲染块变量赋值
+  xuanran_block_device.value = yingshe_array.value[0].is_show;//查看该组内容是否可渲染,一致处理
+
   const result1 = await axios.get("/api/data?start=1&end=1");
   date_Array.value = result1.data;
   type_array.value = qu_repeate(date_Array.value);//去重数组的获取
@@ -708,102 +512,7 @@ onMounted(async () => {
     chartOption1.value.series[0].data = [];
 
   }
-  // if (Pinia.Action_sign) {//当且仅当date_Array1中存在值且Action_sign为true时才进行处理
-  //   //在监视阶段进行currentPage的赋值用于进行初次切割的验证
-  //   currentPage1.value = 1;
-  //   //故不需要再使用filter函数进行d_no的筛选
-  //   const result22 = await axios.get(`/api/action_count?person=${person.value}&book_id=${book_id.value}&start_time=${start_time.value}`);
-  //   total2.value = result22.data;//某设备行为总量的获取
 
-  //   //行为数据
-  //   // 定义图表配置--折线图
-  //   chartOption0 = ref({
-  //     title: {
-  //       text: "",
-  //       left: 'center',//标题居中
-  //     },
-  //     tooltip: {
-  //       trigger: 'axis'
-  //     },
-  //     legend: {
-  //       top: "25px",
-  //       data: ["借阅:1/存放:0"]
-  //     },
-  //     grid: {
-  //       left: '3%',
-  //       right: '4%',
-  //       bottom: '3%',
-  //       containLabel: true
-  //     },
-  //     xAxis: {
-  //       type: 'category',
-  //       boundaryGap: false,
-  //       data: [],
-  //       axisLabel: {
-  //         fontSize: 10,
-  //         color: '#333',
-  //         fontWeight: '400',
-  //         rotate: 90
-  //       }
-  //     },
-  //     yAxis: {
-  //       type: 'value'
-  //     },
-  //     series: [
-  //       {
-  //         name: "借阅:1/存放:0",
-  //         type: 'line',
-  //         smooth: true,
-  //         data: []
-  //       }
-  //     ]
-  //   });
-
-  //   // 定义图表配置--柱状图
-  //   chartOption11 = ref({
-  //     // 标题.value
-  //     title: {
-  //       text: '柱形图示例',
-  //       left: 'center' // 标题居中
-  //     },
-  //     // 提示框
-  //     tooltip: {
-  //       trigger: 'axis', // 触发方式：坐标轴触发
-  //       axisPointer: {
-  //         type: 'shadow' // 阴影指示器
-  //       }
-  //     },
-  //     // X 轴
-  //     xAxis: {
-  //       type: 'category', // 类目轴
-  //       data: ["借阅总数", "归还总数"] // X 轴数据
-  //     },
-  //     // Y 轴
-  //     yAxis: {
-  //       type: 'value' // 数值轴
-  //     },
-  //     // 数据系列
-  //     series: [
-  //       {
-  //         name: '实时量', // 系列名称
-  //         type: 'bar', // 柱形图
-  //         data: [], // 数据
-  //         itemStyle: {
-  //           color: '#5470C6' // 柱形图颜色
-  //         }
-  //       }
-  //     ]
-  //   });
-
-
-  //   //需要注意的是初始化体表进行渲染的时候的赋值应该发生在异步处理中，否则报错且不生效
-  //   //首先将折线图内容清空
-  //   //行为信息清空
-  //   chartOption0.value.series[0].data = [];
-  //   // chartOption0.value.series[3].data = [];
-  //   //将柱状图内容清空
-  //   chartOption11.value.series[0].data = [];
-  // }
   // 根据当前的Pinia状态决定是否调用enough函数
   if ((a_length.value > 0 && Pinia.Device_sign) || (Pinia.Action_sign)) {
     // 确保需要的图表对象都已初始化
@@ -1074,160 +783,9 @@ onMounted(async () => {
       }
     }
     if (type_array.value.length > 1) {//当不止有两种类型的设备的时候
-      //定义change事件--设备信息
-      // change1 = async (value, value1) => {//点击了这个按钮就说明本身其实是存在着这个数组的
-      //   //点击了设备按钮之后对样式进行修改
-      //   //对所有内容进行统一的设计
-      //   if (a1_length.value > 1) {
-      //     const option_array: any = document.querySelectorAll(".device_list");
-      //     option_array.forEach(item => {
-      //       item.children[0].style.color = "black";
-      //       item.children[0].style.backgroundColor = "white";
-      //     })
-      //     value1.target.parentNode.style.color = "#409eff";
-      //     value1.target.parentNode.style.backgroundColor = "rgb(235.9, 245.3, 255)";
-      //   }
-      //   else { }
 
-      //   //首先判断signzhi是否发生改变
-      //   if (signzhi.value !== value[0]) {//改变则进行device_array的从新请求赋值
-      //     //进行signzhi的转换
-      //     signzhi.value = value[0];
-      //     if (start !== 1 && end !== 1 && start.getTime() === end.getTime()) {
-      //       const result = await axios.get(`/api/History?&start=end&end=${end}&d_no=${signzhi.value}`);
-      //       device_array.value = result.data;
-      //       const result11 = await axios.get(`/api/History_count?start=end&end=${end}&d_no=${signzhi.value}`);
-      //       total1.value = result11.data;//进行某设备总数的获取
-      //       const result2 = await axios.get(`/api/data?start=end&end=${end}`);
-      //       a_length.value = result2.data.length;//进行设备总数的获取
-      //     }
-      //     else {
-      //       const result = await axios.get(`/api/History?&start=${start}&end=${end}&d_no=${signzhi.value}`);
-      //       device_array.value = result.data;
-      //       const result11 = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);
-      //       total1.value = result11.data;//进行某设备总数的获取
-      //       const result2 = await axios.get(`/api/data?start=${start}&end=${end}`);
-      //       a_length.value = result2.data.length;//进行设备总数的获取
-      //     }
-
-      //     //进行watch事件的动态执行
-      //     currentPage.value = 0;
-      //     currentPage.value = 1;
-      //     //折线图数据清空
-      //     //设备信息清空
-      //     chartOption.value.series[0].data = [];
-      //     chartOption.value.series[1].data = [];
-      //     chartOption.value.series[2].data = [];
-      //     // chartOption.value.series[3].data = [];
-      //     //柱状图数据清空
-      //     //设备信息清空
-      //     chartOption1.value.series[0].data = [];
-      //     //修改折线图标题,柱状图不需要进行修改，标题内容只随着时间发生改变
-      //     //设备信息填充
-      //     if (start === 1 || end === 1) {
-      //       // chartOption.value.title.text = `传感器设备${device_array.value[0][0]}的变化情况`;
-      //       chartOption.value.title.text = `传感器设备的变化情况`;
-      //     }
-      //     else {
-      //       // chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备${device_array.value[0][0]}的变化情况`;
-      //       chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备的变化情况`;
-      //     }
-      //   }
-      //   //调用填充函数
-      //   enough();
-
-      //   //对初始文本进行编辑
-      //   const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
-      //   text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
-      // };
     }
   }
-  // if (Pinia.Action_sign) {//当是设备行为信息进行呈现的时候
-  //   //定义切换图像事件--行为信息上的change事件
-  //   change0 = (value) => {//需要注意的是点击了按钮之后需要对整个表格的内容进行填充
-  //     console.log("点击到了捏");
-  //     const zhexian_btn = document.querySelector("#zhexian1") as HTMLElement;
-  //     const zhuzhuang_btn = document.querySelector("#zhuzhuang1") as HTMLElement;
-  //     const zhexian = document.querySelector(".zhexian1") as HTMLElement;
-  //     const zhuzhuang = document.querySelector(".zhuzhuang1") as HTMLElement;
-  //     if (value.target === zhexian_btn) {
-  //       //对选中的元素进行样式修改
-  //       zhexian_btn.classList.add("active");
-  //       zhuzhuang_btn.classList.remove("active");
-
-  //       // 对剩余对象进行隐藏
-  //       zhexian.style.display = "block";
-  //       zhuzhuang.style.display = "none";
-  //       //折线图清空
-  //       //行为信息清空
-  //       chartOption0.value.series[0].data = [];
-  //       // chartOption0.value.series[3].data = [];
-  //       time_array1 = [];
-  //       //行为信息赋值
-  //       if (!signzhi1) {
-  //         chartOption0.value.title.text = `图书借阅情况`;
-  //       }
-  //       else {
-  //         chartOption0.value.title.text = `图书号为${signzhi1}的借阅情况`;
-  //       }
-  //       //行为信息
-  //       for (let i = 0; i < device_array1.value.length; i++) {
-  //         time_array1.push(moment(device_array1.value[i].start_time).format('YYYY-MM-DD HH:mm'));
-  //       }
-  //       //行为信息赋值
-  //       console.log("time_array222:" + time_array1);
-  //       chartOption0.value.xAxis.data = time_array1;
-  //       //折线图填充
-  //       //行为信息赋值
-  //       for (let i = 0; i < device_array1.value.length; i++) {
-  //         chartOption0.value.series[0].data.push(device_array1.value[i].remarks === "借阅" ? 1 : 0);
-  //         // alert("1");
-  //       }
-  //       // for (let i = 0; i < device_array1.value.length; i++){
-  //       //   chartOption0.value.series[3].data.push(device_array1.value[i][4]);
-  //       //   // alert("4");
-  //       // }
-  //     }
-  //     else if (value.target === zhuzhuang_btn) {
-  //       //为选中的元素进行样式修改
-  //       zhuzhuang_btn.classList.add("active");
-  //       zhexian_btn.classList.remove("active");
-
-
-  //       // 对剩余对象进行隐藏
-  //       zhexian.style.display = "none";
-  //       zhuzhuang.style.display = "block";
-  //       //柱状图清空
-  //       //行为信息清空
-  //       chartOption11.value.series[0].data = [];
-  //       let sum11 = 0;
-  //       let sum22 = 0;
-  //       //行为信息
-  //       for (let i = 0; i < device_array1.value.length; i++) {
-  //         if (device_array1.value[i].field1 === "1") {
-  //           sum11++;
-  //         }
-  //         else if (device_array1.value[i].field1 === "0") {
-  //           sum22++;
-  //         }
-  //       }
-  //       //行为信息赋值
-  //       console.log("行为成功赋值：");
-  //       console.log("sum11：" + sum11);
-  //       console.log("sum22：" + sum22);
-  //       chartOption11.value.series[0].data.push(sum11);
-  //       chartOption11.value.series[0].data.push(sum22);
-  //       //修改柱状图标题
-  //       //行为信息修改
-  //       if (!signzhi1) {
-  //         chartOption11.value.title.text = `图书借阅情况`;
-  //       }
-  //       else {
-  //         chartOption11.value.title.text = `图书号为${signzhi1}的借阅情况`;
-  //       }
-  //     }
-  //   }
-  // }
   enough();
 })
 
@@ -1236,23 +794,9 @@ let cc = 0;
 //需要注意和New之间的区别，此处的.device_list并不会同时存在，因为同时存在意味着同时悬浮，故无法同时进行操作，只能根据一次的响应式的dom出现进行单次的判断
 onUpdated(() => {//使用updated钩子解决onMounted无法动态挂载完随响应式数据变化而变化的dom,并且此处仅要求执行一次,否则定时器一直运行导致当前的一号为的内容同样一直运行
   if (cc < 1) {
-    // if (type_array.value.length > 1) {
-    //   console.log("桂军桥");
-    //   const option_array: any = document.querySelectorAll(".device_list");
-    //   console.log("type_array:" + type_array.value.length);
-    //   if (type_array.value.length > 1) {
-    //     option_array[0].children[0].style.color = "#409eff";
-    //     option_array[0].children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
-    //   }
-    //   cc++;
-    // }
   }
   else { }
 })
-//上方响应式数据修改后的钩子的执行的注意点：
-// 首先当type_array单独发生改变的时候，由于本身处于异步的过程中所以若在本身执行的下一步立即执行type_array1的赋值的话则在进入
-//onUpdated中的时候会带上type_array1赋值后的结果一起进行判断了，若两者赋值语句处于不同的分支则只会携带上一方的修改后的结果进行判断可能会达不到自己的需求的效果
-
 
 </script>
 

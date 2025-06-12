@@ -18,26 +18,26 @@ let connection1;//定义数据库连接对象--project02
 })();
 
 //动态获取到多设备的总数，完成设备列表的填充
-const [rows1] = await connection1.execute(`
-SELECT d_no 
-FROM t_device
-WHERE device_name = "电动自行车"
-`);
+// const [rows1] = await connection1.execute(`
+// SELECT d_no 
+// FROM t_device
+// WHERE device_name = "电动自行车"
+// `);
 
 export let active_array;
-for(let i=0;i<rows1[0].length;i++){
-  active_array.push([Number(rows1[0][i]),false]);
-}
+// for(let i=0;i<rows1[0].length;i++){
+//   active_array.push([Number(rows1[0][i]),false]);
+// }
 //定义当前心跳是否正常的标志变量
 // export let active_array = [[2021,false]];
-// export let active = false;
+export let active = false;
 
 //定义指令备份数组
-let zhiling_beifen_array = [];
-for(let i=0;i<rows1[0].length;i++){
-  zhiling_beifen_array.push([Number(rows1[0][i]),[]]);
-}
 // let zhiling_beifen_array = [];
+// for(let i=0;i<rows1[0].length;i++){
+//   zhiling_beifen_array.push([Number(rows1[0][i]),[]]);
+// }
+let zhiling_beifen_array = [];
 
 //定义全局阶段性变量
 let level = 0;
@@ -90,19 +90,19 @@ function getTongbu() {
 // 制作一个定时器用于定期向设备层订阅的主题中发送消息，并且设备层在接受到消息之后则响应相同的消息到应用层，用于检测设备层和应用层是不是直接的连接
 setInterval(()=>{
   console.log("心跳正常发送");
-  // client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  // 单设备
-  // active = false;
+  client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
+  单设备
+  active = false;
   //多设备
   //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
-  active_array.forEach((item,index)=>{
-    //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
-    client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-    // 多设备情况
-    item[1] = false;
+  // active_array.forEach((item,index)=>{
+  //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
+  //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
+  //   // 多设备情况
+  //   item[1] = false;
 
-    console.log("成功发送消息到主题direct:"+item[0]);
-  })
+  //   console.log("成功发送消息到主题direct:"+item[0]);
+  // })
 },5000);//每5s进行一次心跳的检测
 
 
@@ -110,13 +110,13 @@ setInterval(()=>{
 //定义重发函数--针对重连的重发函数，封装
 function reconnect_republish(value){//参数对应上了实际的响应的设备编号
   // 多设备
-  active_array.forEach((item,index)=>{
-    if(item[0]===value){
-      item[1] = true;//当接收到心跳重连的信息的时候进行备份数组的内容的重发布，并且后续在主动进行指令的配置的时候进行active的直接判断并且执行一次是否为active为false的情况并且将对应的指令的信息存入到beifen_array中
-    }
-  });
+  // active_array.forEach((item,index)=>{
+  //   if(item[0]===value){
+  //     item[1] = true;//当接收到心跳重连的信息的时候进行备份数组的内容的重发布，并且后续在主动进行指令的配置的时候进行active的直接判断并且执行一次是否为active为false的情况并且将对应的指令的信息存入到beifen_array中
+  //   }
+  // });
   // 单设备
-  // active = true;
+  active = true;
   //主动调用一次重发
   republish();
 };
@@ -124,37 +124,37 @@ function reconnect_republish(value){//参数对应上了实际的响应的设备
 //定义重发函数--广义
 async function republish(){
   // 多设备
-  const length = zhiling_beifen_array.length;
-  for(let i=0;i<length;i++){
-    for(let j=0;zhiling_beifen_array[i][1].length;j++){
-      if(zhiling_beifen_array.length>0&&zhiling_beifen_array[0].length>0&&zhiling_beifen_array[0][1].length>0){
-          beifen(zhiling_beifen_array[i][0],zhiling_beifen_array[i][1][j]);//参数1为设备编号，参数2为指令本身内容
-          zhiling_beifen_array.shift();
-      }
-      else{}
-      await delay(3000);//单位为ms
-    }
-  }
+  // const length = zhiling_beifen_array.length;
+  // for(let i=0;i<length;i++){
+  //   for(let j=0;zhiling_beifen_array[i][1].length;j++){
+  //     if(zhiling_beifen_array.length>0&&zhiling_beifen_array[0].length>0&&zhiling_beifen_array[0][1].length>0){
+  //         beifen(zhiling_beifen_array[i][0],zhiling_beifen_array[i][1][j]);//参数1为设备编号，参数2为指令本身内容
+  //         zhiling_beifen_array.shift();
+  //     }
+  //     else{}
+  //     await delay(3000);//单位为ms
+  //   }
+  // }
   // 单设备
   //首先检查长度
-  // console.log("zhiling_beifen_array_length:"+zhiling_beifen_array.length);
-  // console.log("zhiling_beifen:");
-  // console.dir(zhiling_beifen_array);
-  // const length = zhiling_beifen_array.length;
-  // console.log("length:"+length);
-  // for(let i=0;i<length;i++){
-  //   // client.publish(...zhiling_beifen_array[i],{qos:1});
-  //   // client.publish(...zhiling_beifen_array[i],{qos:1});
-  //   console.log(zhiling_beifen_array[0]); 
-  //   if(zhiling_beifen_array.length>0&&zhiling_beifen_array[0].length>0){
-  //     beifen(1,zhiling_beifen_array[0]);
-  //     zhiling_beifen_array.shift();
-  //   }
-  //   else{
+  console.log("zhiling_beifen_array_length:"+zhiling_beifen_array.length);
+  console.log("zhiling_beifen:");
+  console.dir(zhiling_beifen_array);
+  const length = zhiling_beifen_array.length;
+  console.log("length:"+length);
+  for(let i=0;i<length;i++){
+    // client.publish(...zhiling_beifen_array[i],{qos:1});
+    // client.publish(...zhiling_beifen_array[i],{qos:1});
+    console.log(zhiling_beifen_array[0]); 
+    if(zhiling_beifen_array.length>0&&zhiling_beifen_array[0].length>0){
+      beifen(1,zhiling_beifen_array[0]);
+      zhiling_beifen_array.shift();
+    }
+    else{
       
-  //   }
-  //   await delay(3000);//单位为ms
-  // }
+    }
+    await delay(3000);//单位为ms
+  }
 }  
 
 //定义备份函数--value2中的topic必须带上d_no的信息
@@ -165,17 +165,17 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
   client.publish(value2[0],JSON.stringify(value2[1]),{qos:1});
 
   // 多设备指令备份
-  active_array.forEach((item,index)=>{
-    if(item[0]===value1&&item[1]===false){
-    // 备份数组的内容填充
-    zhiling_beifen_array[index][1].push(value2);//其中value2的格式为：[topic,JSON.stringify({origin:"bujindianji",content})]
-    }
-  })
+  // active_array.forEach((item,index)=>{
+  //   if(item[0]===value1&&item[1]===false){
+  //   // 备份数组的内容填充
+  //   zhiling_beifen_array[index][1].push(value2);//其中value2的格式为：[topic,JSON.stringify({origin:"bujindianji",content})]
+  //   }
+  // })
   // 单设备指令备份
-  // if(active===false){
-  //   zhiling_beifen_array.push(value2);
-  //   console.log("zhiling_beifen_array.length:"+zhiling_beifen_array.length);
-  // }
+  if(active===false){
+    zhiling_beifen_array.push(value2);
+    console.log("zhiling_beifen_array.length:"+zhiling_beifen_array.length);
+  }
 } 
 
 
@@ -357,11 +357,11 @@ client.on('message', async (topic, message) => {
   else if(topic==="heartbeat"){//当发送的心跳消息得到响应的时候的主题消息的内容的执行 --心跳信息中应当存在设备编号的信息
     console.log("收到底层心跳");
     // 单设备
-    // reconnect_republish();//完成对应设备的心跳置true
+    reconnect_republish();//完成对应设备的心跳置true
     // 多设备
     //获取到d_no信息
-    const {d_no} = JSON.parse(message);
-    reconnect_republish(d_no);//完成对应设备的心跳置true
+    // const {d_no} = JSON.parse(message);
+    // reconnect_republish(d_no);//完成对应设备的心跳置true
   }
   // 接收到底层的自动模式下的修改控件状态的指令的情况
   // else if(topic==="veiw"){

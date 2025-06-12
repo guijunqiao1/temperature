@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.beifen = beifen;
-exports.client = exports.active_array = void 0;
+exports.client = exports.active = exports.active_array = void 0;
 
 var _mqtt = _interopRequireDefault(require("mqtt"));
 
@@ -50,14 +50,27 @@ var connection1; //定义数据库连接对象--project02
     }
   }, null, null, [[0, 7]]);
 })(); //动态获取到多设备的总数，完成设备列表的填充
+// const [rows1] = await connection1.execute(`
+// SELECT d_no 
+// FROM t_device
+// WHERE device_name = "电动自行车"
+// `);
+
+
+var active_array; // for(let i=0;i<rows1[0].length;i++){
+//   active_array.push([Number(rows1[0][i]),false]);
+// }
 //定义当前心跳是否正常的标志变量
-
-
-var active_array = [[2021, false]]; // export let active = false;
-//定义指令备份数组
-// let zhiling_beifen_array = [[2021,[]]];
+// export let active_array = [[2021,false]];
 
 exports.active_array = active_array;
+var active = false; //定义指令备份数组
+// let zhiling_beifen_array = [];
+// for(let i=0;i<rows1[0].length;i++){
+//   zhiling_beifen_array.push([Number(rows1[0][i]),[]]);
+// }
+
+exports.active = active;
 var zhiling_beifen_array = []; //定义全局阶段性变量
 
 var level = 0; //定义准确的ID标识变量
@@ -115,32 +128,30 @@ setInterval(function () {
   }), {
     qos: 1
   }); //多设备情况下考虑的文本内容得添加上设备的具体编号
-  // 单设备
 
-  active = false; //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
-  // zhiling_beifen_array.forEach((item,index)=>{
+  单设备;
+  exports.active = active = false; //多设备
+  //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
+  // active_array.forEach((item,index)=>{
   //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
-  //   client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  //   //将当前心跳设备置为false
+  //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
   //   // 多设备情况
-  //   // active_array[index][1] = false;
-  //   // 单设备
-  //   active = false;
+  //   item[1] = false;
+  //   console.log("成功发送消息到主题direct:"+item[0]);
   // })
 }, 5000); //每5s进行一次心跳的检测
 //定义重发函数--针对重连的重发函数，封装
 
-function reconnect_republish() {
-  // 多设备
-  // console.log(`client成功接收设备${value}到数据`);
+function reconnect_republish(value) {
+  //参数对应上了实际的响应的设备编号
   // 多设备
   // active_array.forEach((item,index)=>{
   //   if(item[0]===value){
-  //     active_array[index][1] = true;//当接收到心跳重连的信息的时候进行备份数组的内容的重发布，并且后续在主动进行指令的配置的时候进行active的直接判断并且执行一次是否为active为false的情况并且将对应的指令的信息存入到beifen_array中
+  //     item[1] = true;//当接收到心跳重连的信息的时候进行备份数组的内容的重发布，并且后续在主动进行指令的配置的时候进行active的直接判断并且执行一次是否为active为false的情况并且将对应的指令的信息存入到beifen_array中
   //   }
   // });
   // 单设备
-  active = true; //主动调用一次重发
+  exports.active = active = true; //主动调用一次重发
 
   republish();
 }
@@ -154,22 +165,15 @@ function republish() {
       switch (_context2.prev = _context2.next) {
         case 0:
           // 多设备
-          // console.log("当前执行了一次重发内容");
-          // console.log("zhiling:"+zhiling_beifen_array[0][1]);
-          // 单设备
-          // console.log("zhiling:"+zhiling_beifen_array);
-          // 检查当前的备份数组是否为空，若不为空则将每条数据发送两次，每次间隔为100ms
-          // 多设备
-          // for(let i=0;i<zhiling_beifen_array.length;i++){
-          //   for(let j=0;j<zhiling_beifen_array[i][1].length;j++){
-          //     console.log("桂军桥本人人人人人人人人人人人人:"+zhiling_beifen_array[i][1][j]);
-          //     client.publish(...zhiling_beifen_array[i][1][j]);//需要观察原先存入到zhiling_beifen_array中的元素的结构:[topic,{origin:"bujindianji",content},{qos:1}]
-          //     console.log("第一次发送成功");
-          //     await delay(100);//单位为ms
-          //     client.publish(...zhiling_beifen_array[i][1][j]);
-          //     console.log("第二次发送成功");
-          //     //执行完成一次第一个元素的完全发送之后将第一个元素进行剔除
-          //     zhiling_beifen_array[i][1].shift();
+          // const length = zhiling_beifen_array.length;
+          // for(let i=0;i<length;i++){
+          //   for(let j=0;zhiling_beifen_array[i][1].length;j++){
+          //     if(zhiling_beifen_array.length>0&&zhiling_beifen_array[0].length>0&&zhiling_beifen_array[0][1].length>0){
+          //         beifen(zhiling_beifen_array[i][0],zhiling_beifen_array[i][1][j]);//参数1为设备编号，参数2为指令本身内容
+          //         zhiling_beifen_array.shift();
+          //     }
+          //     else{}
+          //     await delay(3000);//单位为ms
           //   }
           // }
           // 单设备
@@ -210,7 +214,7 @@ function republish() {
       }
     }
   });
-} //定义备份函数
+} //定义备份函数--value2中的topic必须带上d_no的信息
 
 
 function beifen(value1, value2) {
@@ -219,9 +223,6 @@ function beifen(value1, value2) {
       switch (_context3.prev = _context3.next) {
         case 0:
           //一号位参数用于确定发送的指令类对应的编号、二号位参数用于传递给具体的报文信息
-          // console.log("value2[0]"+value2[0]);
-          // console.log("value2[1]");
-          // console.dir(value2[1]);
           //首先进行指令发送 
           client.publish(value2[0], JSON.stringify(value2[1]), {
             qos: 1
@@ -233,13 +234,14 @@ function beifen(value1, value2) {
           //单位为ms 
           client.publish(value2[0], JSON.stringify(value2[1]), {
             qos: 1
-          }); // 多设备
-          // if(active_array[value1][1]===false){
+          }); // 多设备指令备份
+          // active_array.forEach((item,index)=>{
+          //   if(item[0]===value1&&item[1]===false){
           //   // 备份数组的内容填充
-          //   zhiling_beifen_array[value1][1].push(value2);//其中value2的格式为：[topic,JSON.stringify({origin:"bujindianji",content}),{qos:1}]
-          //   console.log("当前为离线状态");
-          // }
-          // 单设备
+          //   zhiling_beifen_array[index][1].push(value2);//其中value2的格式为：[topic,JSON.stringify({origin:"bujindianji",content})]
+          //   }
+          // })
+          // 单设备指令备份
 
           if (active === false) {
             zhiling_beifen_array.push(value2);
@@ -489,12 +491,9 @@ client.on('message', function _callee2(topic, message) {
 
           reconnect_republish(); //完成对应设备的心跳置true
           // 多设备
-          // if(!JSON.parse(message).d_no){
-          //   reconnect_republish(2021);//完成对应设备的心跳置true
-          // }
-          // else{
-          //   reconnect_republish(JSON.parse(message).d_no);//完成对应设备的心跳置true
-          // }
+          //获取到d_no信息
+          // const {d_no} = JSON.parse(message);
+          // reconnect_republish(d_no);//完成对应设备的心跳置true
 
           _context4.next = 116;
           break;

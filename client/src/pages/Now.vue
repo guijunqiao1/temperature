@@ -47,8 +47,7 @@
         <tbody>
           <tr>
             <!-- <td v-show="nowArray[0] && Pinia.device_sign">{{ nowArray[0] }}</td> -->
-            <td>{{ nowArray[1][nowArray[1].length - 1][0] }} <button class="btn_modal"
-                @click="start_block(nowArray[1][nowArray[1].length - 1][0])">查看</button></td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][0] }}</td>
             <td>{{ nowArray[1][nowArray[1].length - 1][1] }} <button class="btn_modal"
                 @click="start_block(nowArray[1][nowArray[1].length - 1][1])">查看</button></td>
             <td>{{ nowArray[1][nowArray[1].length - 1][2] }} <button class="btn_modal"
@@ -94,7 +93,7 @@
     </div>
 
     <ECharts :option="chartOption" style="width:600px; height: 400px;"
-      v-show="a_length > 0 && zhexian_device && Pinia.Device_sign" class="zhexian" />
+      v-show="a_length > 0 && zhexian_device && Pinia.Device_sign && (xuanran_block_device === '1')" class="zhexian" />
     <ECharts :option="chartOption1" style="width:600px; height:400px;" class="zhuzhuang"
       v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
 
@@ -249,6 +248,12 @@ let unit_array = ref();
 let unit_action_array = ref();
 
 
+//存储渲染块的变量
+let xuanran_block_device = ref();
+
+
+
+
 //定义弹出框绑定的事件
 async function start_block(value) {
   console.log("成功触发事件");
@@ -262,18 +267,7 @@ async function start_block(value) {
   modal.style.display = "block";
   // 解析传递的value
   const value_Extension = value.split('.').pop();//补充：pop方法用于返回到最后一项
-  if (value_Extension === "txt") {//若为文本数据
-    //请求文本内容
-    const result = await axios.get(`/api/file_txt?path=${value}`);//注意value为文件名，后端自行拼接
-    console.log("提前查看传输的结果值:" + result.data);
-    //添加文本到子元素中
-    modal_child.innerHTML = `
-    <pre>
-    ${result.data}
-    </pre>
-    `;
-  }
-  else if (value_Extension === "png") {
+  if (value_Extension === "png") {
     //添加img标签对象
     const img = document.createElement("img");
     //属性赋值
@@ -544,6 +538,10 @@ function y_zhi11(value) {
 
   const result = await axios.get("/api/yingshe");//设备映射数组
   yingshe_array.value = result.data;
+  //渲染块变量赋值
+  xuanran_block_device.value = yingshe_array.value[0].is_show;//查看该组内容是否可渲染,一致处理
+
+
   const result0 = await axios.get("/api/yingshe/action");//行为映射数组
   yingshe_action_array.value = result0.data;
   const result1 = await axios.get("/api/recent");//设备种类数组
@@ -623,19 +621,23 @@ function y_zhi11(value) {
         name: yingshe_array.value[0].field1,
         type: 'line',
         data: [],
-        smooth: true
+        smooth: true,
+
       },
       {
         name: yingshe_array.value[1].field2,
         type: 'line',
         data: [],
-        smooth: true
+        smooth: true,
+
+
       },
       {
         name: yingshe_array.value[2].field3,
         type: 'line',
         data: [],
-        smooth: true
+        smooth: true,
+
       },
     ]
   });
@@ -2091,10 +2093,6 @@ input[type="checkbox"]:hover {
 .X:hover {
   cursor: pointer;
 }
-
-
-
-
 </style>
 
 <!-- 

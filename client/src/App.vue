@@ -313,6 +313,13 @@ div.nothing {
 .error_date_time>.el-date-editor.el-date-editor--datetimerange.el-input__wrapper.el-range-editor.el-tooltip__trigger.el-tooltip__trigger {
   height: 24px !important;
 }
+
+
+/* 容器对齐 */
+.container.fit-view {
+  height: 646px !important;
+}
+
 </style>
 
 <!-- 

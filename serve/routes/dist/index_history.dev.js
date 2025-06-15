@@ -178,9 +178,9 @@ Router4.get("/History", function _callee2(ctx) {
           _ref7 = _context2.sent;
           _ref8 = _slicedToArray(_ref7, 1);
           _rows3 = _ref8[0];
-          res.json(_rows3.map(function (row) {
+          ctx.body = _rows3.map(function (row) {
             return [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field4, row.field5, row.field6, row.field7, row.field8, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), row.type];
-          }));
+          });
 
         case 51:
           _context2.next = 81;
@@ -243,9 +243,9 @@ Router4.get("/History", function _callee2(ctx) {
           _ref11 = _context2.sent;
           _ref12 = _slicedToArray(_ref11, 1);
           _rows5 = _ref12[0];
-          res.json(_rows5.map(function (row) {
+          ctx.body = _rows5.map(function (row) {
             return [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field4, row.field5, row.field6, row.field7, row.field8, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), row.type];
-          }));
+          });
 
         case 81:
           _context2.next = 90;

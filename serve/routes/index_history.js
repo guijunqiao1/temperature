@@ -129,7 +129,7 @@ Router4.get("/History", async ctx => {
           ORDER BY c_time DESC
           LIMIT ${parseInt(pageSize)} OFFSET ${offset}
         `);
-        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
+        ctx.body = rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]);
       }
     }
     else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
@@ -182,7 +182,7 @@ Router4.get("/History", async ctx => {
           ORDER BY c_time DESC
           LIMIT ${parseInt(pageSize)} OFFSET ${offset}
         `);
-        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
+        ctx.body = rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]);
       }
     }
   }

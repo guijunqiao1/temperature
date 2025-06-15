@@ -236,38 +236,21 @@ function XXX() {
 
 //专门用于更新的函数--赋值device_page_array和jiezhi_array
 update = async () => {//用于自动触发分页路由
+  const boolean_x = start !== 1 && end !== 1 && start.getTime() === end.getTime();
   //直接进行赋值(由于本身databases_array就随着ok的变化而变化所以不需要进行条件判断)
-  if (start !== 1 && end !== 1 && start.getTime() === end.getTime()) {
-    const result = await axios.get(`/api/History?currentPage=${currentPage.value}&pageSize=${pageSize}&start=end&end=${end}&d_no=${signzhi.value}`);
-    device_page_array.value = result.data;//进行设备分页数组的赋值
-    const result1 = await axios.get(`/api/History?start=end&end=${end}&d_no=${signzhi.value}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
-    device_array.value = result1.data;
-    const result_count = await axios.get(`/api/History_count?start=end&end=${end}&d_no=${signzhi.value}`);//用于获取总数
-    total1.value = result_count.data;
-    const result2 = await axios.get(`/api/device_unit`);
-    unit_array.value = result2.data;
-    unitlen.value = unit_array.value.length;
-    // 数据更新阶段对type_array进行赋值
-    const result111 = await axios.get("/api/data?start=1&end=1");
-    type_array.value = qu_repeate(result111.data);//去重数组的获取
-    enough();
-  }
-  else {
-    const result = await axios.get(`/api/History?currentPage=${currentPage.value}&pageSize=${pageSize}&start=${start}&end=${end}&d_no=${signzhi.value}`);
-    device_page_array.value = result.data;//进行设备分页数组的赋值
-    const result1 = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
-    device_array.value = result1.data;
-    const result_count = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);//用于获取总数
-    total1.value = result_count.data;
-    const result2 = await axios.get(`/api/device_unit`);
-    unit_array.value = result2.data;
-    unitlen.value = unit_array.value.length;
-    // 数据更新阶段对type_array进行赋值
-    const result111 = await axios.get("/api/data?start=1&end=1");
-    type_array.value = qu_repeate(result111.data);//去重数组的获取
-    console.log("桥豪杰:" + device_array.value);
-    enough();
-  }
+  const result = await axios.get(`/api/History?currentPage=${currentPage.value}&pageSize=${pageSize}&start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);
+  device_page_array.value = result.data;//进行设备分页数组的赋值
+  const result1 = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
+  device_array.value = result1.data;
+  const result_count = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//用于获取总数
+  total1.value = result_count.data;
+  const result2 = await axios.get(`/api/device_unit`);
+  unit_array.value = result2.data;
+  unitlen.value = unit_array.value.length;
+  // 数据更新阶段对type_array进行赋值
+  const result111 = await axios.get("/api/data?start=1&end=1");
+  type_array.value = qu_repeate(result111.data);//去重数组的获取
+  enough();
 };
 
 //专门用于更新的函数--赋值device_action和action
@@ -301,6 +284,9 @@ function qu_repeate(databases) {
 }
 //专门用于填充图表以及echarts的函数
 function enough() {
+  console.log("当前进入成功enough后的device_array:" + device_array.value);
+
+
   if (a_length.value >= 0 && Pinia.Device_sign) {//当对应上第一个组件正常显示的时候执行
     //折线图的横轴结构设计--柱状图不需要设计
     time_array = [];
@@ -317,9 +303,7 @@ function enough() {
       if (device_array && device_array.value && device_array.value.length > 0) {
         //时间轴赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          if (yingshe_array.value[i].is_show === "1") {
-            time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
-          }
+          time_array.push(moment(device_array.value[i][9]).format('YYYY-MM-DD HH:mm'));
         }
         chartOption.value.xAxis.data = time_array;
         let tem_index = 0;
@@ -330,6 +314,7 @@ function enough() {
             console.log("chart长度:" + chartOption.value.series.length);
             console.log("映射数组长度" + yingshe_array.value.length);
             console.log("当前条件nei'rong:" + yingshe_array.value[index].is_show);
+            console.log("当前点击了ok之后的设备数组neirong:" + device_array.value);
             for (let k = tem_index; k < device_array.value[i].length; k++) {
               if (yingshe_array.value[k].is_show === "1") {//同步判断
                 console.log("成功进入fuzhi一次");
@@ -387,6 +372,14 @@ function enough() {
             chartOption1.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备的各项数据总量`;
           }
         }
+      }
+      else{
+        //清空
+        chartOption.value.xAxis.data = [];
+        chartOption.value.series.forEach((item, index) => {
+          item.data = [];
+        })
+        chartOption1.value.series[0].data = [];
       }
     }
   }
@@ -646,85 +639,32 @@ onMounted(async () => {
       start = value1.value[0];
       end = value1.value[1];
       let jiezhi;
-      if (start !== 1 && end !== 1 && start.getTime() === end.getTime()) {
-        jiezhi = await axios.get(`/api/data?start=end&end=${end}`);//data路由在有start\end参与的情况下同样进行查询
-        a_length.value = jiezhi.data.length;//进行总设备数量的赋值
-        currentPage.value = 1;
-        if (a_length.value > 0) {
-          signzhi.value = jiezhi.data[0][0];
-        }
-        //当点击ok的时候则对date_array进行获取
-        const resultk = await axios.get(`/api/History?start=end&end=${end}`);
-        date_Array.value = resultk.data;//分页内容的呈现数组赋值
-        type_array.value = qu_repeate(date_Array.value);//去重数组的获取
-
-        const resultx = await axios.get(`/api/History?start=end&end=${end}&d_no=${signzhi.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
-        now_databasesArray.value = resultx.data;//进行总ok内容的赋值
-        device_page_array.value = resultx.data;
-        const resultxx = await axios.get(`/api/History?start=end&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
-        if (resultxx.data.length > 0) {
-          signzhi.value = resultxx.data[0][0];//记录编号
-        }
-        device_array.value = resultxx.data;//赋值完毕
-        const resultxxx = await axios.get(`/api/History_count?start=end&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
-        total1.value = resultxxx.data;//进行某设备总值的赋值
-        //进行时间段总数据的d_no不重复筛选
-
+      let boolean_x = start !== 1 && end !== 1 && start.getTime() === end.getTime();
+      jiezhi = await axios.get(`/api/data?start=${boolean_x ? "end" : start}&end=${end}`);//data路由在有start\end参与的情况下同样进行查询
+      a_length.value = jiezhi.data.length;//进行总设备数量的赋值
+      currentPage.value = 1;
+      if (a_length.value > 0) {
+        signzhi.value = jiezhi.data[0][0];
       }
-      else {
-        jiezhi = await axios.get(`/api/data?start=${start}&end=${end}`);//data路由在有start\end参与的情况下同样进行查询
-        a_length.value = jiezhi.data.length;//进行总设备数量的赋值
-        currentPage.value = 1;
-        if (a_length.value > 0) {
-          signzhi.value = jiezhi.data[0][0];
-        }
-        //当点击ok的时候则对date_array进行获取
-        const resultk = await axios.get(`/api/History?start=${start}&end=${end}`);
-        date_Array.value = resultk.data;//分页内容的呈现数组赋值
-        type_array.value = qu_repeate(date_Array.value);//去重数组的获取
+      //当点击ok的时候则对date_array进行获取
+      const resultk = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}`);
+      date_Array.value = resultk.data;//分页内容的呈现数组赋值
+      type_array.value = qu_repeate(date_Array.value);//去重数组的获取
 
-        const resultx = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
-        now_databasesArray.value = resultx.data;//进行总ok内容的赋值
-        device_page_array.value = resultx.data;
-        const resultxx = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
-        if (resultxx.data.length > 0) {
-          signzhi.value = resultxx.data[0][0];//记录编号
-        }
-        device_array.value = resultxx.data;//赋值完毕
-        const resultxxx = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
-        total1.value = resultxxx.data;//进行某设备总值的赋值
-        //进行时间段总数据的d_no不重复筛选
+      const resultx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
+      now_databasesArray.value = resultx.data;//进行总ok内容的赋值
+      device_page_array.value = resultx.data;
+      const resultxx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
+      if (resultxx.data.length > 0) {
+        signzhi.value = resultxx.data[0][0];//记录编号
       }
+      device_array.value = resultxx.data;//赋值完毕
+      const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
+      total1.value = resultxxx.data;//进行某设备总值的赋值
 
-      //折线图清空
-      //设备信息清空
-      chartOption.value.series.forEach((item, index) => {
-        item.data = [];
-      })
-      //柱状图清空
-      //设备信息清空
-      chartOption1.value.series[0].data = [];
-      // alert(nowArray.value);
-      //在执行完数组的获取操作的时候判断时间段内合法的数据总数并集成
-      //调用填充函数
+      console.log("点击了Ok但是还没有进入到enough中的device_array:" + device_array.value);
+      //进行时间段总数据的d_no不重复筛选
       enough();
-      console.log("signzhi:" + signzhi.value);
-
-      //对signzhi进行重新赋值
-      if (a_length.value > 1) {
-        signzhi.value = type_array.value[0][0];
-        //将cc清为0
-        cc = 0;
-        //清空其余的选中的样式
-        const option_array: any = document.querySelectorAll(".device_list");
-        option_array.forEach(item => {
-          item.children[0].style.color = "black";
-          item.children[0].style.backgroundColor = "white";
-        })
-      }
-      //对文本进行修改
-      // const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
-      // text_array[0].innerText = `设备编号为${signzhi.value}的信息`;
     });
     //定义切换图像事件--设备信息上的change事件
     change = (value) => {//需要注意的是点击了按钮之后需要对整个表格的内容进行填充
@@ -740,37 +680,7 @@ onMounted(async () => {
         // 对剩余对象进行隐藏
         zhexian.style.display = "block";
         zhuzhuang.style.display = "none";
-        //折线图清空
-        //设备信息清空
-        chartOption.value.series.forEach((item, index) => {
-          item.data = [];
-        })
-        time_array = [];
-        //设备信息赋值
-        if (start === 1 || end === 1) {
-          // chartOption.value.title.text = `传感器设备${device_array.value[0][0]}的变化情况`;
-          // chartOption.value.title.text = `传感器设备的变化情况`;
-        }
-        else {
-          // chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备${device_array.value[0][0]}的变化情况`;
-          // chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备的变化情况`;
-        }
-        //设备信息
-        for (let i = 0; i < device_array.value.length; i++) {
-          time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
-        }
-        //设备信息赋值
-        chartOption.value.xAxis.data = time_array;
-        //折线图填充
-        //设备信息赋值
-        for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series.forEach((item, index) => {
-            if (yingshe_array.value[i].is_show === "1") {
-              item.data.push(device_array.value[i][index + 1]);
-            }
-          })
-          chartOption.value.series[0].data.push();
-        }
+
       }
       else if (value.target === zhuzhuang_btn) {
         //为选中元素进行样式修改
@@ -780,34 +690,11 @@ onMounted(async () => {
         // 对剩余对象进行隐藏
         zhexian.style.display = "none";
         zhuzhuang.style.display = "block";
-        //柱状图清空
-        //设备信息清空
-        chartOption1.value.series[0].data = [];
-        let sum1 = 0;
-        let sum2 = 0;
-        let sum3 = 0;
-        let sum4 = 0;
-        let sum5 = 0;
-        //设备信息
-        for (let i = 0; i < device_array.value.length; i++) {
-          sum1 += Number(device_array.value[i][4]);
-          sum2 += Number(device_array.value[i][5]);
-          sum3 += Number(device_array.value[i][6]);
-          sum4 += Number(device_array.value[i][7]);
-          sum5 += Number(device_array.value[i][8]);
-        }
-        //设备信息赋值
-        chartOption1.value.series[0].data.push(sum1);
-        chartOption1.value.series[0].data.push(sum2);
-        chartOption1.value.series[0].data.push(sum3);
-        chartOption1.value.series[0].data.push(sum4);
-        chartOption1.value.series[0].data.push(sum5);
 
       }
+      enough();
     }
-    if (type_array.value.length > 1) {//当不止有两种类型的设备的时候
 
-    }
   }
   enough();
 })

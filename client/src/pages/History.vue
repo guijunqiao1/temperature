@@ -17,22 +17,40 @@
       <thead v-if="yingshe_array && unit_array">
         <tr>
           <!-- 直接考虑是否为多设备的情况 -->
-          <!-- <th v-if="Pinia.device_sign">设备编号</th> -->
-          <th>{{ yingshe_array[0].field1 }}</th>
-          <th>{{ yingshe_array[1].field2 }}</th>
-          <th>{{ yingshe_array[2].field3 }}</th>
+          <!-- <th>设备编号</th> -->
+          <th>{{ yingshe_array[0].field1 }} {{ unit_array[0] !== "null" ? `(${unit_array[0]})` : "" }}</th>
+          <th>{{ yingshe_array[1].field2 }} {{ unit_array[1] !== "null" ? `(${unit_array[1]})` : "" }}</th>
+          <th>{{ yingshe_array[2].field3 }} {{ unit_array[2] !== "null" ? `(${unit_array[2]})` : "" }}</th>
+          <th>{{ yingshe_array[3].field4 }} {{ unit_array[3] !== "null" ? `(${unit_array[3]})` : "" }}</th>
+          <th>{{ yingshe_array[4].field5 }} {{ unit_array[4] !== "null" ? `(${unit_array[4]})` : "" }}</th>
+          <th>{{ yingshe_array[5].field6 }} {{ unit_array[5] !== "null" ? `(${unit_array[5]})` : "" }}</th>
+          <th>{{ yingshe_array[6].field7 }} {{ unit_array[6] !== "null" ? `(${unit_array[6]})` : "" }}</th>
+          <th>{{ yingshe_array[7].field8 }} {{ unit_array[7] !== "null" ? `(${unit_array[7]})` : "" }}</th>
           <th>收集时间</th>
           <!-- <th>数据类型</th> -->
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in device_page_array">
-          <!-- <td v-if="Pinia.device_sign">{{ item[0] }}</td> -->
-          <td>{{ item[1] }}</td>
-          <td>{{ item[2] }} <button class="btn_modal" @click="start_block(item[2])">查看</button></td>
-          <td>{{ item[3] }} <button class="btn_modal" @click="start_block(item[3])">查看</button></td>
-          <td>{{ moment(item[4]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          <!-- <td>{{ item[5] }}</td> -->
+        <tr v-for="(item, index) in device_page_array">
+          <!-- <td>{{ item[0] }}</td> -->
+          <td>{{ item[1] }} <button v-show="yingshe_array[0].type !== '1'" class="btn_modal"
+              @click="start_block(item[1])">查看</button> </td>
+          <td>{{ item[2] }} <button v-show="yingshe_array[1].type !== '1'" class="btn_modal"
+              @click="start_block(item[2])">查看</button></td>
+          <td>{{ item[3] }} <button v-show="yingshe_array[2].type !== '1'" class="btn_modal"
+              @click="start_block(item[3])">查看</button></td>
+          <td>{{ item[4] }} <button v-show="yingshe_array[3].type !== '1'" class="btn_modal"
+              @click="start_block(item[4])">查看</button></td>
+          <td>{{ item[5] }} <button v-show="yingshe_array[4].type !== '1'" class="btn_modal"
+              @click="start_block(item[5])">查看</button></td>
+          <td>{{ item[6] }} <button v-show="yingshe_array[5].type !== '1'" class="btn_modal"
+              @click="start_block(item[6])">查看</button></td>
+          <td>{{ item[7] }} <button v-show="yingshe_array[6].type !== '1'" class="btn_modal"
+              @click="start_block(item[7])">查看</button></td>
+          <td>{{ item[8] }} <button v-show="yingshe_array[7].type !== '1'" class="btn_modal"
+              @click="start_block(item[8])">查看</button></td>
+          <td>{{ moment(item[9]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <!-- <td>{{ item[10] }}</td> -->
         </tr>
       </tbody>
     </table>
@@ -60,7 +78,7 @@
 
 
     <ECharts :option="chartOption" style="width: 600px; height: 400px; display:block;" class="zhexian"
-      v-show="Pinia.Device_sign && (xuanran_block_device === '1')" />
+      v-show="Pinia.Device_sign" />
     <ECharts :option="chartOption1" style="width:600px; height:400px;display:none;" class="zhuzhuang"
       v-show="Pinia.Device_sign" />
 
@@ -159,8 +177,6 @@ let update = () => { };//普通数据表更新函数
 //定义查询方法--行为模块
 // let search = (value) => { };
 
-//存储渲染块的变量
-let xuanran_block_device = ref();
 
 
 const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
@@ -285,64 +301,79 @@ function qu_repeate(databases) {
 }
 //专门用于填充图表以及echarts的函数
 function enough() {
-  console.log("执行enough之前的a_length：" + a_length.value);
   if (a_length.value >= 0 && Pinia.Device_sign) {//当对应上第一个组件正常显示的时候执行
     //折线图的横轴结构设计--柱状图不需要设计
     time_array = [];
     //设备判断
     if (Pinia.Device_sign && chartOption && chartOption.value && chartOption.value.title && chartOption1 && chartOption1.value && chartOption1.value.title) {
-      console.log("成功进入判断");
       if (start === 1 || end === 1) {
-        // chartOption.value.title.text = `传感器设备${signzhi.value}变化情况`;
         chartOption.value.title.text = `传感器设备变化情况`;
       }
       else {
-        // chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备${signzhi.value}变化情况`;
         chartOption.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备变化情况`;
       }
 
       // 确保device_array已初始化且有数据
       if (device_array && device_array.value && device_array.value.length > 0) {
-        console.log("成功进入赋值阶段");
         //时间轴赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
+          if (yingshe_array.value[i].is_show === "1") {
+            time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
+          }
         }
-        console.log("chengzheyong:" + device_array.value);
-        //折线图(设备指标随日期变化)
         chartOption.value.xAxis.data = time_array;
-        console.log("时间轴成功赋值");
-        console.log(time_array);
-        //设备赋值
+        let tem_index = 0;
+        //设备赋值d
         for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[0].data.push(device_array.value[i][1]);
+          // 和映射数组对比判断是否需要将值加入到渲染数组中
+          chartOption.value.series.forEach((item, index) => {
+            console.log("chart长度:" + chartOption.value.series.length);
+            console.log("映射数组长度" + yingshe_array.value.length);
+            console.log("当前条件nei'rong:" + yingshe_array.value[index].is_show);
+            for (let k = tem_index; k < device_array.value[i].length; k++) {
+              if (yingshe_array.value[k].is_show === "1") {//同步判断
+                console.log("成功进入fuzhi一次");
+                console.log("当前fuzhineirongwei:");
+                console.dir(device_array.value[i][k + 1]);
+                item.data.push(device_array.value[i][k + 1]);
+                tem_index = k + 1;
+                break;
+              }
+            }
+          })
         }
-        for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[1].data.push(device_array.value[i][2]);
-        }
-        for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[2].data.push(device_array.value[i][3]);
-        }
-        // for (let i = 0; i < device_array.value.length; i++) {
-        //   chartOption.value.series[3].data.push(device_array.value[i][4]);
-        // }
+        console.log("当前成功图像的：");
+        console.dir(chartOption.value);
+        chartOption1.value.series[0].data = [];
         //柱状图(设备生产总量,定义总和变量)
         let sum1 = 0;
         let sum2 = 0;
         let sum3 = 0;
         let sum4 = 0;
+        let sum5 = 0;
         //设备信息
         for (let i = 0; i < device_array.value.length; i++) {
-          sum1 += Number(device_array.value[i][1]);
-          sum2 += Number(device_array.value[i][2]);
-          sum3 += Number(device_array.value[i][3]);
-          sum4 += Number(device_array.value[i][4]);
+          console.log("当前设备为：" + device_array.value[i]);
+          sum1 += Number(device_array.value[i][4]);
+          sum2 += Number(device_array.value[i][5]);
+          sum3 += Number(device_array.value[i][6]);
+          sum4 += Number(device_array.value[i][7]);
+          sum5 += Number(device_array.value[i][8]);
         }
         //设备赋值
         chartOption1.value.series[0].data.push(sum1);
         chartOption1.value.series[0].data.push(sum2);
         chartOption1.value.series[0].data.push(sum3);
         chartOption1.value.series[0].data.push(sum4);
+        chartOption1.value.series[0].data.push(sum5);
+
+        //赋值后的总数
+        console.log("当前总数:");
+        console.dir(chartOption1.value);
+        console.log("实际总数:");
+        console.log("sum1:" + sum1, "sum2:" + sum2, "su3:" + sum3, "sum4:" + sum4, "sum5:" + sum5);
+
+
         //修改柱状图标题
         //设备判断
         if (!start || !end) {//若起始
@@ -350,11 +381,9 @@ function enough() {
         }
         else {
           if (start === 1 || end === 1) {
-            // chartOption1.value.title.text = `传感器设备${signzhi.value}的各项数据总量`;
             chartOption1.value.title.text = `传感器设备的各项数据总量`;
           }
           else {
-            // chartOption1.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备${signzhi.value}的各项数据总量`;
             chartOption1.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备的各项数据总量`;
           }
         }
@@ -382,8 +411,6 @@ onMounted(async () => {
   update();
   const result = await axios.get("/api/yingshe");
   yingshe_array.value = result.data;
-  //渲染块变量赋值
-  xuanran_block_device.value = yingshe_array.value[0].is_show;//查看该组内容是否可渲染,一致处理
 
   const result1 = await axios.get("/api/data?start=1&end=1");
   date_Array.value = result1.data;
@@ -418,7 +445,8 @@ onMounted(async () => {
       },
       legend: {
         top: "25px",
-        data: [yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3]
+        data: []
+        //yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3
       },
       grid: {
         left: '3%',
@@ -441,26 +469,26 @@ onMounted(async () => {
         type: 'value'
       },
       series: [
-        {
-          name: yingshe_array.value[0].field1,
-          type: 'line',
-          smooth: true,
-          data: []
-        },
-        {
-          name: yingshe_array.value[1].field2,
-          type: 'line',
-          smooth: true,
+        // {
+        //   name: yingshe_array.value[0].field1,
+        //   type: 'line',
+        //   smooth: true,
+        //   data: []
+        // },
+        // {
+        //   name: yingshe_array.value[1].field2,
+        //   type: 'line',
+        //   smooth: true,
 
-          data: []
-        },
-        {
-          name: yingshe_array.value[2].field3,
-          type: 'line',
-          smooth: true,
+        //   data: []
+        // },
+        // {
+        //   name: yingshe_array.value[2].field3,
+        //   type: 'line',
+        //   smooth: true,
 
-          data: []
-        }
+        //   data: []
+        // }
       ]
     });
 
@@ -481,7 +509,8 @@ onMounted(async () => {
       // X 轴
       xAxis: {
         type: 'category', // 类目轴
-        data: [yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3] // X 轴数据
+        data: [] // X 轴数据
+        // yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3
       },
       // Y 轴
       yAxis: {
@@ -500,16 +529,32 @@ onMounted(async () => {
       ]
     });
 
-    //需要注意的是初始化体表进行渲染的时候的赋值应该发生在异步处理中，否则报错且不生效
-    //首先将折线图内容清空
+    // 获取可渲染总数
+    let is_show_total = 0;
 
-    //设备信息清空 
-    chartOption.value.series[0].data = [];
-    chartOption.value.series[1].data = [];
-    chartOption.value.series[2].data = [];
-    // chartOption.value.series[3].data = [];
-    //将柱状图内容清空 
-    chartOption1.value.series[0].data = [];
+    // chartOption(1)内容仅存放is_show为1的字段
+    yingshe_array.value.forEach((item, index) => {
+      if (item.is_show === "1") {
+        is_show_total++;
+        // 折线赋值
+        console.log("检查当前实际插入的字段值:" + item[`field${index + 1}`]);
+        chartOption.value.legend.data.push(item[`field${index + 1}`]);
+        chartOption.value.series.push({
+          name: item[`field${index + 1}`],
+          type: 'line',
+          smooth: true,
+          data: []
+        })
+        //柱状赋值
+        chartOption1.value.xAxis.data.push(item[`field${index + 1}`]);
+      }
+    })
+
+    console.log("当前图像完成基本赋值：");
+    console.dir(chartOption.value);
+    console.dir(chartOption1.value);
+
+    //需要注意的是初始化体表进行渲染的时候的赋值应该发生在异步处理中，否则报错且不生效
 
   }
 
@@ -643,7 +688,7 @@ onMounted(async () => {
         device_page_array.value = resultx.data;
         const resultxx = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
         if (resultxx.data.length > 0) {
-          signzhi.value = resultxx.data[0][0];//记录编号            
+          signzhi.value = resultxx.data[0][0];//记录编号
         }
         device_array.value = resultxx.data;//赋值完毕
         const resultxxx = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
@@ -653,10 +698,9 @@ onMounted(async () => {
 
       //折线图清空
       //设备信息清空
-      chartOption.value.series[0].data = [];
-      chartOption.value.series[1].data = [];
-      chartOption.value.series[2].data = [];
-      // chartOption.value.series[3].data = [];
+      chartOption.value.series.forEach((item, index) => {
+        item.data = [];
+      })
       //柱状图清空
       //设备信息清空
       chartOption1.value.series[0].data = [];
@@ -698,10 +742,9 @@ onMounted(async () => {
         zhuzhuang.style.display = "none";
         //折线图清空
         //设备信息清空
-        chartOption.value.series[0].data = [];
-        chartOption.value.series[1].data = [];
-        chartOption.value.series[2].data = [];
-        // chartOption.value.series[3].data = [];
+        chartOption.value.series.forEach((item, index) => {
+          item.data = [];
+        })
         time_array = [];
         //设备信息赋值
         if (start === 1 || end === 1) {
@@ -721,21 +764,13 @@ onMounted(async () => {
         //折线图填充
         //设备信息赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[0].data.push(device_array.value[i][1]);
-          // alert("1");
+          chartOption.value.series.forEach((item, index) => {
+            if (yingshe_array.value[i].is_show === "1") {
+              item.data.push(device_array.value[i][index + 1]);
+            }
+          })
+          chartOption.value.series[0].data.push();
         }
-        for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[1].data.push(device_array.value[i][2]);
-          // alert("2");
-        }
-        for (let i = 0; i < device_array.value.length; i++) {
-          chartOption.value.series[2].data.push(device_array.value[i][3]);
-          // alert("3");
-        }
-        // for (let i = 0; i < device_array.value.length; i++) {
-        //   chartOption.value.series[3].data.push(device_array.value[i][4]);
-        //   // alert("4");
-        // }
       }
       else if (value.target === zhuzhuang_btn) {
         //为选中元素进行样式修改
@@ -752,34 +787,22 @@ onMounted(async () => {
         let sum2 = 0;
         let sum3 = 0;
         let sum4 = 0;
+        let sum5 = 0;
         //设备信息
         for (let i = 0; i < device_array.value.length; i++) {
-          sum1 += Number(device_array.value[i][1]);
-          sum2 += Number(device_array.value[i][2]);
-          sum3 += Number(device_array.value[i][3]);
-          sum4 += Number(device_array.value[i][4]);
+          sum1 += Number(device_array.value[i][4]);
+          sum2 += Number(device_array.value[i][5]);
+          sum3 += Number(device_array.value[i][6]);
+          sum4 += Number(device_array.value[i][7]);
+          sum5 += Number(device_array.value[i][8]);
         }
         //设备信息赋值
         chartOption1.value.series[0].data.push(sum1);
         chartOption1.value.series[0].data.push(sum2);
         chartOption1.value.series[0].data.push(sum3);
         chartOption1.value.series[0].data.push(sum4);
-        //修改柱状图标题
-        //设备信息修改
-        if (!start || !end) {//若起始
-          // chartOption1.value.title.text = `从起始统计到现在的传感器设备${device_array.value[0][0]}各项数据总量`;
-          // chartOption1.value.title.text = `从起始统计到现在的传感器设备各项数据总量`;
-        }
-        else {
-          if (start === 1 || end === 1) {
-            // chartOption1.value.title.text = `传感器设备${device_array.value[0][0]}各项数据总量`;
-            // chartOption1.value.title.text = `传感器设备各项数据总量`;
-          }
-          else {
-            // chartOption1.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备${device_array.value[0][0]}各项数据总量`;
-            // chartOption1.value.title.text = `从${moment(start).format('YYYY-MM-DD HH:mm')}到${moment(end).format('YYYY-MM-DD HH:mm')}传感器设备各项数据总量`;
-          }
-        }
+        chartOption1.value.series[0].data.push(sum5);
+
       }
     }
     if (type_array.value.length > 1) {//当不止有两种类型的设备的时候
@@ -919,7 +942,7 @@ h2 {
 table {
   margin-top: 18px;
   border-top: 5px solid gray;
-  width: 1020px;
+  /* width: 1020px; */
   height: 66px;
   /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
   border-spacing: 0;
@@ -1163,13 +1186,13 @@ input[type="checkbox"]:hover {
 }
 
 /* 控制表格宽度铺满全屏  */
-.device_table {
+/* .device_table {
   width: 100% !important;
 }
 
 .action_table {
   width: 100% !important;
-}
+} */
 
 .pagination-container1>.el-pagination {
   margin-left: 800px;

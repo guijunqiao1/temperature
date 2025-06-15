@@ -16,18 +16,19 @@ const Router1 = new Router();
   }
 })();
 
-Router1.get("/yingshe", async  ctx => {
+Router1.get("/yingshe", async ctx => {
   console.log("123");
   let dbResult = await connection2.execute(`
-    SELECT db_name, f_name ,is_show FROM t_field_mapper;
+    SELECT db_name, f_name ,is_show , type FROM t_field_mapper;
   `);
   dbResult = dbResult[0];
 
   const objectArray = dbResult.map(row => {
-    return { [row.db_name]: row.f_name,is_show:row.is_show };
+    return { [row.db_name]: row.f_name,is_show:row.is_show,type:row.type };
   });
 
-  console.log("yinghse" + objectArray);
+  console.log("yingshe");
+  console.dir(objectArray);
   ctx.body = objectArray;
 });
 //行为映射表

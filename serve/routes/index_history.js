@@ -22,13 +22,13 @@ const Router4= new Router();
 //表格的呈现-图像的呈现路由
 Router4.get("/History", async ctx => {
   let { start,end,currentPage,pageSize,d_no } = ctx.query;
-  try{
+  try{ 
     //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
     if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
       if(currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined){
         // 执行查询并格式化结果
         const [rows] = await connection2.execute(`
-          SELECT d_no, field1, field2, field3, DATE_FORMAT(c_time, '%Y-%m-%dT%H:%i:%s.000Z') AS c_time,type
+          SELECT d_no, field1, field2, field3,field4, field5, field6,field7,field8, DATE_FORMAT(c_time, '%Y-%m-%dT%H:%i:%s.000Z') AS c_time,type
           FROM t_data 
           ORDER BY c_time DESC
         `, [d_no]);
@@ -39,6 +39,11 @@ Router4.get("/History", async ctx => {
           row.field1.toString(),  // 确保所有字段为字符串类型
           row.field2.toString(),
           row.field3.toString(),
+          row.field4.toString(),
+          row.field5.toString(),
+          row.field6.toString(),
+          row.field7.toString(),
+          row.field8.toString(),
           dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
           row.type
         ]);
@@ -53,7 +58,7 @@ Router4.get("/History", async ctx => {
         const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
         //直接查询
         const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,c_time,type
+          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
           FROM t_data 
           ORDER BY c_time DESC
           LIMIT ${parseInt(pageSize)} OFFSET ${offset}
@@ -64,6 +69,11 @@ Router4.get("/History", async ctx => {
           row.field1.toString(),  // 确保所有字段为字符串类型
           row.field2.toString(),
           row.field3.toString(),
+          row.field4.toString(),
+          row.field5.toString(),
+          row.field6.toString(),
+          row.field7.toString(),
+          row.field8.toString(),
           dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
           row.type
         ]);
@@ -81,7 +91,7 @@ Router4.get("/History", async ctx => {
           const formattedEnd = formatTime(end);
           //直接查询
           const [rows] = await connection2.execute(`
-            SELECT d_no,field1,field2,field3,c_time,type
+            SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
             FROM t_data 
             WHERE c_time < "${formattedEnd}"
             ORDER BY c_time DESC
@@ -92,6 +102,11 @@ Router4.get("/History", async ctx => {
             row.field1.toString(),  // 确保所有字段为字符串类型
             row.field2.toString(),
             row.field3.toString(),
+            row.field4.toString(),
+            row.field5.toString(),
+            row.field6.toString(),
+            row.field7.toString(),
+            row.field8.toString(),
             dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
             row.type
           ]);
@@ -108,13 +123,13 @@ Router4.get("/History", async ctx => {
         const formattedEnd = formatTime(end);
         //直接查询
         const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,c_time,type
+          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
           FROM t_data
           WHERE c_time < "${formattedEnd}"
           ORDER BY c_time DESC
           LIMIT ${parseInt(pageSize)} OFFSET ${offset}
         `);
-        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
+        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
       }
     }
     else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
@@ -128,7 +143,7 @@ Router4.get("/History", async ctx => {
           const formattedEnd = formatTime(end);
           //直接查询
           const [rows] = await connection2.execute(`
-            SELECT d_no,field1,field2,field3,c_time,type
+            SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
             FROM t_data 
             WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
             ORDER BY c_time DESC
@@ -139,6 +154,11 @@ Router4.get("/History", async ctx => {
             row.field1.toString(),  // 确保所有字段为字符串类型
             row.field2.toString(),
             row.field3.toString(),
+            row.field4.toString(),
+            row.field5.toString(),
+            row.field6.toString(),
+            row.field7.toString(),
+            row.field8.toString(),
             dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
             row.type
           ]);
@@ -156,13 +176,13 @@ Router4.get("/History", async ctx => {
         const formattedEnd = formatTime(end);
         //直接查询
         const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,c_time,type
+          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
           FROM t_data 
           WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
           ORDER BY c_time DESC
           LIMIT ${parseInt(pageSize)} OFFSET ${offset}
         `);
-        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
+        res.json(rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]));
       }
     }
   }
@@ -283,6 +303,11 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
             '"', field1, '"', ',', 
             '"', field2, '"', ',', 
             '"', field3, '"', ',', 
+            '"', field4, '"', ',', 
+            '"', field5, '"', ',', 
+            '"', field6, '"', ',', 
+            '"', field7, '"', ',', 
+            '"', field8, '"', ',', 
             '"', c_time, '"', 
           ']') ORDER BY c_time
         ) AS data
@@ -298,7 +323,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
       });
     });
   
@@ -316,7 +341,13 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
             '"', field1, '"', ',', 
             '"', field2, '"', ',', 
             '"', field3, '"', ',', 
+            '"', field4, '"', ',', 
+            '"', field5, '"', ',', 
+            '"', field6, '"', ',', 
+            '"', field7, '"', ',', 
+            '"', field8, '"', ',', 
             '"', c_time, '"', 
+            '"', type, '"',
           ']') ORDER BY c_time
         ) AS data
       FROM t_data
@@ -331,7 +362,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
       });
     });
     // 最终返回的格式为 [[设备名, 数据1...], [设备名, 数据2...], ...]
@@ -349,6 +380,11 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
             '"', field1, '"', ',', 
             '"', field2, '"', ',', 
             '"', field3, '"', ',', 
+            '"', field4, '"', ',', 
+            '"', field5, '"', ',', 
+            '"', field6, '"', ',', 
+            '"', field7, '"', ',', 
+            '"', field8, '"', ',', 
             '"', c_time, '"', 
           ']') ORDER BY c_time
         ) AS data
@@ -364,7 +400,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
       });
     });
     // 最终返回的格式为 [[设备名, 数据1...], [设备名, 数据2...], ...]

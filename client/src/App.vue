@@ -314,12 +314,6 @@ div.nothing {
   height: 24px !important;
 }
 
-
-/* 容器对齐 */
-.container.fit-view {
-  height: 646px !important;
-}
-
 </style>
 
 <!-- 

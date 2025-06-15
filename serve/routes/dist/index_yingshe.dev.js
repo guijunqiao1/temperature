@@ -62,18 +62,21 @@ Router1.get("/yingshe", function _callee2(ctx) {
         case 0:
           console.log("123");
           _context2.next = 3;
-          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name FROM t_field_mapper;\n  "));
+          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name ,is_show , type FROM t_field_mapper;\n  "));
 
         case 3:
           dbResult = _context2.sent;
           dbResult = dbResult[0];
           objectArray = dbResult.map(function (row) {
-            return _defineProperty({}, row.db_name, row.f_name);
+            var _ref;
+
+            return _ref = {}, _defineProperty(_ref, row.db_name, row.f_name), _defineProperty(_ref, "is_show", row.is_show), _defineProperty(_ref, "type", row.type), _ref;
           });
-          console.log("yinghse" + objectArray);
+          console.log("yingshe");
+          console.dir(objectArray);
           ctx.body = objectArray;
 
-        case 8:
+        case 9:
         case "end":
           return _context2.stop();
       }

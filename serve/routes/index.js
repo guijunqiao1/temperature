@@ -51,6 +51,10 @@ Router.get("/recent", async (ctx) => {
                       '"', t.field2, '",', 
                       '"', t.field3, '",', 
                       '"', t.field4, '",', 
+                      '"', t.field5, '",', 
+                      '"', t.field6, '",', 
+                      '"', t.field7, '",', 
+                      '"', t.field8, '",', 
                       '"', t.c_time, '"', 
                   ']'
               ) ORDER BY t.c_time
@@ -105,6 +109,10 @@ Router.get("/recent/action", async  ctx => {
                      '"', t.field2, '"', ',', 
                      '"', t.field3, '"', ',', 
                      '"', t.field4, '"', ',', 
+                     '"', t.field5, '"', ',', 
+                     '"', t.field6, '"', ',', 
+                     '"', t.field7, '"', ',', 
+                     '"', t.field8, '"', ',', 
                      '"', t.c_time, '"', 
               ']') ORDER BY t.c_time
           ) AS data

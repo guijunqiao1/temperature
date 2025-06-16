@@ -61,7 +61,7 @@ var Router = new _koaRouter["default"](); //引入数据库链接函数
 
 
 Router.get("/recent", function _callee2(ctx) {
-  var _ref, _ref2, results, formattedResult;
+  var _ref, _ref2, result_now, sql_string, item, x, _ref3, _ref4, results, formattedResult;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -73,63 +73,27 @@ Router.get("/recent", function _callee2(ctx) {
 
         case 3:
           _context2.next = 5;
-          return regeneratorRuntime.awrap(connection2.query("\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT(\n                  '[', \n                      '\"', t.field1, '\",', \n                      '\"', t.field2, '\",', \n                      '\"', t.field3, '\",', \n                      '\"', t.field4, '\",', \n                      '\"', t.field5, '\",', \n                      '\"', t.field6, '\",', \n                      '\"', t.field7, '\",', \n                      '\"', t.field8, '\",', \n                      '\"', t.c_time, '\"', \n                  ']'\n              ) ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      WHERE t.c_time BETWEEN \n          (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no) - INTERVAL 5 MINUTE \n          AND (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no)\n      GROUP BY t.d_no;\n    "));
+          return regeneratorRuntime.awrap(connection2.query("\n      SELECT * \n      FROM t_data\n    "));
 
         case 5:
           _ref = _context2.sent;
           _ref2 = _slicedToArray(_ref, 1);
-          results = _ref2[0];
-          formattedResult = results.map(function (row) {
-            try {
-              if (!row.data) return [row.d_no, []];
-              var fixedData = "[".concat(row.data, "]");
-              var data = JSON.parse(fixedData); // 遍历 data 数组，修改 c_time 格式（去掉秒数）
+          result_now = _ref2[0];
+          //动态拼接sql依据字符串
+          sql_string = '';
 
-              data = data.map(function (entry) {
-                return entry;
-              });
-              return [row.d_no, data];
-            } catch (error) {
-              console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
-              return [row.d_no, []];
+          for (item in result_now[0]) {
+            if (result_now[0][item] !== null && item.includes("field")) {
+              x = "'\"', t." + item + ", '\",', ";
+              sql_string += x;
             }
-          }); //允许所有的来源
+          }
 
-          ctx.set("Access-Control-Allow-Origin", "*");
-          ctx.body = formattedResult;
-          _context2.next = 16;
-          break;
+          _context2.next = 12;
+          return regeneratorRuntime.awrap(connection2.query("\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT(\n                  '[', " + sql_string + "'\"', t.c_time, '\"', \n                  ']'\n              ) ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      WHERE t.c_time BETWEEN \n          (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no) - INTERVAL 5 MINUTE \n          AND (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no)\n      GROUP BY t.d_no;\n    "));
 
-        case 13:
-          _context2.prev = 13;
-          _context2.t0 = _context2["catch"](0);
-          console.error("数据库查询失败", _context2.t0);
-
-        case 16:
-        case "end":
-          return _context2.stop();
-      }
-    }
-  }, null, null, [[0, 13]]);
-}); //行为最新数据
-
-Router.get("/recent/action", function _callee3(ctx) {
-  var _ref3, _ref4, results, formattedResult;
-
-  return regeneratorRuntime.async(function _callee3$(_context3) {
-    while (1) {
-      switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.prev = 0;
-          _context3.next = 3;
-          return regeneratorRuntime.awrap(connection2.query("SET SESSION group_concat_max_len = 1000000"));
-
-        case 3:
-          _context3.next = 5;
-          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n          SELECT d_no, MAX(c_time) AS max_time \n          FROM t_data\n          GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', \n                     '\"', t.field1, '\"', ',', \n                     '\"', t.field2, '\"', ',', \n                     '\"', t.field3, '\"', ',', \n                     '\"', t.field4, '\"', ',', \n                     '\"', t.field5, '\"', ',', \n                     '\"', t.field6, '\"', ',', \n                     '\"', t.field7, '\"', ',', \n                     '\"', t.field8, '\"', ',', \n                     '\"', t.c_time, '\"', \n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      JOIN latest_time_per_dno l \n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
-
-        case 5:
-          _ref3 = _context3.sent;
+        case 12:
+          _ref3 = _context2.sent;
           _ref4 = _slicedToArray(_ref3, 1);
           results = _ref4[0];
           formattedResult = results.map(function (row) {
@@ -146,26 +110,97 @@ Router.get("/recent/action", function _callee3(ctx) {
               console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
               return [row.d_no, []];
             }
-          });
+          }); //允许所有的来源
+
+          ctx.set("Access-Control-Allow-Origin", "*"); //简单请求
+
           ctx.body = formattedResult;
-          _context3.next = 15;
+          _context2.next = 23;
           break;
 
+        case 20:
+          _context2.prev = 20;
+          _context2.t0 = _context2["catch"](0);
+          console.error("数据库查询失败", _context2.t0);
+
+        case 23:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, null, null, [[0, 20]]);
+}); //行为最新数据
+
+Router.get("/recent/action", function _callee3(ctx) {
+  var _ref5, _ref6, result_now, sql_string, item, x, _ref7, _ref8, results, formattedResult;
+
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 3;
+          return regeneratorRuntime.awrap(connection2.query("SET SESSION group_concat_max_len = 1000000"));
+
+        case 3:
+          _context3.next = 5;
+          return regeneratorRuntime.awrap(connection2.query("\n      SELECT * \n      FROM t_behavior_data\n    "));
+
+        case 5:
+          _ref5 = _context3.sent;
+          _ref6 = _slicedToArray(_ref5, 1);
+          result_now = _ref6[0];
+          //动态拼接sql依据字符串
+          sql_string = '';
+
+          for (item in result_now[0]) {
+            if (result_now[0][item] !== null && item.includes("field")) {
+              x = "'\"', t." + item + ", '\",', ";
+              sql_string += x;
+            }
+          }
+
+          _context3.next = 12;
+          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n          SELECT d_no, MAX(c_time) AS max_time \n          FROM t_data\n          GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', " + sql_string + "'\"', t.c_time, '\"', \n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      JOIN latest_time_per_dno l \n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
+
         case 12:
-          _context3.prev = 12;
+          _ref7 = _context3.sent;
+          _ref8 = _slicedToArray(_ref7, 1);
+          results = _ref8[0];
+          formattedResult = results.map(function (row) {
+            try {
+              if (!row.data) return [row.d_no, []];
+              var fixedData = "[".concat(row.data, "]");
+              var data = JSON.parse(fixedData); // 遍历 data 数组，修改 c_time 格式（去掉秒数）
+
+              data = data.map(function (entry) {
+                return entry;
+              });
+              return [row.d_no, data];
+            } catch (error) {
+              console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
+              return [row.d_no, []];
+            }
+          });
+          ctx.body = formattedResult;
+          _context3.next = 22;
+          break;
+
+        case 19:
+          _context3.prev = 19;
           _context3.t0 = _context3["catch"](0);
           console.error("数据库查询失败", _context3.t0);
 
-        case 15:
+        case 22:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 12]]);
+  }, null, null, [[0, 19]]);
 }); //设备ID最新记录--映射列表对象路由
 
 Router.get("/recent/list_obj", function _callee4(ctx) {
-  var _ref5, _ref6, rows;
+  var _ref9, _ref10, rows;
 
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
@@ -175,9 +210,9 @@ Router.get("/recent/list_obj", function _callee4(ctx) {
           return regeneratorRuntime.awrap(connection2.query("\n  SELECT *\n  FROM t_container\n  ORDER BY ctime DESC\n  "));
 
         case 2:
-          _ref5 = _context4.sent;
-          _ref6 = _slicedToArray(_ref5, 1);
-          rows = _ref6[0];
+          _ref9 = _context4.sent;
+          _ref10 = _slicedToArray(_ref9, 1);
+          rows = _ref10[0];
           ctx.body = rows[0];
 
         case 6:

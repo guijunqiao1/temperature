@@ -22,176 +22,104 @@ const Router4= new Router();
 //表格的呈现-图像的呈现路由
 Router4.get("/History", async ctx => {
   let { start,end,currentPage,pageSize,d_no } = ctx.query;
-  try{ 
-    //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
-    if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
-      if(currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined){
-        // 执行查询并格式化结果
-        const [rows] = await connection2.execute(`
-          SELECT d_no, field1, field2, field3,field4, field5, field6,field7,field8, DATE_FORMAT(c_time, '%Y-%m-%dT%H:%i:%s.000Z') AS c_time,type
-          FROM t_data 
-          ORDER BY c_time DESC
-        `, [d_no]);
+  //全局sql
+  const query = `SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type FROM t_data `;
+  //降序sql
+  const DESC_query = `ORDER BY c_time DESC`;
+  //页数有效值判断布尔变量
+  const page_boolean = currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined;
+  //封装转化为数组的方法
+  function toTwoArray(value){
+    // 将数据转换为二维数组格式
+    const formattedRows = value.map(row => [
+      row.d_no,
+      row.field1.toString(),  // 确保所有字段为字符串类型
+      row.field2.toString(),
+      row.field3.toString(),
+      row.field4.toString(),
+      row.field5.toString(),
+      row.field6.toString(),
+      row.field7.toString(),
+      row.field8.toString(),
+      dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
+      row.type
+    ]);
+    return formattedRows;
+  }
+  //封装获取数据格式的方法
+  function OFFSET(value1,value2){//value1:currentPage,value2:pageSize
+    return (parseInt(value1) - 1) * parseInt(value2);
+  }
+  function FORMATTIME(value){
+    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+    return formatTime(value);
+  }
+  //全局解构赋值
+  const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
+  const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
+  //单向限制sql
+  const one_query = `WHERE c_time < "${formattedEnd}"`;
+  let offset;
+  if(page_boolean){}
+  else{
+    offset = OFFSET(currentPage,pageSize);
+  }
+  //封装响应结果格式化的方法
+  function toMap(value){
+    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
+  }
 
-        // 将数据转换为二维数组格式
-        const formattedRows = rows.map(row => [
-          row.d_no,
-          row.field1.toString(),  // 确保所有字段为字符串类型
-          row.field2.toString(),
-          row.field3.toString(),
-          row.field4.toString(),
-          row.field5.toString(),
-          row.field6.toString(),
-          row.field7.toString(),
-          row.field8.toString(),
-          dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-          row.type
-        ]);
 
-        // 直接使用 res.send() 返回数据
-        ctx.body = JSON.stringify(formattedRows);
-      }
-      else{
-        console.log("currentPage:"+currentPage);
-        console.log("pageSize:"+pageSize);
-        //首先将页数整数化
-        const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
-        //直接查询
-        const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
-          FROM t_data 
-          ORDER BY c_time DESC
-          LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-        `);
-        // 将数据转换为二维数组格式
-        const formattedRows = rows.map(row => [
-          row.d_no,
-          row.field1.toString(),  // 确保所有字段为字符串类型
-          row.field2.toString(),
-          row.field3.toString(),
-          row.field4.toString(),
-          row.field5.toString(),
-          row.field6.toString(),
-          row.field7.toString(),
-          row.field8.toString(),
-          dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-          row.type
-        ]);
-
-        // 直接使用 res.send() 返回数据
-        ctx.body = JSON.stringify(formattedRows);
-      }
+  //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
+  if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
+    if(page_boolean){
+      // 执行查询并格式化结果
+      const [rows] = await connection2.execute(query+DESC_query, [d_no]);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
     }
-    else if(start === "end" && end !=="1"){
-      console.log("end:"+end);
-      console.log("d_no"+d_no);
-      if(currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined){
-          //首先将时间格式化同时将页数整数化
-          const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-          const formattedEnd = formatTime(end);
-          //直接查询
-          const [rows] = await connection2.execute(`
-            SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
-            FROM t_data 
-            WHERE c_time < "${formattedEnd}"
-            ORDER BY c_time DESC
-          `);
-          // 将数据转换为二维数组格式
-          const formattedRows = rows.map(row => [
-            row.d_no,
-            row.field1.toString(),  // 确保所有字段为字符串类型
-            row.field2.toString(),
-            row.field3.toString(),
-            row.field4.toString(),
-            row.field5.toString(),
-            row.field6.toString(),
-            row.field7.toString(),
-            row.field8.toString(),
-            dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-            row.type
-          ]);
-
-          // 直接使用 res.send() 返回数据
-          ctx.body = JSON.stringify(formattedRows);
-      }
-      else{
-        console.log("currentPage:"+currentPage);
-        console.log("pageSize:"+pageSize);
-        //首先将时间格式化同时将页数整数化
-        const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
-        const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-        const formattedEnd = formatTime(end);
-        //直接查询
-        const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
-          FROM t_data
-          WHERE c_time < "${formattedEnd}"
-          ORDER BY c_time DESC
-          LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-        `);
-        ctx.body = rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]);
-      }
-    }
-    else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
-      console.log("start:"+start);
-      console.log("end:"+end);
-      console.log("d_no"+d_no);
-      if(currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined){
-          //首先将时间格式化同时将页数整数化
-          const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-          const formattedStart = formatTime(start);
-          const formattedEnd = formatTime(end);
-          //直接查询
-          const [rows] = await connection2.execute(`
-            SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
-            FROM t_data 
-            WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
-            ORDER BY c_time DESC
-          `);
-          // 将数据转换为二维数组格式
-          const formattedRows = rows.map(row => [
-            row.d_no,
-            row.field1.toString(),  // 确保所有字段为字符串类型
-            row.field2.toString(),
-            row.field3.toString(),
-            row.field4.toString(),
-            row.field5.toString(),
-            row.field6.toString(),
-            row.field7.toString(),
-            row.field8.toString(),
-            dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-            row.type
-          ]);
-
-          // 直接使用 res.send() 返回数据
-          ctx.body = JSON.stringify(formattedRows);
-      }
-      else{
-        console.log("currentPage:"+currentPage);
-        console.log("pageSize:"+pageSize);
-        //首先将时间格式化同时将页数整数化
-        const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
-        const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-        const formattedStart = formatTime(start);
-        const formattedEnd = formatTime(end);
-        //直接查询
-        const [rows] = await connection2.execute(`
-          SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type
-          FROM t_data 
-          WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
-          ORDER BY c_time DESC
-          LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-        `);
-        ctx.body = rows.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type]);
-      }
+    else{
+      //直接查询
+      const [rows] = await connection2.execute(query+DESC_query+`
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
     }
   }
-  catch{
-    console.log("History路由中："+start);
-    console.log("History路由中："+end);
-    console.log("History路由中："+currentPage);
-    console.log("History路由中："+pageSize);
-    console.log("History路由中："+d_no);
+  else if(start === "end" && end !=="1"){
+    if(page_boolean){
+        //直接查询
+        const [rows] = await connection2.execute(query+one_query+DESC_query);
+        const formattedRows = toTwoArray(rows);
+        // 直接使用 res.send() 返回数据
+        ctx.body = JSON.stringify(formattedRows);
+    }
+    else{
+      //直接查询
+      const [rows] = await connection2.execute(query+one_query+DESC_query+`
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      `);
+      ctx.body = toMap(rows);
+    }
+  }
+  else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
+    if(page_boolean){
+      //首先将时间格式化同时将页数整数化
+      //直接查询
+      const [rows] = await connection2.execute(query+`
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+DESC_query);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
+    }
+    else{
+      //直接查询
+      const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      `);
+      ctx.body = toMap(rows);
+    }
   }
 
   //模拟只有一组数据返回的情况
@@ -215,8 +143,6 @@ Router4.get("/History_count", async ctx => {
       ctx.body = ""+rows[0].total.toString()
     }
     else if(start === "end" && end !=="1"){
-      console.log("end:"+end);
-      console.log("d_no"+d_no);
       //格式化时间值
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedEnd = formatTime(end);
@@ -293,11 +219,8 @@ Router4.get("/History/container",async ctx=>{
 //设备选项列表相关路由
 Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
   const { start,end } = ctx.query;
-  if(start==="1"&&end==="1"){//当需要的是总的数据的时候
-    await connection2.query("SET SESSION group_concat_max_len = 1000000");
-
-    const [results] = await connection2.query(`
-      SELECT d_no, 
+  //全局sql
+  const query = `SELECT d_no, 
         GROUP_CONCAT(
           CONCAT('[', 
             '"', field1, '"', ',', 
@@ -312,13 +235,24 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
           ']') ORDER BY c_time
         ) AS data
       FROM t_data
-      WHERE type = '实时数据'
-      GROUP BY d_no;
-    `);
-  
-    // 处理查询结果
+      WHERE type = '实时数据'`;
+  function FORMATTIME(value){
+    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+    return formatTime(value);
+  }
+  //按照d_no分组-sql
+  const groupbyd_no = `GROUP BY d_no`;
+  //扩容sql方法
+  async function toBig(){
+    await connection2.query("SET SESSION group_concat_max_len = 1000000");
+  };
+  //全局解构赋值
+  const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
+  const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
+  //封装处理查询结果
+  function search_result(value){
     const formattedResult = [];
-    results.forEach(row => {
+    value.forEach(row => {
       if (!row.data) return;
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
@@ -326,86 +260,35 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
         formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
       });
     });
-  
-    // 最终返回的格式为 [[设备名, 数据1...], [设备名, 数据2...], ...]
-    ctx.body = formattedResult;
+    return formattedResult;
+  }
+
+  //全局查询结果变量
+  let formattedResult;
+
+  toBig();
+  if(start==="1"&&end==="1"){//当需要的是总的数据的时候
+    const [results] = await connection2.query(query+groupbyd_no);
+    // 处理查询结果
+    formattedResult = search_result(results);
   }
   else if(start === "end" && end !=="1"){
-    await connection2.query("SET SESSION group_concat_max_len = 1000000");
-    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-    const formattedEnd = formatTime(end);
-    const [results] = await connection2.query(`
-      SELECT d_no, 
-        GROUP_CONCAT(
-          CONCAT('[', 
-            '"', field1, '"', ',', 
-            '"', field2, '"', ',', 
-            '"', field3, '"', ',', 
-            '"', field4, '"', ',', 
-            '"', field5, '"', ',', 
-            '"', field6, '"', ',', 
-            '"', field7, '"', ',', 
-            '"', field8, '"', ',', 
-            '"', c_time, '"', 
-            '"', type, '"',
-          ']') ORDER BY c_time
-        ) AS data
-      FROM t_data
-      WHERE type = '实时数据'
+    const [results] = await connection2.query(query+`
       AND c_time < "${formattedEnd}"
-      GROUP BY d_no;
-    `);
+    `+groupbyd_no);
     // 处理查询结果
-    const formattedResult = [];
-    results.forEach(row => {
-      if (!row.data) return;
-      const fixedData = `[${row.data}]`;
-      const data = JSON.parse(fixedData); // 解析 JSON 数据
-      data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
-      });
-    });
-    // 最终返回的格式为 [[设备名, 数据1...], [设备名, 数据2...], ...]
-    ctx.body = formattedResult;
+    formattedResult = search_result(results);
   }
   else{
-    await connection2.query("SET SESSION group_concat_max_len = 1000000");
-    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-    const formattedStart = formatTime(start);
-    const formattedEnd = formatTime(end);
-    const [results] = await connection2.query(`
-      SELECT d_no,  
-        GROUP_CONCAT(
-          CONCAT('[', 
-            '"', field1, '"', ',', 
-            '"', field2, '"', ',', 
-            '"', field3, '"', ',', 
-            '"', field4, '"', ',', 
-            '"', field5, '"', ',', 
-            '"', field6, '"', ',', 
-            '"', field7, '"', ',', 
-            '"', field8, '"', ',', 
-            '"', c_time, '"', 
-          ']') ORDER BY c_time
-        ) AS data
-      FROM t_data
-      WHERE type = '实时数据'
+    const [results] = await connection2.query(query+`
       AND c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
-      GROUP BY d_no;
-    `);
+    `+groupbyd_no);
     // 处理查询结果
-    const formattedResult = [];
-    results.forEach(row => {
-      if (!row.data) return;
-      const fixedData = `[${row.data}]`;
-      const data = JSON.parse(fixedData); // 解析 JSON 数据
-      data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
-      });
-    });
-    // 最终返回的格式为 [[设备名, 数据1...], [设备名, 数据2...], ...]
-    ctx.body = formattedResult; 
+    formattedResult = search_result(results);
   }
+
+  ctx.body = formattedResult; 
+
 
   //模拟只返回一组数据的情况
   // res.send([["2021","11","22","23","61","2019-01-01 15:40","实时数据"]]);

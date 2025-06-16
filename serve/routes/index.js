@@ -32,30 +32,27 @@ const Router = new Router1();
 Router.get("/recent", async (ctx) => {
   try {
     await connection2.query("SET SESSION group_concat_max_len = 1000000");
-    // //动态拼接sql
-    // const [result0] = await connection2.query(`
-    // SELECT *
-    // FROM t_data
-    // `);
-    // const [result00] = await connection2.query(`
-    // SELECT 
-    // `);
+
+    //获取实时表字段
+    const [result_now] = await connection2.query(`
+      SELECT * 
+      FROM t_data
+    `);
+    //动态拼接sql依据字符串
+    let sql_string = '';
+    for(const item in result_now[0]){
+      if(result_now[0][item]!==null&&item.includes("field")){
+        const x = `'"', t.` + item + `, '",', `;
+        sql_string += x;
+      }
+    }
 
     const [results] = await connection2.query(`
       SELECT 
           t.d_no, 
           GROUP_CONCAT(
               CONCAT(
-                  '[', 
-                      '"', t.field1, '",', 
-                      '"', t.field2, '",', 
-                      '"', t.field3, '",', 
-                      '"', t.field4, '",', 
-                      '"', t.field5, '",', 
-                      '"', t.field6, '",', 
-                      '"', t.field7, '",', 
-                      '"', t.field8, '",', 
-                      '"', t.c_time, '"', 
+                  '[', `+sql_string+`'"', t.c_time, '"', 
                   ']'
               ) ORDER BY t.c_time
           ) AS data
@@ -85,16 +82,31 @@ Router.get("/recent", async (ctx) => {
       }
     });
     //允许所有的来源
-    ctx.set("Access-Control-Allow-Origin", "*");
+    ctx.set("Access-Control-Allow-Origin", "*");//简单请求
     ctx.body = formattedResult;
   } catch (err) {
     console.error("数据库查询失败", err);
   }
 });
 //行为最新数据
-Router.get("/recent/action", async  ctx => {
+Router.get("/recent/action", async ctx => {
   try {
     await connection2.query("SET SESSION group_concat_max_len = 1000000");
+    //获取实时表字段
+    const [result_now] = await connection2.query(`
+      SELECT * 
+      FROM t_behavior_data
+    `);
+    //动态拼接sql依据字符串
+    let sql_string = '';
+    for(const item in result_now[0]){
+      if(result_now[0][item]!==null&&item.includes("field")){
+        const x = `'"', t.` + item + `, '",', `;
+        sql_string += x;
+      }
+    }
+
+
     const [results] = await connection2.query(`
       WITH latest_time_per_dno AS (
           SELECT d_no, MAX(c_time) AS max_time 
@@ -104,16 +116,7 @@ Router.get("/recent/action", async  ctx => {
       SELECT 
           t.d_no, 
           GROUP_CONCAT(
-              CONCAT('[', 
-                     '"', t.field1, '"', ',', 
-                     '"', t.field2, '"', ',', 
-                     '"', t.field3, '"', ',', 
-                     '"', t.field4, '"', ',', 
-                     '"', t.field5, '"', ',', 
-                     '"', t.field6, '"', ',', 
-                     '"', t.field7, '"', ',', 
-                     '"', t.field8, '"', ',', 
-                     '"', t.c_time, '"', 
+              CONCAT('[', `+sql_string+`'"', t.c_time, '"', 
               ']') ORDER BY t.c_time
           ) AS data
       FROM t_data t

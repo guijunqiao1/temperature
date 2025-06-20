@@ -161,7 +161,7 @@ Router.get("/recent/action", function _callee3(ctx) {
           }
 
           _context3.next = 12;
-          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n          SELECT d_no, MAX(c_time) AS max_time \n          FROM t_data\n          GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', " + sql_string + "'\"', t.c_time, '\"', \n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      JOIN latest_time_per_dno l \n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
+          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n        SELECT d_no, MAX(c_time) AS max_time \n        FROM t_behavior_data\n        GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', " + sql_string + "'\"', t.c_time, '\"', \n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_behavior_data t\n      JOIN latest_time_per_dno l\n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
 
         case 12:
           _ref7 = _context3.sent;

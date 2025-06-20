@@ -4,7 +4,7 @@ import Router from 'koa-router';
 import path from 'path';
 import logger from 'koa-morgan';
 import cors from '@koa/cors';
-import koaBody from 'koa-body';
+import {koaBody} from 'koa-body';
 import serve from 'koa-static';
 import views from 'koa-views';
 import { fileURLToPath } from 'url';
@@ -18,6 +18,8 @@ import Router4 from './routes/index_history.js';
 import Router5 from './routes/index_action.js';
 import Router_direct from './routes/direct.js';  
 import Router_direct_control from './routes/direct_control.js';
+// 导入和YOLOV5的沟通模块 
+import Router_http from "./routes/http_server_get.js";
 
 // 创建 Koa 应用实例
 const app = new Koa();
@@ -50,14 +52,17 @@ app.use(serve(path.join(__dirname, 'public')));
 const router = new Router();
 
 // 挂载子路由（假设路由模块已适配 Koa 路由）
-router.use('/', IndexRouter.routes(), IndexRouter.allowedMethods());
-router.use('/', Router1.routes(), Router1.allowedMethods());
-router.use('/', Router2.routes(), Router2.allowedMethods());
-router.use('/', Router3.routes(), Router3.allowedMethods());
-router.use('/', Router4.routes(), Router4.allowedMethods());
-router.use('/', Router5.routes(), Router5.allowedMethods());
-router.use('/', Router_direct.routes(), Router_direct.allowedMethods());
-router.use('/', Router_direct_control.routes(), Router_direct_control.allowedMethods());
+router.use(IndexRouter.routes(), IndexRouter.allowedMethods());
+router.use(Router1.routes(), Router1.allowedMethods());
+router.use(Router2.routes(), Router2.allowedMethods());
+router.use(Router3.routes(), Router3.allowedMethods());
+router.use(Router4.routes(), Router4.allowedMethods());
+router.use(Router5.routes(), Router5.allowedMethods());
+router.use( Router_direct.routes(), Router_direct.allowedMethods());
+router.use( Router_direct_control.routes(), Router_direct_control.allowedMethods());
+// 应用和YOLO服务端的沟通http路由
+router.use( Router_http.routes(), Router_http.allowedMethods());
+
 
 // 应用主路由器
 app.use(router.routes()).use(router.allowedMethods());

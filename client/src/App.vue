@@ -314,6 +314,10 @@ div.nothing {
   height: 24px !important;
 }
 
+/* 配置上高度 */
+.container.fit-view {
+  height: 1734px;
+}
 </style>
 
 <!-- 

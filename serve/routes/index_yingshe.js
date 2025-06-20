@@ -19,14 +19,12 @@ const Router1 = new Router();
 Router1.get("/yingshe", async ctx => {
   console.log("123");
   let dbResult = await connection2.execute(`
-    SELECT db_name, f_name ,is_show , type FROM t_field_mapper;
+    SELECT db_name, f_name  FROM t_field_mapper;
   `);
   dbResult = dbResult[0];
-
   const objectArray = dbResult.map(row => {
-    return { [row.db_name]: row.f_name,is_show:row.is_show,type:row.type };
+    return { [row.db_name]: row.f_name };
   });
-
   console.log("yingshe");
   console.dir(objectArray);
   ctx.body = objectArray;
@@ -35,23 +33,17 @@ Router1.get("/yingshe", async ctx => {
 Router1.get("/yingshe/action",async ctx=>{
   console.log("123");
   let dbResult = await connection2.execute(`
-    SELECT db_name, f_name FROM t_behavior_field_mapper;
+    SELECT db_name, f_name ,type,is_show FROM t_behavior_field_mapper;
   `);
   dbResult = dbResult[0];
 
   const objectArray = dbResult.map(row => {
-    return { [row.db_name]: row.f_name };
+    return { [row.db_name]: row.f_name,type:row.type,is_show:row.is_show };
   });
 
   console.log("yingshe/action" + objectArray);
   ctx.body = objectArray;
 });
 
-Router1.get("/guijunqiao",async ctx=>{
-  let [rows] = await connection2.execute(`
-    SELECT p_name FROM t_field_mapper;
-  `);
-  ctx.body = rows;
-})
 
 export default Router1;

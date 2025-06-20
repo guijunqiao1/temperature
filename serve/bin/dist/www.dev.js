@@ -5,7 +5,7 @@
  */
 "use strict";
 
-var _app = _interopRequireDefault(require("../app.js"));
+var _app_koa = _interopRequireDefault(require("../app_koa.js"));
 
 var _debug = _interopRequireDefault(require("debug"));
 
@@ -25,7 +25,7 @@ var port = normalizePort(process.env.PORT || '9000'); // app.set('port', port);/
  */
 // var server = http.createServer(app);//express写法
 
-var server = _http["default"].createServer(_app["default"].callback()); //koa写法
+var server = _http["default"].createServer(_app_koa["default"].callback()); //koa写法
 
 /**
  * Listen on provided port, on all network interfaces.

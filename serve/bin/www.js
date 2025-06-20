@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-import app from "../app.js";
+import app from "../app_koa.js";
 import debug from 'debug';
 const log = debug('serve1:server');
 import http from "http";

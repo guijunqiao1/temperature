@@ -1,144 +1,10 @@
-// //用于接受映射数组获取请求的路由文件
-// import express from "express";
-// //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
-// import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
-
-// let connection;//定义数据库连接对象
-// const Router5 = express();
-// (async ()=>{
-//   try{
-//     //异步执行Config，用于连接数据库,后续可对connection数据库链接对象进行数据库语法操作用于对数据库本身进行操作
-//     connection = await Config();
-//     console.log("数据库5连接成功");
-//   }
-//   catch(error){
-//     console.log("数据库5连接失败");
-//   }
-// })();
-
-// //表格的呈现-图像的呈现路由
-// Router5.get("/action",async(req,res)=>{
-//   const { person,start_time,book_id,currentPage,pageSize } = req.query;
-//   try{
-//     const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
-//     let query = `
-//       SELECT *
-//       FROM t_behavior_data
-//       `;
-//     if(!person&&!start_time&&!book_id){
-//       query+=`
-//       ORDER BY c_time
-//       LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-//       `;
-//       const [rows] = await connection.execute(query);
-//       res.send(rows);
-//       return;
-//     }
-//     else {//该分支下的！+变量为true的情况需要忽略当前维度
-//       //格式化时间方法
-//       const formatTime = (timeStr) => {
-//         // 检查timeStr是否为"undefined"字符串或无效值
-//         if (!timeStr || timeStr === "undefined") {
-//           return null;
-//         }
-//         return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-//       };
-      
-//       // 检查参数是否为"undefined"字符串
-//       const isPerson = person && person !== "undefined";
-//       const isBookId = book_id && book_id !== "undefined";
-//       const isStartTime = start_time && start_time !== "undefined";
-      
-//       // 格式化开始时间，只有在有效时才格式化
-//       const formattedStartTime = isStartTime ? formatTime(start_time) : null;
-      
-//       query += `
-//       WHERE field2 ${!isPerson ? '!= "此为非法值"' : '= "' + person + '"'}
-//       AND d_no ${!isBookId ? '!= "此为非法值"' : '= "' + book_id + '"'}
-//       AND c_time ${!isStartTime ? '!= "2005-03-03 17:29:47"' : '> "' + formattedStartTime + '"'}
-//       ORDER BY c_time
-//       LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-//       `;
-//       const [rows] = await connection.execute(query);
-//       res.send(rows);
-//       return;
-//     }
-//   }
-//   catch(error){
-//     console.log(error);
-//   }
-
-
-//   //模拟只有一组数据的情况 
-//   // res.send([["2021","11","22","23","61","2019-01-01 15:40","实时数据"]]);
-
-//   //模拟有0组数据返回的情况
-//   // res.send([]);
-// })  
-// //表格的呈现路由
-// Router5.get("/action_count",async(req,res)=>{
-//   const { person,start_time,book_id,all } = req.query;
-//   try{
-//     let query = `
-//       SELECT *
-//       FROM t_behavior_data
-//       `;
-//     if(!person&&!start_time&&!book_id){  
-//       const [rows] = await connection.execute(query);
-//       res.send(!all? ""+rows.length:rows);
-//       return;
-//     }
-//     else {//该分支下的！+变量为true的情况需要忽略当前维度
-//       //格式化时间方法
-//       const formatTime = (timeStr) => {
-//         // 检查timeStr是否为"undefined"字符串或无效值
-//         if (!timeStr || timeStr === "undefined") {
-//           return null;
-//         }
-//         return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-//       };
-      
-//       // 检查参数是否为"undefined"字符串
-//       const isPerson = person && person !== "undefined";
-//       const isBookId = book_id && book_id !== "undefined";
-//       const isStartTime = start_time && start_time !== "undefined";
-      
-//       // 格式化开始时间，只有在有效时才格式化
-//       const formattedStartTime = isStartTime ? formatTime(start_time) : null;
-      
-//       query += `
-//         WHERE field2 ${!isPerson ? '!= "此为非法值"' : '= "' + person + '"'}
-//         AND d_no ${!isBookId ? '!= "此为非法值"' : '= "' + book_id + '"'}
-//         AND c_time ${!isStartTime ? '!= "2005-03-03 17:29:47"' : '> "' + formattedStartTime + '"'}
-//         ORDER BY c_time
-//       `;
-//       const [rows] = await connection.execute(query);
-//       res.send(!all? ""+rows.length:rows);
-//       return;
-//     }
-//   }
-//   catch(error){
-//     console.log(error);
-//   }
-
-
-//   // 模拟只有一组数据的情况
-//   // res.send("1");
-
-//   //模拟有0组数据返回的情况
-//   // res.send("0");
-// })
-
-// export default Router5;
-
-
-
 //用于接受映射数组获取请求的路由文件
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
 
 let connection;//定义数据库连接对象
 import Router from "koa-router";
+import dayjs from "dayjs";//引入提供format使用环境的组件
 const Router5 = new Router();
 (async ()=>{
   try{
@@ -152,116 +18,265 @@ const Router5 = new Router();
 })();
 
 //表格的呈现-图像的呈现路由
-Router5.get("/action",async ctx=>{
-  const { person,start_time,book_id,currentPage,pageSize } = ctx.query;
-  try{
-    const offset = (parseInt(currentPage) - 1) * parseInt(pageSize);
-    let query = `
-      SELECT *
-      FROM t_behavior_data
-      `;
-    if(!person&&!start_time&&!book_id){
-      query+=`
-      ORDER BY c_time
-      LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-      `;
-      const [rows] = await connection.execute(query);
-      ctx.body = rows;
-      return;
-    }
-    else {//该分支下的！+变量为true的情况需要忽略当前维度
-      //格式化时间方法
-      const formatTime = (timeStr) => {
-        // 检查timeStr是否为"undefined"字符串或无效值
-        if (!timeStr || timeStr === "undefined") {
-          return null;
-        }
-        return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-      };
-      
-      // 检查参数是否为"undefined"字符串
-      const isPerson = person && person !== "undefined";
-      const isBookId = book_id && book_id !== "undefined";
-      const isStartTime = start_time && start_time !== "undefined";
-      
-      // 格式化开始时间，只有在有效时才格式化
-      const formattedStartTime = isStartTime ? formatTime(start_time) : null;
-      
-      query += `
-      WHERE field2 ${!isPerson ? '!= "此为非法值"' : '= "' + person + '"'}
-      AND d_no ${!isBookId ? '!= "此为非法值"' : '= "' + book_id + '"'}
-      AND c_time ${!isStartTime ? '!= "2005-03-03 17:29:47"' : '> "' + formattedStartTime + '"'}
-      ORDER BY c_time
-      LIMIT ${parseInt(pageSize)} OFFSET ${offset}
-      `;
-      const [rows] = await connection.execute(query);
-      ctx.body = rows;
-      return;
+Router5.get("/action", async ctx => {
+  let { start,end,currentPage,pageSize,d_no } = ctx.query;
+  // 动态获取到字段
+  const [result_now] = await connection.query(`
+    SELECT * 
+    FROM t_behavior_data 
+  `);
+  //动态拼接sql依据字符串
+  let sql_string = '';
+  for(const item in result_now[0]){
+    if(result_now[0][item]!==null&&item.includes("field")){
+      const x = item + `,`;
+      sql_string += x;
     }
   }
-  catch(error){
-    console.log(error);
+
+  //全局sql
+  const query = `SELECT d_no , ${sql_string } c_time,is_saved FROM t_behavior_data `;
+  //降序sql
+  const DESC_query = `ORDER BY c_time DESC`;
+  //页数有效值判断布尔变量
+  const page_boolean = currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined;
+  //封装转化为数组的方法
+  function toTwoArray(value){
+    // 将数据转换为二维数组格式
+    const formattedRows = value.map(row => [
+      row.d_no,
+      row.field1.toString(),  // 确保所有字段为字符串类型
+      row.field2.toString(),
+      dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
+      row.is_saved
+    ]);
+    return formattedRows;
+  }
+  //封装获取数据格式的方法
+  function OFFSET(value1,value2){//value1:currentPage,value2:pageSize
+    return (parseInt(value1) - 1) * parseInt(value2);
+  }
+  function FORMATTIME(value){
+    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+    return formatTime(value);
+  }
+  //全局解构赋值
+  const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
+  const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
+  //单向限制sql
+  const one_query = `WHERE c_time < "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}"`);
+  let offset;
+  if(page_boolean){}
+  else{
+    offset = OFFSET(currentPage,pageSize);
+  }
+  //封装响应结果格式化的方法
+  function toMap(value){
+    return value.map(row => [row.d_no, row.field1, row.field2, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.is_saved])
   }
 
+  //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
+  if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
+    if(page_boolean){
+      // 执行查询并格式化结果
+      const [rows] = await connection.execute(query+(d_no==="null"?"":` WHERE d_no = "${d_no}" `)+DESC_query);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
+    }
+    else{
+      //直接查询
+      const [rows] = await connection.execute(query+(d_no==="null"?"":` WHERE d_no = "${d_no}" `)+DESC_query+`
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
+    }
+  }
+  else if(start === "end" && end !=="1"){
+    if(page_boolean){
+        //直接查询
+        const [rows] = await connection.execute(query+one_query+DESC_query); 
+        const formattedRows = toTwoArray(rows);
+        // 直接使用 res.send() 返回数据
+        ctx.body = JSON.stringify(formattedRows);
+    }
+    else{
+      //直接查询
+      const [rows] = await connection.execute(query+one_query+DESC_query+`
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      `);
+      ctx.body = toMap(rows);
+    }
+  }
+  else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
+    if(page_boolean){
+      //首先将时间格式化同时将页数整数化
+      //直接查询
+      const [rows] = await connection.execute(query+`
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` +(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query);
+      const formattedRows = toTwoArray(rows);
+      // 直接使用 res.send() 返回数据
+      ctx.body = JSON.stringify(formattedRows);
+    }
+    else{
+      //直接查询
+      const [rows] = await connection.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      `);
+      ctx.body = toMap(rows);
+    }
+  }
 
-  //模拟只有一组数据的情况 
+  //模拟只有一组数据返回的情况
   // res.send([["2021","11","22","23","61","2019-01-01 15:40","实时数据"]]);
 
   //模拟有0组数据返回的情况
   // res.send([]);
-})  
+}); 
 //表格的呈现路由
-Router5.get("/action_count",async ctx=>{
-  const { person,start_time,book_id,all } = ctx.query;
+Router5.get("/action_count", async ctx => {
+  const {start,end,d_no} = ctx.query;
   try{
-    let query = `
-      SELECT *
-      FROM t_behavior_data
-      `;
-    if(!person&&!start_time&&!book_id){  
-      const [rows] = await connection.execute(query);
-      ctx.body = !all? ""+rows.length:rows;
-      return;
+    //首先判断是否已经激活了ok
+    if(start==="1" && end==="1"){//初始状态直接算
+      //直接查询
+      const [rows] = await connection.execute(`
+        SELECT COUNT(*) as total 
+        FROM t_behavior_data
+      `+(d_no==="null"?"":`WHERE d_no = "${d_no}"`));
+      // 直接返回数组长度
+      ctx.body = ""+rows[0].total.toString()
     }
-    else {//该分支下的！+变量为true的情况需要忽略当前维度
-      //格式化时间方法
-      const formatTime = (timeStr) => {
-        // 检查timeStr是否为"undefined"字符串或无效值
-        if (!timeStr || timeStr === "undefined") {
-          return null;
-        }
-        return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-      };
+    else if(start === "end" && end !=="1"){
+      //格式化时间值
+      const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+      const formattedEnd = formatTime(end);
+      //直接查询
+      const [rows] = await connection.execute(`
+        SELECT COUNT(*) as total 
+        FROM t_behavior_data 
+        WHERE c_time < "${formattedEnd}"
       
-      // 检查参数是否为"undefined"字符串
-      const isPerson = person && person !== "undefined";
-      const isBookId = book_id && book_id !== "undefined";
-      const isStartTime = start_time && start_time !== "undefined";
-      
-      // 格式化开始时间，只有在有效时才格式化
-      const formattedStartTime = isStartTime ? formatTime(start_time) : null;
-      
-      query += `
-        WHERE field2 ${!isPerson ? '!= "此为非法值"' : '= "' + person + '"'}
-        AND d_no ${!isBookId ? '!= "此为非法值"' : '= "' + book_id + '"'}
-        AND c_time ${!isStartTime ? '!= "2005-03-03 17:29:47"' : '> "' + formattedStartTime + '"'}
-        ORDER BY c_time
-      `;
-      const [rows] = await connection.execute(query);
-      ctx.body = !all? ""+rows.length:rows;
-      return;
+      `+(d_no==="null"?"":`AND d_no = "${d_no}"`));
+      // 直接返回数组长度
+      ctx.body = ""+rows[0].total.toString()
+    }
+    else {//进行分页查询后计算大小
+      console.log("start:"+start);
+      console.log("end:"+end);
+      console.log("d_no"+d_no);
+      //格式化时间值
+      const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+      const formattedStart = formatTime(start);
+      const formattedEnd = formatTime(end);
+      //直接查询
+      const [rows] = await connection.execute(`
+        SELECT COUNT(*) as total  
+        FROM t_behavior_data 
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
+      `+(d_no==="null"?"":` AND d_no="${d_no}" `));
+      // 直接返回数组长度
+      ctx.body = ""+rows[0].total.toString()
     }
   }
-  catch(error){
-    console.log(error);
+  catch{
+    console.log("History："+start);
+    console.log("History："+end);
+    console.log("History："+d_no);
   }
-
-
-  // 模拟只有一组数据的情况
+  //模拟只有一组数据的情况
   // res.send("1");
 
   //模拟有0组数据返回的情况
   // res.send("0");
-})
+});
+
+Router5.get("/data/action", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
+  const { start,end } = ctx.query;
+  //动态获取到filed字段
+  const [result_now] = await connection.query(`
+    SELECT * 
+    FROM t_behavior_data
+  `);
+  //动态拼接sql依据字符串
+  let sql_string = '';
+  for(const item in result_now[0]){
+    if(result_now[0][item]!==null&&item.includes("field")){
+      const x = `'"', ` + item + `, '",', `;
+      sql_string += x;
+    }
+  }
+
+  //全局sql
+  const query = `SELECT d_no, 
+        GROUP_CONCAT(
+          CONCAT('[', `
+          +sql_string+
+          `'"', c_time, '"', 
+          ']') ORDER BY c_time
+        ) AS data
+      FROM t_behavior_data
+      WHERE is_saved = '实时数据'`;
+  function FORMATTIME(value){
+    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+    return formatTime(value);
+  }
+  //按照d_no分组-sql
+  const groupbyd_no = `GROUP BY d_no`;
+  //扩容sql方法
+  async function toBig(){
+    await connection.query("SET SESSION group_concat_max_len = 1000000");
+  };
+  //全局解构赋值
+  const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
+  const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
+  //封装处理查询结果
+  function search_result(value){
+    const formattedResult = [];
+    value.forEach(row => {
+      if (!row.data) return;
+      const fixedData = `[${row.data}]`;
+      const data = JSON.parse(fixedData); // 解析 JSON 数据
+      data.forEach(entry => {
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2]]);
+      });
+    });
+    return formattedResult;
+  }
+
+  //全局查询结果变量
+  let formattedResult;
+
+  toBig();
+  if(start==="1"&&end==="1"){//当需要的是总的数据的时候
+    const [results] = await connection.query(query+groupbyd_no);
+    // 处理查询结果
+    formattedResult = search_result(results);
+  }
+  else if(start === "end" && end !=="1"){
+    const [results] = await connection.query(query+`
+      AND c_time < "${formattedEnd}"
+    `+groupbyd_no);
+    // 处理查询结果
+    formattedResult = search_result(results);
+  }
+  else{
+    const [results] = await connection.query(query+`
+      AND c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
+    `+groupbyd_no);
+    // 处理查询结果
+    formattedResult = search_result(results);
+  }
+
+  ctx.body = formattedResult; 
+
+
+  //模拟只返回一组数据的情况
+  // res.send([["2021","11","22","23","61","2019-01-01 15:40","实时数据"]]);
+
+  //模拟返回0组数据的情况
+  // res.send([]);
+});
+
 
 export default Router5;

@@ -8,7 +8,7 @@ async function Config3(){
     const connection = await mysql.createConnection({
       host:"127.0.0.1",
       password:"123456",
-      database:"project03",
+      database:"project02",
       port:3306,
       user:"root"
     });

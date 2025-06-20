@@ -107,11 +107,12 @@ Router.get("/recent/action", async ctx => {
     }
 
 
+
     const [results] = await connection2.query(`
       WITH latest_time_per_dno AS (
-          SELECT d_no, MAX(c_time) AS max_time 
-          FROM t_data
-          GROUP BY d_no
+        SELECT d_no, MAX(c_time) AS max_time 
+        FROM t_behavior_data
+        GROUP BY d_no
       )
       SELECT 
           t.d_no, 
@@ -119,8 +120,8 @@ Router.get("/recent/action", async ctx => {
               CONCAT('[', `+sql_string+`'"', t.c_time, '"', 
               ']') ORDER BY t.c_time
           ) AS data
-      FROM t_data t
-      JOIN latest_time_per_dno l 
+      FROM t_behavior_data t
+      JOIN latest_time_per_dno l
         ON t.d_no = l.d_no
         WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time
       GROUP BY t.d_no;

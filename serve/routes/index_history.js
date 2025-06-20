@@ -3,6 +3,7 @@
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 import Config4 from "../indexNode2.js";//此处获取到数据库链接配置对象
 import dayjs from "dayjs";//引入提供format使用环境的组件
+import { json } from "express";
 let connection2;//定义数据库连接对象
 import Router from "koa-router";
 const Router4= new Router();
@@ -22,8 +23,22 @@ const Router4= new Router();
 //表格的呈现-图像的呈现路由
 Router4.get("/History", async ctx => {
   let { start,end,currentPage,pageSize,d_no } = ctx.query;
+  // 动态获取到字段
+  const [result_now] = await connection2.query(`
+    SELECT * 
+    FROM t_data 
+  `);
+  //动态拼接sql依据字符串
+  let sql_string = '';
+  for(const item in result_now[0]){
+    if(result_now[0][item]!==null&&item.includes("field")){
+      const x = item + `,`;
+      sql_string += x;
+    }
+  }
+
   //全局sql
-  const query = `SELECT d_no,field1,field2,field3,field4, field5, field6,field7,field8,c_time,type FROM t_data `;
+  const query = `SELECT d_no,${sql_string }c_time,type FROM t_data `;
   //降序sql
   const DESC_query = `ORDER BY c_time DESC`;
   //页数有效值判断布尔变量
@@ -37,10 +52,6 @@ Router4.get("/History", async ctx => {
       row.field2.toString(),
       row.field3.toString(),
       row.field4.toString(),
-      row.field5.toString(),
-      row.field6.toString(),
-      row.field7.toString(),
-      row.field8.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
       row.type
     ]);
@@ -58,7 +69,7 @@ Router4.get("/History", async ctx => {
   const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
   const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
   //单向限制sql
-  const one_query = `WHERE c_time < "${formattedEnd}"`;
+  const one_query = `WHERE c_time < "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}"`);
   let offset;
   if(page_boolean){}
   else{
@@ -66,7 +77,7 @@ Router4.get("/History", async ctx => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field4,row.field5,row.field6,row.field7,row.field8, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
+    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
   }
 
 
@@ -74,14 +85,16 @@ Router4.get("/History", async ctx => {
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
     if(page_boolean){
       // 执行查询并格式化结果
-      const [rows] = await connection2.execute(query+DESC_query, [d_no]);
+      const [rows] = await connection2.execute(query+(d_no==="null"?"":` WHERE d_no="${d_no} "`)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      ctx.body = JSON.stringify(formattedRows); 
     }
     else{
+      console.log("当前总输出结果："+query+(d_no==="null"?"":` WHERE d_no="${d_no} "`)+DESC_query+`
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}`)
       //直接查询
-      const [rows] = await connection2.execute(query+DESC_query+`
+      const [rows] = await connection2.execute(query+(d_no==="null"?"":` WHERE d_no="${d_no} "`)+DESC_query+`
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
@@ -91,7 +104,7 @@ Router4.get("/History", async ctx => {
   else if(start === "end" && end !=="1"){
     if(page_boolean){
         //直接查询
-        const [rows] = await connection2.execute(query+one_query+DESC_query);
+        const [rows] = await connection2.execute(query+one_query+DESC_query); 
         const formattedRows = toTwoArray(rows);
         // 直接使用 res.send() 返回数据
         ctx.body = JSON.stringify(formattedRows);
@@ -109,14 +122,14 @@ Router4.get("/History", async ctx => {
       //首先将时间格式化同时将页数整数化
       //直接查询
       const [rows] = await connection2.execute(query+`
-        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+DESC_query);
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
       ctx.body = JSON.stringify(formattedRows);
     }
     else{
       //直接查询
-      const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
       ctx.body = toMap(rows);
     }
@@ -132,15 +145,26 @@ Router4.get("/History", async ctx => {
 Router4.get("/History_count", async ctx => {
   const {start,end,d_no} = ctx.query;
   try{
+    console.log("判断布尔结构是否存在问题");
+    console.log("start:"+typeof start);
+    console.log("start:"+start);
+    console.log("end:"+typeof end);
+    console.log("end:"+end);
+    console.log("当前的d_no的值"+typeof d_no);
+    console.log("当前的d_no的值"+d_no);
     //首先判断是否已经激活了ok
     if(start==="1" && end==="1"){//初始状态直接算
+      console.log("判断的diyijiedian");
+      console.log("虚拟拼接的sql：");
+      console.log(`SELECT COUNT(*) as total FROM t_data` + (d_no==="null"?"":`WHERE d_no = "${d_no}"`));
       //直接查询
       const [rows] = await connection2.execute(`
         SELECT COUNT(*) as total 
-        FROM t_data 
-      `);
+        FROM t_data
+      ` + (d_no==="null"?"":`WHERE d_no = "${d_no}"`));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      console.log("观察返回的结构");
+      ctx.body = ""+rows[0].total.toString();
     }
     else if(start === "end" && end !=="1"){
       //格式化时间值
@@ -151,7 +175,7 @@ Router4.get("/History_count", async ctx => {
         SELECT COUNT(*) as total 
         FROM t_data 
         WHERE c_time < "${formattedEnd}"
-      `);
+      `+(d_no==="null"?"":`AND d_no = "${d_no}"`));
       // 直接返回数组长度
       ctx.body = ""+rows[0].total.toString()
     }
@@ -167,9 +191,7 @@ Router4.get("/History_count", async ctx => {
       const [rows] = await connection2.execute(`
         SELECT COUNT(*) as total  
         FROM t_data 
-        WHERE d_no="${d_no}" 
-        AND c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
-      `);
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":`AND d_no="${d_no}" `));
       // 直接返回数组长度
       ctx.body = ""+rows[0].total.toString()
     }
@@ -194,44 +216,51 @@ Router4.get("/History_count", async ctx => {
 
 
 // })
-//储运箱入库历史数据
-Router4.get("/History/container",async ctx=>{
-  const {start,end} = ctx.query;
-  const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-  const formattedStart = formatTime(start);
-  const formattedEnd = formatTime(end);
-  const [results] = await connection2.query(`
-    SELECT *
-    FROM t_container
-    WHERE ctime BETWEEN "${formattedStart}" AND "${formattedEnd}"
-    ORDER BY ctime
-  `);
-  // 格式化数据
-  const formattedResults = results.map(row => [
-      row.PID,
-      row.VID,
-      row.ctime
-  ]);
-  ctx.body = formattedResults;
-})
+// //储运箱入库历史数据
+// Router4.get("/History/container",async ctx=>{
+//   const {start,end} = ctx.query;
+//   const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+//   const formattedStart = formatTime(start);
+//   const formattedEnd = formatTime(end);
+//   const [results] = await connection2.query(`
+//     SELECT *
+//     FROM t_container
+//     WHERE ctime BETWEEN "${formattedStart}" AND "${formattedEnd}"
+//     ORDER BY ctime
+//   `);
+//   // 格式化数据
+//   const formattedResults = results.map(row => [
+//       row.PID,
+//       row.VID,
+//       row.ctime
+//   ]);
+//   ctx.body = formattedResults;
+// })
 
 
 //设备选项列表相关路由
 Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
   const { start,end } = ctx.query;
+  //动态获取到filed字段
+  const [result_now] = await connection2.query(`
+    SELECT * 
+    FROM t_data
+  `);
+  //动态拼接sql依据字符串
+  let sql_string = '';
+  for(const item in result_now[0]){
+    if(result_now[0][item]!==null&&item.includes("field")){
+      const x = `'"', ` + item + `, '",', `;
+      sql_string += x;
+    }
+  }
+
   //全局sql
   const query = `SELECT d_no, 
         GROUP_CONCAT(
-          CONCAT('[', 
-            '"', field1, '"', ',', 
-            '"', field2, '"', ',', 
-            '"', field3, '"', ',', 
-            '"', field4, '"', ',', 
-            '"', field5, '"', ',', 
-            '"', field6, '"', ',', 
-            '"', field7, '"', ',', 
-            '"', field8, '"', ',', 
-            '"', c_time, '"', 
+          CONCAT('[', `
+          +sql_string+
+          `'"', c_time, '"', 
           ']') ORDER BY c_time
         ) AS data
       FROM t_data
@@ -257,7 +286,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4],entry[5],entry[6],entry[7],entry[8]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
       });
     });
     return formattedResult;

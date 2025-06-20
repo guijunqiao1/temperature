@@ -9,6 +9,8 @@ var _koaRouter = _interopRequireDefault(require("koa-router"));
 
 var _indexNode = _interopRequireDefault(require("../indexNode3.js"));
 
+var _mqtt_server_get = require("./mqtt_server_get.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -25,7 +27,6 @@ var Router_direct_response = new _koaRouter["default"](); //在当前需要对My
 //此处获取到数据库链接配置对象
 var connection; //定义数据库连接对象 
 //导入mqtt模块--用于指令的正确发送响应 
-// import { beifen } from "./mqtt_server_get.js";
 
 (function _callee2() {
   var result, rowx;

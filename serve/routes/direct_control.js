@@ -8,7 +8,7 @@ const Router_direct_response = new Router();
 import Config from "../indexNode3.js";//此处获取到数据库链接配置对象
 let connection;//定义数据库连接对象 
 //导入mqtt模块--用于指令的正确发送响应 
-// import { beifen } from "./mqtt_server_get.js";
+import { beifen } from "./mqtt_server_get.js";
 
 (async ()=>{
   try{

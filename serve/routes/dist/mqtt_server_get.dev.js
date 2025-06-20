@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.beifen = beifen;
-exports.client = exports.active = exports.active_array = void 0;
+exports.client = exports.active = void 0;
 
 var _mqtt = _interopRequireDefault(require("mqtt"));
 
@@ -55,16 +55,14 @@ var connection1; //定义数据库连接对象--project02
 // FROM t_device
 // WHERE device_name = "电动自行车"
 // `);
-
-
-var active_array; // for(let i=0;i<rows1[0].length;i++){
-//   active_array.push([Number(rows1[0][i]),false]);
-// }
 //定义当前心跳是否正常的标志变量
 // export let active_array = [[2021,false]];
 
-exports.active_array = active_array;
-var active = false; //定义指令备份数组
+
+var active = false; // for(let i=0;i<rows1[0].length;i++){
+//   active_array.push([Number(rows1[0][i]),false]);
+// }
+//定义指令备份数组
 // let zhiling_beifen_array = [];
 // for(let i=0;i<rows1[0].length;i++){
 //   zhiling_beifen_array.push([Number(rows1[0][i]),[]]);
@@ -122,20 +120,19 @@ function getTongbu() {
 
 
 setInterval(function () {
-  console.log("心跳正常发送");
+  console.log("心跳正常发送"); // 单设备
+
+  exports.active = active = false;
   client.publish("direct", JSON.stringify({
     heartTest_client: "start"
   }), {
     qos: 1
   }); //多设备情况下考虑的文本内容得添加上设备的具体编号
-
-  单设备;
-  exports.active = active = false; //多设备
+  //多设备
   //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
   // active_array.forEach((item,index)=>{
   //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
   //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  //   // 多设备情况
   //   item[1] = false;
   //   console.log("成功发送消息到主题direct:"+item[0]);
   // })
@@ -352,7 +349,7 @@ client.on('disconnect', function () {
 }); //监听控制台客户端对象收到的消息--接收方完成即可
 
 client.on('message', function _callee2(topic, message) {
-  var _ref, _ref2, rows1, _JSON$parse, d_no, waibuwendu, neibuwendu, guangzhao, type, time_base, obj, _ref3, _ref4, rows, _JSON$parse2, _d_no, _neibuwendu, _waibuwendu, _guangzhao, _type, hour, minute, second, _ref5, _ref6, _rows, _time_base, _obj, time, _ref7, _ref8, _rows2, _JSON$parse3, Vstatus, _ref9, _ref10, _rows3, _ref11, _ref12, rows0, _ref13, _ref14, _rows4, _JSON$parse4, OK, _ref15, _ref16, _rows5, _ref17, _ref18, _rows6, sum, i, _ref19, _ref20, rows2, _JSON$parse5, PID, VID, _ref21, _ref22, _rows7;
+  var _ref, _ref2, rows1, _JSON$parse, d_no, waibuwendu, neibuwendu, guangzhao, type, time_base, obj, _ref3, _ref4, rows, _JSON$parse2, _d_no, _neibuwendu, _waibuwendu, _guangzhao, _type, hour, minute, second, _ref5, _ref6, _rows, _time_base, _obj, time, _ref7, _ref8, _rows2, _JSON$parse3, _d_no2, _JSON$parse4, Vstatus, _ref9, _ref10, _rows3, _ref11, _ref12, rows0, _ref13, _ref14, _rows4, _JSON$parse5, OK, _ref15, _ref16, _rows5, _ref17, _ref18, _rows6, sum, i, _ref19, _ref20, rows2, _JSON$parse6, PID, VID, _ref21, _ref22, _rows7;
 
   return regeneratorRuntime.async(function _callee2$(_context4) {
     while (1) {
@@ -415,7 +412,7 @@ client.on('message', function _callee2(topic, message) {
           rows = _ref4[0];
 
         case 21:
-          _context4.next = 116;
+          _context4.next = 117;
           break;
 
         case 23:
@@ -477,77 +474,77 @@ client.on('message', function _callee2(topic, message) {
           _rows2 = _ref8[0];
 
         case 45:
-          _context4.next = 116;
+          _context4.next = 117;
           break;
 
         case 47:
           if (!(topic === "heartbeat")) {
-            _context4.next = 52;
+            _context4.next = 53;
             break;
           }
 
           //当发送的心跳消息得到响应的时候的主题消息的内容的执行 --心跳信息中应当存在设备编号的信息
           console.log("收到底层心跳"); // 单设备
-
-          reconnect_republish(); //完成对应设备的心跳置true
+          // reconnect_republish();//完成对应设备的心跳置true
           // 多设备
           //获取到d_no信息
-          // const {d_no} = JSON.parse(message);
-          // reconnect_republish(d_no);//完成对应设备的心跳置true
 
-          _context4.next = 116;
+          _JSON$parse3 = JSON.parse(message), _d_no2 = _JSON$parse3.d_no;
+          reconnect_republish(_d_no2); //完成对应设备的心跳置true
+
+          _context4.next = 117;
           break;
 
-        case 52:
+        case 53:
           if (!(topic === "alarm")) {
-            _context4.next = 71;
+            _context4.next = 72;
             break;
           }
 
-          _JSON$parse3 = JSON.parse(message), Vstatus = _JSON$parse3.Vstatus;
-          _context4.next = 56;
+          _JSON$parse4 = JSON.parse(message), Vstatus = _JSON$parse4.Vstatus;
+          _context4.next = 57;
           return regeneratorRuntime.awrap(connection1.execute("\n      UPDATE t_error_msg\n      SET e_msg = \"".concat(Vstatus === "1" ? "空调故障" : Vstatus === "2" ? "风扇故障" : Vstatus === "3" ? "危险气体浓度超标" : Vstatus === "4" ? "湿度超标" : "储运箱断电时间过长", "\", c_time = \"").concat(getFormattedDate(), "\"\n      WHERE id = ").concat(Number(Vstatus), ";\n    ")));
 
-        case 56:
+        case 57:
           _ref9 = _context4.sent;
           _ref10 = _slicedToArray(_ref9, 1);
           _rows3 = _ref10[0];
-          _context4.next = 61;
+          _context4.next = 62;
           return regeneratorRuntime.awrap(connection1.execute("\n      UPDATE t_error_msg\n      SET VStatus = \"1\"; \n    "));
 
-        case 61:
+        case 62:
           _ref11 = _context4.sent;
           _ref12 = _slicedToArray(_ref11, 1);
           rows0 = _ref12[0];
-          _context4.next = 66;
+          _context4.next = 67;
           return regeneratorRuntime.awrap(connection1.execute("\n    INSERT INTO t_error_history(e_msg,c_time)\n    VALUES (\"".concat(Vstatus === "1" ? "空调故障" : Vstatus === "2" ? "风扇故障" : Vstatus === "3" ? "危险气体浓度超标" : Vstatus === "4" ? "湿度超标" : "储运箱断电时间过长", "\",\"").concat(getFormattedDate(), "\")\n    ")));
 
-        case 66:
+        case 67:
           _ref13 = _context4.sent;
           _ref14 = _slicedToArray(_ref13, 1);
           _rows4 = _ref14[0];
-          _context4.next = 116;
+          _context4.next = 117;
           break;
 
-        case 71:
+        case 72:
           if (!(topic === "alarm1")) {
-            _context4.next = 104;
+            _context4.next = 105;
             break;
           }
 
           console.log("alarm1成功触发");
-          _JSON$parse4 = JSON.parse(message), OK = _JSON$parse4.OK;
-          _context4.next = 76;
+          _JSON$parse5 = JSON.parse(message), OK = _JSON$parse5.OK;
+          _context4.next = 77;
           return regeneratorRuntime.awrap(connection1.execute("\n      UPDATE t_error_msg\n      SET e_msg = \"\u672A\u53D1\u751F\u544A\u8B66\", c_time = \"".concat(getFormattedDate(), "\" \n      WHERE id = ").concat(Number(OK), ";\n    ")));
 
-        case 76:
+        case 77:
           _ref15 = _context4.sent;
           _ref16 = _slicedToArray(_ref15, 1);
           _rows5 = _ref16[0];
-          _context4.next = 81;
+          _context4.next = 82;
           return regeneratorRuntime.awrap(connection1.execute("\n      SELECT e_msg\n      FROM t_error_msg \n    "));
 
-        case 81:
+        case 82:
           _ref17 = _context4.sent;
           _ref18 = _slicedToArray(_ref17, 1);
           _rows6 = _ref18[0];
@@ -556,50 +553,50 @@ client.on('message', function _callee2(topic, message) {
           sum = 0;
           i = 0;
 
-        case 87:
+        case 88:
           if (!(i < 5)) {
-            _context4.next = 96;
+            _context4.next = 97;
             break;
           }
 
           if (!(_rows6[i].e_msg === "未发生告警")) {
-            _context4.next = 92;
+            _context4.next = 93;
             break;
           }
 
           sum++;
-          _context4.next = 93;
+          _context4.next = 94;
           break;
-
-        case 92:
-          return _context4.abrupt("break", 96);
 
         case 93:
+          return _context4.abrupt("break", 97);
+
+        case 94:
           i++;
-          _context4.next = 87;
+          _context4.next = 88;
           break;
 
-        case 96:
+        case 97:
           if (!(sum === 5)) {
-            _context4.next = 102;
+            _context4.next = 103;
             break;
           }
 
-          _context4.next = 99;
+          _context4.next = 100;
           return regeneratorRuntime.awrap(connection1.execute("\n      UPDATE t_error_msg\n      SET VStatus = \"0\";\n    "));
 
-        case 99:
+        case 100:
           _ref19 = _context4.sent;
           _ref20 = _slicedToArray(_ref19, 1);
           rows2 = _ref20[0];
 
-        case 102:
-          _context4.next = 116;
+        case 103:
+          _context4.next = 117;
           break;
 
-        case 104:
+        case 105:
           if (!(topic === "chonglian")) {
-            _context4.next = 109;
+            _context4.next = 110;
             break;
           }
 
@@ -610,25 +607,25 @@ client.on('message', function _callee2(topic, message) {
               time: "".concat(getTongbu())
             }]); //发布当前时间信息到同步时间相关的主题中
           }, 10000);
-          _context4.next = 116;
+          _context4.next = 117;
           break;
 
-        case 109:
+        case 110:
           if (!(topic === "direct1")) {
-            _context4.next = 116;
+            _context4.next = 117;
             break;
           }
 
-          _JSON$parse5 = JSON.parse(message), PID = _JSON$parse5.PID, VID = _JSON$parse5.VID;
-          _context4.next = 113;
+          _JSON$parse6 = JSON.parse(message), PID = _JSON$parse6.PID, VID = _JSON$parse6.VID;
+          _context4.next = 114;
           return regeneratorRuntime.awrap(connection1.execute("\n    INSERT INTO t_container(VID,ctime,PID)\n    VALUES (\"".concat(VID, "\",\"").concat(getFormattedDate(), "\",\"").concat(PID, "\")\n    ")));
 
-        case 113:
+        case 114:
           _ref21 = _context4.sent;
           _ref22 = _slicedToArray(_ref21, 1);
           _rows7 = _ref22[0];
 
-        case 116:
+        case 117:
         case "end":
           return _context4.stop();
       }

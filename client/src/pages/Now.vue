@@ -18,7 +18,7 @@
               </div>
             </el-dropdown-menu>
           </template>
-</el-dropdown> -->
+        </el-dropdown> -->
       <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
       <!-- <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && date_Array[0][0]">设备为{{ date_Array[0][0]
         }}的信息</div>
@@ -26,25 +26,16 @@
 
       <!-- 最新信息的提示 -->
       <h2 class="newest_device" v-show="Pinia.Device_sign" style="margin-top:70px;">传感器最新记录表格</h2>
-
-      <h2></h2>
-
-
-
       <!-- 下方执行v-if语句用于优先对nowArray的值进行动态的判断之后在进行渲染(防止在控制台报错出现内容还没获取到就报错的问题，
       而之所以会报错是因为ref数据的"开始"渲染发生在"所有异步"处理完成之后) -->
       <table v-if="nowArray && nowArray[1] && nowArray[1].length > 0 && c_length > 0" class="table_device">
         <thead>
           <tr>
             <!-- <th v-show="nowArray[0] && Pinia.device_sign">设备编号</th> -->
-            <th>{{ yingshe_array[0].field1 }}</th>
-            <th>{{ yingshe_array[1].field2 }}</th>
-            <th>{{ yingshe_array[2].field3 }}</th>
-            <th>{{ yingshe_array[3].field4 }}</th>
-            <th>{{ yingshe_array[4].field5 }}</th>
-            <th>{{ yingshe_array[5].field6 }}</th>
-            <th>{{ yingshe_array[6].field7 }}</th>
-            <th>{{ yingshe_array[7].field8 }}</th>
+            <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
+            <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
+            <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
+            <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
             <!-- <th>最新告警状态</th> -->
             <th>收集时间</th>
           </tr>
@@ -52,24 +43,12 @@
         <tbody>
           <tr>
             <!-- <td v-show="nowArray[0] && Pinia.device_sign">{{ nowArray[0] }}</td> -->
-            <td>{{ nowArray[1][nowArray[1].length - 1][0] }} <button v-show="yingshe_array[0].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][0])">查看</button> </td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][1] }} <button v-show="yingshe_array[1].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][1])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][2] }} <button v-show="yingshe_array[2].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][2])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][3] }} <button v-show="yingshe_array[3].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][3])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][4] }} <button v-show="yingshe_array[4].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][4])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][5] }} <button v-show="yingshe_array[5].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][5])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][6] }} <button v-show="yingshe_array[6].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][6])">查看</button></td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][7] }} <button v-show="yingshe_array[7].type !== '1'"
-                class="btn_modal" @click="start_block(nowArray[1][nowArray[1].length - 1][7])">查看</button></td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][0] }}</td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][1] }}</td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][2] }}</td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][3] }}</td>
             <!-- <td>{{ alarm[0].e_msg }}</td> -->
-            <td>{{ nowArray[1][nowArray[1].length - 1][8] }}</td>
+            <td>{{ nowArray[1][nowArray[1].length - 1][4] }}</td>
           </tr>
         </tbody>
       </table>
@@ -123,13 +102,13 @@
         <el-dropdown>
           <!-- 当前框只在保底一个的情况下才出现 -->
           <el-button type="primary" v-show="b_length > 1">
-            传感器设备选择列表<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            选择不同场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <div class="device_list1" v-for="item in action_Array" :key="item[0]">
                 <el-dropdown-item>
-                  <div style="border-radius: 5px;" @click="change2(item, $event)">查看传感器设备{{ item[0] }}的最新行为的一条行为数据
+                  <div style="border-radius: 5px;" @click="change2(item, $event)">{{ item[0] }}
                   </div>
                 </el-dropdown-item>
               </div>
@@ -137,7 +116,7 @@
           </template>
         </el-dropdown>
         <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
-        <div class="only1" style="border-radius: 5px;" v-if="b_length === 1">设备编号为{{ action_Array[0][0] }}的信息
+        <div class="only1" style="border-radius: 5px;" v-if="b_length === 1">{{ action_Array[0][0] }}
         </div>
       </div>
 
@@ -149,20 +128,20 @@
       <table v-if="nowArray1 && nowArray1[1] && nowArray1[1].length > 0 && d_length > 0" class="table_action">
         <thead>
           <tr>
-            <th v-if="Pinia.action_sign">设备编号</th>
+            <th>场地</th>
             <th>{{ yingshe_action_array[0].field1 }}</th>
             <th>{{ yingshe_action_array[1].field2 }}</th>
-            <th></th>
-            <th>创建时间</th>
+            <th>收集时间</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td v-if="Pinia.action_sign">{{ nowArray1[0] }}</td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][0] }}</td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }}</td>
-            <td></td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][4] }}</td>
+            <td>{{ nowArray1[0] }}</td>
+            <td>{{ nowArray1[1][nowArray1[1].length - 1][0] }} <button v-show="yingshe_action_array[0].type !== '0'"
+                class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][0])">查看</button> </td>
+            <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }} <button v-show="yingshe_action_array[1].type !== '0'"
+                class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][1])">查看</button></td>
+            <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
           </tr>
         </tbody>
       </table>
@@ -174,9 +153,9 @@
       <button id="zhuzhuang1">柱状图</button>
     </div>
     <ECharts :option="chartOption0" style="width: 600px; height: 400px;" class="zhexian1"
-      v-show="b_length > 0 && zhexian_action && Pinia.Action_sign" />
+      v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array.is_show === '1'" />
     <ECharts :option="chartOption11" style="width: 600px; height:400px;" class="zhuzhuang1"
-      v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign" />
+      v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array.is_show === '1'" />
   </div>
 </template>
 
@@ -351,21 +330,22 @@ function OneMinute(value1, value2) {//value2为'1'时去秒
     time_now.push(time[time.length - i - 1]);
   }
   if (value2 === "1") {
+    console.log("成功进入当前去除的情况");
     // 对时间进行遍历并且将最终的内容进行输出
     time_now.forEach((item, index) => {
       time_now[index] = moment(item).format('YYYY-MM-DD HH:mm');
     })
+    console.log("此时的时间值为：" + time_now);
     return time_now;
   }
   return time_now;
-
 }
 
 //定义获取分钟间隔的时候的平均值数组的函数--折线图值的配置函数
 function y_zhi(value1, value2) {
-  let average: any = value2 === "device" ? [[], [], [], [], []] : [[], [], [], []]; // 用于存储 5 个字段的平均值--设备信息
+  let average: any = value2 === "device" ? [[], [], [], []] : [[], []]; // 用于存储 5 个字段的平均值--设备信息
   const for_length = average.length;
-
+  const object_chart = value2 === "device" ? chartOption : chartOption0;
   // 遍历 4 个字段--设备信息
   for (let j = 0; j < for_length; j++) {
     let avg_values: any = []; // 存储当前字段的平均值
@@ -374,14 +354,13 @@ function y_zhi(value1, value2) {
       let startTime = new Date(targetDate.getTime() - 60 * 1000); // 1 分钟前
       // 筛选出在 [startTime, target_time] 之间的数据
       let relevantRecords = nowArray.value[1].filter(record => {
-        let recordDate = new Date(record[8]);
+        let recordDate = new Date(record[value2 === "device" ? 4 : 2]);
         return recordDate >= startTime && recordDate <= targetDate;
       });
-
       if (relevantRecords.length > 0) {
         let sum = 0;
         relevantRecords.forEach(record => {
-          sum += parseFloat(record[value2 === "device" ? j + 3 : j]); // 计算当前列的总和
+          sum += parseFloat(record[j]); // 计算当前列的总和
         });
         let avg = sum / relevantRecords.length; // 计算平均值
         avg_values.push(avg);
@@ -391,18 +370,21 @@ function y_zhi(value1, value2) {
     });
     average[j] = avg_values; // 存入对应字段
   }
-  const for_length1 = value2 === "device" ? 5 : 2;
-  const object_chart = value2 === "device" ? chartOption : chartOption0;
   // 更新 chart--设备数据
-  for (let i = 0; i < for_length1; i++) {
+  for (let i = 0; i < for_length; i++) {
+    console.log("成功进入阶段4");
+    console.log("长度：" + object_chart.value.series.length);
     object_chart.value.series[i].data = average[i];
   }
+  console.log("完成所有内容的赋值");
+  console.dir(object_chart);
 }
+
 //柱状图值的配置函数
 function y_zhi0(value1, value2) {
-  let sum1: any = value2 === "device" ? [[], [], [], [], []] : [[], [], [], []]; // 用于存储 4 个字段的平均值--设备信息
+  let sum1: any = value2 === "device" ? [[], [], [], []] : [[], []]; // 用于存储 4 个字段的平均值--设备信息
   const for_length = sum1.length;
-
+  const object_chart = value2 === "device" ? chartOption1 : chartOption11;
 
   // 遍历 4 个字段--设备信息
   for (let j = 0; j < for_length; j++) {
@@ -412,14 +394,14 @@ function y_zhi0(value1, value2) {
       let startTime = new Date(targetDate.getTime() - 60 * 1000); // 1 分钟前
       // 筛选出在 [startTime, target_time] 之间的数据
       let relevantRecords = nowArray.value[1].filter(record => {
-        let recordDate = new Date(record[8]);
+        let recordDate = new Date(record[value2 == "device" ? 4 : 2]);
         return recordDate >= startTime && recordDate <= targetDate;
       });
 
       if (relevantRecords.length > 0) {
         let sum = 0;
         relevantRecords.forEach(record => {
-          sum += parseFloat(record[value2 === "device" ? j + 3 : j]); // 计算当前列的总和
+          sum += parseFloat(record[j]); // 计算当前列的总和
         });
         let avg = sum; // 计算平均值
         avg_values.push(avg);
@@ -429,10 +411,8 @@ function y_zhi0(value1, value2) {
     });
     sum1[j] = avg_values; // 存入对应字段
   }
-  const for_length1 = value2 === "device" ? 5 : 2;
-  const object_chart = value2 === "device" ? chartOption1 : chartOption11;
   // 更新 chart--设备数据
-  for (let i = 0; i < for_length1; i++) {
+  for (let i = 0; i < for_length; i++) {
     object_chart.value.series[i].data = sum1[i];
   }
 }
@@ -446,12 +426,15 @@ function y_zhi0(value1, value2) {
 
   const result = await axios.get("/api/yingshe");//设备映射数组
   yingshe_array.value = result.data;
-  //渲染块变量赋值
-  xuanran_block_device.value = yingshe_array.value[0].is_show;//查看该组内容是否可渲染,一致处理
+
 
 
   const result0 = await axios.get("/api/yingshe/action");//行为映射数组
   yingshe_action_array.value = result0.data;
+
+  //渲染块变量赋值
+  xuanran_block_device.value = yingshe_array.value[0].is_show;//查看该组内容是否可渲染,一致处理
+
   const result1 = await axios.get("/api/recent");//设备种类数组
   date_Array.value = result1.data;
   //对初始文本进行编辑
@@ -459,14 +442,11 @@ function y_zhi0(value1, value2) {
   // text_array[0].innerText = `设备编号为${date_Array.value[0][0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
   const result11 = await axios.get("/api/recent/action");//行为种类数组
   action_Array.value = result11.data;
-  if (Pinia.action_sign) {
-    text_array[1].innerText = `设备编号为${action_Array.value[0][0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
-  }
   nowArray.value = date_Array.value[0];
   tem_array.value = [, []];
   tem_array.value[0] = nowArray.value[0];
   nowArray.value[1].forEach((item, index) => {
-    item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+    item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
     tem_array.value[1].push(item);
   })
   console.log("tem_array:" + tem_array.value);
@@ -474,7 +454,7 @@ function y_zhi0(value1, value2) {
   tem_array1.value = [, []];
   tem_array1.value[0] = nowArray1.value[0];
   nowArray1.value[1].forEach((item, index) => {
-    item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+    item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
     tem_array1.value[1].push(item);
   })
 
@@ -609,7 +589,8 @@ function y_zhi0(value1, value2) {
       trigger: 'axis'
     },
     legend: {
-      data: [yingshe_action_array.value[0].field1, yingshe_action_array.value[1].field2]
+      data: []
+      // yingshe_action_array.value[0].field1, yingshe_action_array.value[1].field2
     },
     grid: {
       left: '3%',
@@ -632,20 +613,20 @@ function y_zhi0(value1, value2) {
       type: 'value'
     },
     series: [
-      {
-        name: yingshe_action_array.value[0].field1,
-        type: 'line',
-        smooth: true,
+      // {
+      //   name: yingshe_action_array.value[0].field1,
+      //   type: 'line',
+      //   smooth: true,
 
-        data: []
-      },
-      {
-        name: yingshe_action_array.value[1].field2,
-        type: 'line',
-        smooth: true,
+      //   data: []
+      // },
+      // {
+      //   name: yingshe_action_array.value[1].field2,
+      //   type: 'line',
+      //   smooth: true,
 
-        data: []
-      }
+      //   data: []
+      // }
     ]
   });
   // 定义图表配置--行为信息--柱状图
@@ -657,7 +638,8 @@ function y_zhi0(value1, value2) {
       trigger: 'axis'
     },
     legend: {
-      data: [yingshe_action_array.value[0].field1, yingshe_action_array.value[1].field2]
+      data: []
+      // yingshe_action_array.value[0].field1, yingshe_action_array.value[1].field2 
     },
     grid: {
       left: '3%',
@@ -680,40 +662,56 @@ function y_zhi0(value1, value2) {
       type: 'value'
     },
     series: [
-      {
-        name: yingshe_action_array.value[0].field1,
-        type: 'bar',
-        data: []
-      },
-      {
-        name: yingshe_action_array.value[1].field2,
-        type: 'bar',
-        data: []
-      }
+      // {
+      //   name: yingshe_action_array.value[0].field1,
+      //   type: 'bar',
+      //   data: []
+      // },
+      // {
+      //   name: yingshe_action_array.value[1].field2,
+      //   type: 'bar',
+      //   data: []
+      // }
     ]
   });
+
+
 
   //需要注意的是初始化体表进行渲染的时候的赋值应该发生在异步处理中，否则报错且不生效
   time_array = [];
 
-  // 获取可渲染总数
-  let is_show_total = 0;
-
-  // 折线图--设备
+  // 设备配置赋值
   yingshe_array.value.forEach((item, index) => {
+    // 折线赋值
+    console.log("检查当前实际插入的字段值:" + item[`field${index + 1}`]);
+    chartOption.value.legend.data.push(item[`field${index + 1}`]);
+    chartOption1.value.legend.data.push(item[`field${index + 1}`]);
+    chartOption.value.series.push({
+      name: item[`field${index + 1}`],
+      type: 'line',
+      smooth: true,
+      data: []
+    })
+    chartOption1.value.series.push({
+      name: item[`field${index + 1}`],
+      type: 'bar',
+      data: []
+    })
+  })
+  // 行为配置赋值
+  yingshe_action_array.value.forEach((item, index) => {
     if (item.is_show === "1") {
-      is_show_total++;
       // 折线赋值
       console.log("检查当前实际插入的字段值:" + item[`field${index + 1}`]);
-      chartOption.value.legend.data.push(item[`field${index + 1}`]);
-      chartOption1.value.legend.data.push(item[`field${index + 1}`]);
-      chartOption.value.series.push({
+      chartOption0.value.legend.data.push(item[`field${index + 1}`]);
+      chartOption11.value.legend.data.push(item[`field${index + 1}`]);
+      chartOption0.value.series.push({
         name: item[`field${index + 1}`],
         type: 'line',
         smooth: true,
         data: []
       })
-      chartOption1.value.series.push({
+      chartOption11.value.series.push({
         name: item[`field${index + 1}`],
         type: 'bar',
         data: []
@@ -722,21 +720,12 @@ function y_zhi0(value1, value2) {
     }
   })
 
+  console.log("已经成功的时候!!!!");
 
-  // 折线图--行为
-  chartOption0.value.series[0].data = [];
-  chartOption0.value.series[1].data = [];
-  // 柱状图--行为
-  chartOption11.value.series[0].data = [];
-  chartOption11.value.series[1].data = [];
-  chartOption.value.title.text = `传感器设备的最近5分钟的数据`;
-  chartOption1.value.title.text = `传感器设备的最近5分钟的数据`;
-  chartOption0.value.title.text = `传感器设备的最近5分钟的数据`;
-  chartOption11.value.title.text = `传感器设备的最近5分钟的数据`;
 
   // 折线图、柱状图--设备
   for (let i = 0; i < tem_array.value[1].length; i++) {
-    time_array.push(tem_array.value[1][i][8]);
+    time_array.push(tem_array.value[1][i][4]);
   }
   console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
   chartOption.value.xAxis.data = OneMinute(time_array, "1");
@@ -744,22 +733,22 @@ function y_zhi0(value1, value2) {
   //为time_array填充上原先时间格式的内容
   time_array = [];
   for (let i = 0; i < tem_array.value[1].length; i++) {
-    time_array.push(tem_array.value[1][i][8]);
+    time_array.push(tem_array.value[1][i][4]);
   }
   console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-  y_zhi(OneMinute(time_array, "0"), "device");
-  y_zhi0(OneMinute(time_array, "0"), "device");
+  y_zhi(OneMinute(time_array, "1"), "device");
+  y_zhi0(OneMinute(time_array, "1"), "device");
   // 折线图、柱状图--行为
   time_array = [];
   for (let i = 0; i < tem_array1.value[1].length; i++) {
-    time_array.push(tem_array1.value[1][i][8]);
+    time_array.push(tem_array1.value[1][i][2]);
   }
   // console.log("test:" + time_array);
   chartOption0.value.xAxis.data = OneMinute(time_array, "1");
   chartOption11.value.xAxis.data = OneMinute(time_array, "1");
   time_array = [];
   for (let i = 0; i < tem_array1.value[1].length; i++) {
-    time_array.push(tem_array1.value[1][i][8]);
+    time_array.push(tem_array1.value[1][i][2]);
   }
 
   y_zhi(OneMinute(time_array, "0"), "action");
@@ -773,8 +762,7 @@ let y: any = 0;
 
 // 挂载时加载数据
 onMounted(async () => {
-
-  // 设备选择按钮
+  // 设备选择按钮--设备逻辑
   change1 = async (value, value1) => {
     //点击了设备按钮之后对样式进行修改
     //对所有内容进行统一的设计
@@ -788,337 +776,148 @@ onMounted(async () => {
       value1.target.parentNode.style.backgroundColor = "rgb(235.9, 245.3, 255)";
     }
     else { }
-
     signzhi = value[0];
-
     clearInterval(x);
-    if (zhexian_device.value) {
-
-      chartOption.value.series.forEach((item, index) => {
+    const jiezhi_object = zhexian_device.value ? chartOption : chartOption1;
+    // 定义代码块--重渲染操作
+    function re_xuanran() {
+      jiezhi_object.value.series.forEach((item, index) => {
         item = [];
       })
       nowArray.value = value;
       tem_array.value = [, []];
       tem_array.value[0] = nowArray.value[0];
       nowArray.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
         tem_array.value[1].push(item);
       })
       // console.log("tem_array:" + tem_array.value);
       // chartOption.value.title.text = `传感器设备${nowArray.value[0]}的最近5分钟的数据`;
-      chartOption.value.title.text = `传感器设备的最近5分钟的数据`;
+      jiezhi_object.value.title.text = `传感器设备的最近5分钟的数据`;
       time_array = [];
       for (let i = 0; i < tem_array.value[1].length; i++) {
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-      chartOption.value.xAxis.data = OneMinute(time_array, "1");//赋值
+      jiezhi_object.value.xAxis.data = OneMinute(time_array, "1");//赋值
       time_array = [];
       for (let i = 0; i < tem_array.value[1].length; i++) {
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
       }
 
-      y_zhi(OneMinute(time_array, "0"), "device");
-
-      x = setInterval(async () => {
-        const result_alarm = await axios.get("/api/alarm");
-        // alarm.value = result_alarm.data;
-        // const result_ID = await axios.get("/api/recent/list_obj");
-        // ID_array.value = result_ID.data;
-        const result1 = await axios.get("/api/recent");
-        date_Array.value = result1.data;
-        a_length.value = date_Array.value.length;
-        //判断设备选择对象并且赋值
-        for (let i = 0; i < date_Array.value.length; i++) {
-          if (value[0] === date_Array.value[i][0]) {
-            nowArray.value = date_Array.value[i];
-          }
-        }
-        tem_array.value = [, []];
-        tem_array.value[0] = nowArray.value[0];
-        nowArray.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
-          tem_array.value[1].push(item);
-        })
-        chartOption.value.series.forEach((item, index) => {
-          item = [];
-        })
-        time_array = [];
-        // chartOption.value.title.text = `传感器设备${nowArray.value[0]}的最近5分钟的数据`;
-        chartOption.value.title.text = `传感器设备的最近5分钟的数据`;
-        for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
-        }
-        chartOption.value.xAxis.data = OneMinute(time_array, "1");
-        time_array = [];
-        for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
-        }
-
-        // 为纵轴赋值
-        y_zhi(OneMinute(time_array, "0"), "device");
-      }, 2000);
+      if (jiezhi_object === chartOption) {//折线情况
+        y_zhi(OneMinute(time_array, "1"), "device");
+      }
+      else {
+        y_zhi0(OneMinute(time_array, "1"), "device");
+      }
     }
-    else {
-      chartOption1.value.series[0].data = [];
-      chartOption1.value.series[1].data = [];
-      chartOption1.value.series[2].data = [];
-      // chartOption1.value.series[3].data = [];
-      nowArray.value = value;
+    re_xuanran();
+    x = setInterval(async () => {
+      // const result_alarm = await axios.get("/api/alarm");
+      // alarm.value = result_alarm.data;
+      // const result_ID = await axios.get("/api/recent/list_obj");
+      // ID_array.value = result_ID.data;
+      const result1 = await axios.get("/api/recent");
+      date_Array.value = result1.data;
+      a_length.value = date_Array.value.length;
+      //判断设备选择对象并且赋值
+      for (let i = 0; i < date_Array.value.length; i++) {
+        if (value[0] === date_Array.value[i][0]) {
+          nowArray.value = date_Array.value[i];
+        }
+      }
       tem_array.value = [, []];
       tem_array.value[0] = nowArray.value[0];
       nowArray.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
         tem_array.value[1].push(item);
       })
-      // console.log("tem_array:" + tem_array.value);
-      // chartOption1.value.title.text = `传感器设备${nowArray.value[0]}的最近5分钟的数据`;
-      chartOption1.value.title.text = `传感器设备的最近5分钟的数据`;
-      time_array = [];
-      for (let i = 0; i < tem_array.value[1].length; i++) {
-        time_array.push(tem_array.value[1][i][8]);
-      }
-      console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
+      re_xuanran();
+    }, 2000);
 
-      chartOption1.value.xAxis.data = OneMinute(time_array, "1");//赋值
-      time_array = [];
-      for (let i = 0; i < tem_array.value[1].length; i++) {
-        time_array.push(tem_array.value[1][i][8]);
-      }
-      console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
-      y_zhi0(OneMinute(time_array, "0"), "device");
-
-      x = setInterval(async () => {
-        const result_alarm = await axios.get("/api/alarm");
-        // alarm.value = result_alarm.data;
-        // const result_ID = await axios.get("/api/recent/list_obj");
-        // ID_array.value = result_ID.data;
-        const result1 = await axios.get("/api/recent");
-        date_Array.value = result1.data;
-        a_length.value = date_Array.value.length;
-        //判断设备选择对象并且赋值
-        for (let i = 0; i < date_Array.value.length; i++) {
-          if (value[0] === date_Array.value[i][0]) {
-            nowArray.value = date_Array.value[i];
-          }
-        }
-        tem_array.value = [, []];
-        tem_array.value[0] = nowArray.value[0];
-        nowArray.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
-          tem_array.value[1].push(item);
-        })
-        console.log("tem_array:" + tem_array.value);
-        chartOption1.value.series[0].data = [];
-        chartOption1.value.series[1].data = [];
-        chartOption1.value.series[2].data = [];
-        // chartOption1.value.series[3].data = [];
-        time_array = [];
-        // chartOption1.value.title.text = `传感器设备${nowArray.value[0]}的最近5分钟的数据`;
-        chartOption1.value.title.text = `传感器设备的最近5分钟的数据`;
-        for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
-        }
-        console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
-        chartOption1.value.xAxis.data = OneMinute(time_array, "1");
-        time_array = [];
-        for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
-        }
-        console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
-        y_zhi0(OneMinute(time_array, "0"), "device");
-      }, 2000);
-    }
 
     //对初始文本进行编辑
     const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
     text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
   }
+  // 设备选择
   change2 = async (value, value1) => {
     //点击了设备按钮之后对样式进行修改
     //对所有内容进行统一的设计
     if (b_length.value > 1) {
-      const option_array: any = document.querySelectorAll(".device_list1");
+      const option_array: any = document.querySelectorAll(".device_list");
       option_array.forEach(item => {
-        item.children[0].style.backgroundColor = "white";
         item.children[0].style.color = "black";
+        item.children[0].style.backgroundColor = "white";
       })
       value1.target.parentNode.style.color = "#409eff";
       value1.target.parentNode.style.backgroundColor = "rgb(235.9, 245.3, 255)";
     }
     else { }
-
     signzhi1 = value[0];
-
     clearInterval(y);
-
-    if (zhexian_action.value) {
-      chartOption0.value.series[0].data = [];
-      chartOption0.value.series[1].data = [];
-      // chartOption0.value.series[2].data = [];
-      // chartOption0.value.series[3].data = [];
+    const jiezhi_object = zhexian_device.value ? chartOption0 : chartOption11;
+    // 定义代码块--重渲染操作
+    function re_xuanran() {
+      jiezhi_object.value.series.forEach((item, index) => {
+        item = [];
+      })
       nowArray1.value = value;
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
-      console.log("tem_array1:" + tem_array1.value);
-
-      // chartOption0.value.title.text = `传感器设备${nowArray1.value[0]}的最近5分钟的数据`;
-      chartOption0.value.title.text = `传感器设备的最近5分钟的数据`;
+      // console.log("tem_array:" + tem_array.value);
+      // chartOption.value.title.text = `传感器设备${nowArray.value[0]}的最近5分钟的数据`;
+      jiezhi_object.value.title.text = `传感器设备的最近5分钟的数据`;
       time_array = [];
       for (let i = 0; i < tem_array1.value[1].length; i++) {
-        console.log("tem_array.value[1]:" + tem_array.value[1]);
-        console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-        time_array.push(tem_array1.value[1][i][8]);
-        console.log("time:" + time_array);
+        time_array.push(tem_array1.value[1][i][2]);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
-
-      chartOption0.value.xAxis.data = OneMinute(time_array, "1");//赋值
+      jiezhi_object.value.xAxis.data = OneMinute(time_array, "1");//赋值
       time_array = [];
       for (let i = 0; i < tem_array1.value[1].length; i++) {
-        time_array.push(tem_array1.value[1][i][8]);
+        time_array.push(tem_array1.value[1][i][2]);
       }
-      console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-      y_zhi(OneMinute(time_array, "0"), "action");
-      y = setInterval(async () => {
-        const result1 = await axios.get("/api/recent/action");
-        action_Array.value = result1.data;
-        b_length.value = action_Array.value.length;
-        //判断设备选择对象并且赋值
-        if (action_Array.value.length >= 1 && value[0] === action_Array.value[0][0]) {
-          nowArray1.value = action_Array.value[0];
-        }
-        else if (action_Array.value.length >= 2 && value[0] === action_Array.value[1][0]) {
-          nowArray1.value = action_Array.value[1];
-        }
-        else if (action_Array.value.length >= 3 && value[0] === action_Array.value[2][0]) {
-          nowArray1.value = action_Array.value[2];
-        }
-        else if (action_Array.value.length >= 4 && value[0] === action_Array.value[3][0]) {
-          nowArray1.value = action_Array.value[3];
-        }
-        tem_array1.value = [, []];
-        tem_array1.value[0] = nowArray1.value[0];
-        nowArray1.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
-          tem_array1.value[1].push(item);
-        })
-        // console.log("tem_array1:" + tem_array1.value);
-        chartOption0.value.series[0].data = [];
-        chartOption0.value.series[1].data = [];
-        // chartOption0.value.series[2].data = [];
-        // chartOption0.value.series[3].data = [];
-        time_array = [];
-        // chartOption0.value.title.text = `传感器设备${nowArray1.value[0]}的最近5分钟的数据`;
-        chartOption0.value.title.text = `传感器设备的最近5分钟的数据`;
-        for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
-        }
-        console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
 
-        chartOption0.value.xAxis.data = OneMinute(time_array, "1");
-        time_array = [];
-        for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
-        }
-        console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
-        // 为纵轴赋值
-        y_zhi(OneMinute(time_array, "0"), "action");
-      }, 2000);
+      if (jiezhi_object === chartOption0) {// 折线情况
+        y_zhi(OneMinute(time_array, "1"), "action");
+      }
+      else {
+        y_zhi0(OneMinute(time_array, "1"), "action");
+      }
     }
-    else {
-      chartOption11.value.series[0].data = [];
-      chartOption11.value.series[1].data = [];
-      ;
-      // chartOption11.value.series[3].data = [];
-      nowArray1.value = value;
+    re_xuanran();
+    y = setInterval(async () => {
+      // const result_alarm = await axios.get("/api/alarm");
+      // alarm.value = result_alarm.data;
+      // const result_ID = await axios.get("/api/recent/list_obj");
+      // ID_array.value = result_ID.data;
+      const result1 = await axios.get("/api/recent/action");
+      action_Array.value = result1.data;
+      b_length.value = action_Array.value.length;
+      //判断设备选择对象并且赋值
+      for (let i = 0; i < action_Array.value.length; i++) {
+        if (value[0] === action_Array.value[i][0]) {
+          nowArray1.value = action_Array.value[i];
+        }
+      }
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
-      console.log("tem_array1:" + tem_array1.value);
-
-      // chartOption11.value.title.text = `传感器设备${nowArray1.value[0]}的最近5分钟的数据`;
-      chartOption11.value.title.text = `传感器设备的最近5分钟的数据`;
-      time_array = [];
-      for (let i = 0; i < tem_array1.value[1].length; i++) {
-        time_array.push(tem_array1.value[1][i][8]);
-      }
-      console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
-      chartOption11.value.xAxis.data = OneMinute(time_array, "1");//赋值
-      time_array = [];
-      for (let i = 0; i < tem_array1.value[1].length; i++) {
-        time_array.push(tem_array1.value[1][i][8]);
-      }
-      console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
-      y_zhi0(OneMinute(time_array, "0"), "action");
-
-      y = setInterval(async () => {
-        const result1 = await axios.get("/api/recent/action");
-        action_Array.value = result1.data;
-        b_length.value = action_Array.value.length;
-        //判断设备选择对象并且赋值
-        if (action_Array.value.length >= 1 && value[0] === action_Array.value[0][0]) {
-          nowArray1.value = action_Array.value[0];
-        }
-        else if (action_Array.value.length >= 2 && value[0] === action_Array.value[1][0]) {
-          nowArray1.value = action_Array.value[1];
-        }
-        else if (action_Array.value.length >= 3 && value[0] === action_Array.value[2][0]) {
-          nowArray1.value = action_Array.value[2];
-        }
-        else if (action_Array.value.length >= 4 && value[0] === action_Array.value[3][0]) {
-          nowArray1.value = action_Array.value[3];
-        }
-        tem_array1.value = [, []];
-        tem_array1.value[0] = nowArray1.value[0];
-        nowArray1.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
-          tem_array1.value[1].push(item);
-        })
-        // console.log("tem_array1:" + tem_array1.value);
-
-        chartOption11.value.series[0].data = [];
-        chartOption11.value.series[1].data = [];
-        ;
-        // chartOption11.value.series[3].data = [];
-        time_array = [];
-        // chartOption11.value.title.text = `传感器设备${nowArray1.value[0]}的最近5分钟的数据`;
-        chartOption11.value.title.text = `传感器设备的最近5分钟的数据`;
-        for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
-        }
-        console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
-        chartOption11.value.xAxis.data = OneMinute(time_array, "1");
-        time_array = [];
-        for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
-        }
-        console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
-        // 为纵轴赋值
-        y_zhi(OneMinute(time_array, "0"), "action");
-      }, 2000);
-    }
-
+      re_xuanran();
+    }, 2000);
 
     //对初始文本进行编辑
     const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
-    text_array[1].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
+    text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
   }
 
   x = setInterval(async () => {
@@ -1133,11 +932,9 @@ onMounted(async () => {
     tem_array.value = [, []];
     tem_array.value[0] = nowArray.value[0];
     nowArray.value[1].forEach((item, index) => {
-      item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+      item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
       tem_array.value[1].push(item);
     })
-    console.log("tem_array:" + tem_array.value);
-
     //渲染折线图
     chartOption.value.series.forEach((item, index) => {
       item = [];
@@ -1148,7 +945,7 @@ onMounted(async () => {
     for (let i = 0; i < tem_array.value[1].length; i++) {
       console.log("tem_array.value[1]:" + tem_array.value[1]);
       console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-      time_array.push(tem_array.value[1][i][8]);
+      time_array.push(tem_array.value[1][i][4]);
       console.log("time:" + time_array);
     }
     console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1156,7 +953,7 @@ onMounted(async () => {
     chartOption.value.xAxis.data = OneMinute(time_array, "1");
     time_array = [];
     for (let i = 0; i < tem_array.value[1].length; i++) {
-      time_array.push(tem_array.value[1][i][8]);
+      time_array.push(tem_array.value[1][i][4]);
     }
     console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1171,20 +968,20 @@ onMounted(async () => {
     tem_array1.value = [, []];
     tem_array1.value[0] = nowArray1.value[0];
     nowArray1.value[1].forEach((item, index) => {
-      item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+      item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
       tem_array1.value[1].push(item);
     })
-    chartOption0.value.series[0].data = [];
-    chartOption0.value.series[1].data = [];
-    // chartOption0.value.series[2].data = [];
-    // chartOption0.value.series[3].data = [];
+    //渲染折线图
+    chartOption.value.series.forEach((item, index) => {
+      item = [];
+    })
     time_array = [];
     // chartOption0.value.title.text = `传感器设备${nowArray1.value[0]}的最近5分钟的数据`;
     chartOption0.value.title.text = `传感器设备的最近5分钟的数据`;
     for (let i = 0; i < tem_array1.value[1].length; i++) {
       console.log("tem_array1.value[1]:" + tem_array1.value[1]);
       console.log("tem_array1.value[1][i][4]:" + tem_array1.value[1][i][4]);
-      time_array.push(tem_array1.value[1][i][8]);
+      time_array.push(tem_array1.value[1][i][2]);
       console.log("time:" + time_array);
     }
     console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1192,27 +989,23 @@ onMounted(async () => {
     chartOption0.value.xAxis.data = OneMinute(time_array, "1");
     time_array = [];
     for (let i = 0; i < tem_array1.value[1].length; i++) {
-      time_array.push(tem_array1.value[1][i][8]);
+      time_array.push(tem_array1.value[1][i][2]);
     }
     console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
-    y_zhi(OneMinute(time_array, "0"), "action");
+    y_zhi(OneMinute(time_array, "1"), "action");
   }, 2000);
 
   // 设备信息图像切换按钮
   change = async (value) => {
     const zhexian_btn = document.querySelector("#zhexian") as HTMLElement;
     const zhuzhuang_btn = document.querySelector("#zhuzhuang") as HTMLElement;
-
     clearInterval(x);
-
     if (value.target === zhexian_btn) {
       zhexian_device.value = true;
-
       //为选中元素进行样式修改
       zhexian_btn.classList.add("active");
       zhuzhuang_btn.classList.remove("active");
-
       //优先执行一次定时器内容
       const result1 = await axios.get("/api/recent");
       date_Array.value = result1.data;
@@ -1229,14 +1022,12 @@ onMounted(async () => {
       tem_array.value = [, []];
       tem_array.value[0] = nowArray.value[0];
       nowArray.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
         tem_array.value[1].push(item);
       })
       console.log("tem_array:" + tem_array.value);
-
       console.log("设备zhuzhuang===none");
       //渲染折线图
-
       chartOption.value.series.forEach((item, index) => {
         item = [];
       })
@@ -1246,23 +1037,20 @@ onMounted(async () => {
       for (let i = 0; i < tem_array.value[1].length; i++) {
         console.log("tem_array.value[1]:" + tem_array.value[1]);
         console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
         console.log("time:" + time_array);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
       chartOption.value.xAxis.data = OneMinute(time_array, "1");
       time_array = [];
       for (let i = 0; i < tem_array.value[1].length; i++) {
         console.log("tem_array.value[1]:" + tem_array.value[1]);
         console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
         console.log("time:" + time_array);
       }
       console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
       y_zhi(OneMinute(time_array, "0"), "device");
-
       x = setInterval(async () => {
         const result_alarm = await axios.get("/api/alarm");
         // alarm.value = result_alarm.data;
@@ -1283,11 +1071,10 @@ onMounted(async () => {
         tem_array.value = [, []];
         tem_array.value[0] = nowArray.value[0];
         nowArray.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+          item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
           tem_array.value[1].push(item);
         })
         console.log("tem_array:" + tem_array.value);
-
         console.log("设备zhuzhuang===none");
         //渲染折线图
         chartOption.value.series.forEach((item, index) => {
@@ -1299,20 +1086,17 @@ onMounted(async () => {
         for (let i = 0; i < tem_array.value[1].length; i++) {
           console.log("tem_array.value[1]:" + tem_array.value[1]);
           console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-          time_array.push(tem_array.value[1][i][8]);
+          time_array.push(tem_array.value[1][i][4]);
           console.log("time:" + time_array);
         }
         console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
-
         chartOption.value.xAxis.data = OneMinute(time_array, "1");
         time_array = [];
         for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
+          time_array.push(tem_array.value[1][i][4]);
         }
         console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
-
         y_zhi(OneMinute(time_array, "0"), "device");
-
       }, 2000)
     }
     else if (value.target === zhuzhuang_btn) {
@@ -1337,7 +1121,7 @@ onMounted(async () => {
       tem_array.value = [, []];
       tem_array.value[0] = nowArray.value[0];
       nowArray.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
         tem_array.value[1].push(item);
       })
       console.log("tem_array:" + tem_array.value);
@@ -1354,14 +1138,14 @@ onMounted(async () => {
       for (let i = 0; i < tem_array.value[1].length; i++) {
         console.log("tem_array.value[1]:" + tem_array.value[1]);
         console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
 
       chartOption1.value.xAxis.data = OneMinute(time_array, "1");
       time_array = [];
       for (let i = 0; i < tem_array.value[1].length; i++) {
-        time_array.push(tem_array.value[1][i][8]);
+        time_array.push(tem_array.value[1][i][4]);
       }
       console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1387,7 +1171,7 @@ onMounted(async () => {
         tem_array.value = [, []];
         tem_array.value[0] = nowArray.value[0];
         nowArray.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+          item[4] = moment(item[4]).format('YYYY-MM-DD HH:mm:ss');
           tem_array.value[1].push(item);
         })
         console.log("tem_array:" + tem_array.value);
@@ -1404,22 +1188,20 @@ onMounted(async () => {
         for (let i = 0; i < tem_array.value[1].length; i++) {
           console.log("tem_array.value[1]:" + tem_array.value[1]);
           console.log("tem_array.value[1][i][4]:" + tem_array.value[1][i][4]);
-          time_array.push(tem_array.value[1][i][8]);
+          time_array.push(tem_array.value[1][i][4]);
         }
         console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
 
         chartOption1.value.xAxis.data = OneMinute(time_array, "1");
         time_array = [];
         for (let i = 0; i < tem_array.value[1].length; i++) {
-          time_array.push(tem_array.value[1][i][8]);
+          time_array.push(tem_array.value[1][i][4]);
         }
         console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
         y_zhi0(OneMinute(time_array, "0"), "device");
       }, 2000)
-
     }
-
   }
   // 行为信息图像切换按钮
   change0 = async (value) => {
@@ -1448,7 +1230,7 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       console.log("tem_array1:" + tem_array1.value);
@@ -1465,7 +1247,7 @@ onMounted(async () => {
       for (let i = 0; i < tem_array1.value[1].length; i++) {
         console.log("tem_array.value[1]:" + tem_array1.value[1]);
         console.log("tem_array.value[1][i][4]:" + tem_array1.value[1][i][4]);
-        time_array.push(tem_array1.value[1][i][8]);
+        time_array.push(tem_array1.value[1][i][2]);
         console.log("time:" + time_array);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1474,7 +1256,7 @@ onMounted(async () => {
       chartOption0.value.xAxis.data = OneMinute(time_array, "1");
       time_array = [];
       for (let i = 0; i < tem_array1.value[1].length; i++) {
-        time_array.push(tem_array1.value[1][i][8]);
+        time_array.push(tem_array1.value[1][i][2]);
       }
       console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1497,7 +1279,7 @@ onMounted(async () => {
         tem_array1.value = [, []];
         tem_array1.value[0] = nowArray1.value[0];
         nowArray1.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+          item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
           tem_array1.value[1].push(item);
         })
         console.log("tem_array1:" + tem_array1.value);
@@ -1514,7 +1296,7 @@ onMounted(async () => {
         for (let i = 0; i < tem_array1.value[1].length; i++) {
           console.log("tem_array.value[1]:" + tem_array1.value[1]);
           console.log("tem_array.value[1][i][4]:" + tem_array1.value[1][i][4]);
-          time_array.push(tem_array1.value[1][i][8]);
+          time_array.push(tem_array1.value[1][i][2]);
           console.log("time:" + time_array);
         }
         console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1523,7 +1305,7 @@ onMounted(async () => {
         chartOption0.value.xAxis.data = OneMinute(time_array, "1");
         time_array = [];
         for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
+          time_array.push(tem_array1.value[1][i][2]);
         }
         console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1552,7 +1334,7 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       console.log("tem_array1:" + tem_array1.value);
@@ -1569,7 +1351,7 @@ onMounted(async () => {
       for (let i = 0; i < tem_array1.value[1].length; i++) {
         console.log("tem_array.value[1]:" + tem_array1.value[1]);
         console.log("tem_array.value[1][i][4]:" + tem_array1.value[1][i][4]);
-        time_array.push(tem_array1.value[1][i][8]);
+        time_array.push(tem_array1.value[1][i][2]);
         console.log("time:" + time_array);
       }
       console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1578,7 +1360,7 @@ onMounted(async () => {
       chartOption11.value.xAxis.data = OneMinute(time_array, "1");
       time_array = [];
       for (let i = 0; i < tem_array1.value[1].length; i++) {
-        time_array.push(tem_array1.value[1][i][8]);
+        time_array.push(tem_array1.value[1][i][2]);
       }
       console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1600,7 +1382,7 @@ onMounted(async () => {
         tem_array1.value = [, []];
         tem_array1.value[0] = nowArray1.value[0];
         nowArray1.value[1].forEach((item, index) => {
-          item[8] = moment(item[8]).format('YYYY-MM-DD HH:mm:ss');
+          item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
           tem_array1.value[1].push(item);
         })
         console.log("tem_array1:" + tem_array1.value);
@@ -1617,7 +1399,7 @@ onMounted(async () => {
         for (let i = 0; i < tem_array1.value[1].length; i++) {
           console.log("tem_array.value[1]:" + tem_array1.value[1]);
           console.log("tem_array.value[1][i][4]:" + tem_array1.value[1][i][4]);
-          time_array.push(tem_array1.value[1][i][8]);
+          time_array.push(tem_array1.value[1][i][2]);
           console.log("time:" + time_array);
         }
         console.log("guiguiguiguiguiguiguiguiguiguiguiguigui" + time_array);
@@ -1626,7 +1408,7 @@ onMounted(async () => {
         chartOption11.value.xAxis.data = OneMinute(time_array, "1");
         time_array = [];
         for (let i = 0; i < tem_array1.value[1].length; i++) {
-          time_array.push(tem_array1.value[1][i][8]);
+          time_array.push(tem_array1.value[1][i][2]);
         }
         console.log("桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂桂：" + time_array);
 
@@ -1759,7 +1541,7 @@ h2 {
 table {
   margin-top: 50px;
   border-top: 5px solid gray;
-  /* width: 1090px;  */
+  width: 100%;
   height: 66px;
   /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
   border-spacing: 0;
@@ -1814,7 +1596,7 @@ table tbody>tr>td {
 /* 为最新消息h2标签进行样式设计 */
 h2.newest_device,
 h2.newest_action {
-  width: 1104px;
+  width: 100%;
   position: relative;
   top: 50px;
   background-color: #9da79f;

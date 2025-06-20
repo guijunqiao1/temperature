@@ -24,13 +24,13 @@ let connection1;//定义数据库连接对象--project02
 // WHERE device_name = "电动自行车"
 // `);
 
-export let active_array;
-// for(let i=0;i<rows1[0].length;i++){
-//   active_array.push([Number(rows1[0][i]),false]);
-// }
 //定义当前心跳是否正常的标志变量
 // export let active_array = [[2021,false]];
 export let active = false;
+// for(let i=0;i<rows1[0].length;i++){
+//   active_array.push([Number(rows1[0][i]),false]);
+// }
+
 
 //定义指令备份数组
 // let zhiling_beifen_array = [];
@@ -90,17 +90,15 @@ function getTongbu() {
 // 制作一个定时器用于定期向设备层订阅的主题中发送消息，并且设备层在接受到消息之后则响应相同的消息到应用层，用于检测设备层和应用层是不是直接的连接
 setInterval(()=>{
   console.log("心跳正常发送");
-  client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  单设备
+  // 单设备
   active = false;
+  client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
   //多设备
   //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
   // active_array.forEach((item,index)=>{
   //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
   //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  //   // 多设备情况
   //   item[1] = false;
-
   //   console.log("成功发送消息到主题direct:"+item[0]);
   // })
 },5000);//每5s进行一次心跳的检测
@@ -357,11 +355,11 @@ client.on('message', async (topic, message) => {
   else if(topic==="heartbeat"){//当发送的心跳消息得到响应的时候的主题消息的内容的执行 --心跳信息中应当存在设备编号的信息
     console.log("收到底层心跳");
     // 单设备
-    reconnect_republish();//完成对应设备的心跳置true
+    // reconnect_republish();//完成对应设备的心跳置true
     // 多设备
     //获取到d_no信息
-    // const {d_no} = JSON.parse(message);
-    // reconnect_republish(d_no);//完成对应设备的心跳置true
+    const {d_no} = JSON.parse(message);
+    reconnect_republish(d_no);//完成对应设备的心跳置true
   }
   // 接收到底层的自动模式下的修改控件状态的指令的情况
   // else if(topic==="veiw"){

@@ -13,6 +13,8 @@ var _koaBody = require("koa-body");
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
+var _path = _interopRequireDefault(require("path"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -61,24 +63,26 @@ var connection1;
 
 
 router.post('/sensor/data', function _callee2(ctx) {
-  var _ctx$request$body, d_no, png, mp4, type, _ref, _ref2, rows1, time_base, obj, finalType, finalDNo;
+  var _ctx$request$body, d_no, png, mp4, type, file_path, _ref, _ref2, rows1, time_base, obj, finalType, finalDNo;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
           _ctx$request$body = ctx.request.body, d_no = _ctx$request$body.d_no, png = _ctx$request$body.png, mp4 = _ctx$request$body.mp4, type = _ctx$request$body.type;
-          console.log("接收到传感器数据", ctx.request.body);
+          console.log("接收到传感器数据", ctx.request.body); // 全局规定文件路径
+
+          file_path = _path["default"].resolve(__dirname, "../", "/clinet", "/public");
 
           if (!(png > 0 && mp4 > 0)) {
-            _context2.next = 15;
+            _context2.next = 16;
             break;
           }
 
-          _context2.next = 5;
+          _context2.next = 6;
           return regeneratorRuntime.awrap(connection1.execute("SELECT p_name FROM t_behavior_field_mapper"));
 
-        case 5:
+        case 6:
           _ref = _context2.sent;
           _ref2 = _slicedToArray(_ref, 1);
           rows1 = _ref2[0];
@@ -89,14 +93,14 @@ router.post('/sensor/data', function _callee2(ctx) {
           });
           finalType = type || "实时数据";
           finalDNo = d_no || null;
-          _context2.next = 15;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no,field1,field2,c_time,type)\n      VALUES (\"".concat(finalDNo, "\",\"").concat(obj.P, "\",\"").concat(obj.V, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n    ")));
+          _context2.next = 16;
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no,field1,field2,path,c_time,type)\n      VALUES (\"".concat(finalDNo, "\",\"").concat(obj.P, "\",\"").concat(obj.V, "\",\"").concat(file_path, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n    ")));
 
-        case 15:
+        case 16:
           ctx.status = 200;
           ctx.body = 'OK';
 
-        case 17:
+        case 18:
         case "end":
           return _context2.stop();
       }

@@ -3,6 +3,7 @@ import Koa from 'koa';
 import Router from 'koa-router';
 import {koaBody} from 'koa-body';
 import Config1 from "../indexNode2.js";
+import path from "path";
 
 const app = new Koa();
 const router = new Router();
@@ -27,6 +28,9 @@ let connection1;
 router.post('/sensor/data', async (ctx) => {
   const { d_no, png, mp4, type } = ctx.request.body;
   console.log("接收到传感器数据", ctx.request.body);
+  // 全局规定文件路径
+  const file_path = path.resolve(__dirname,"../","/clinet","/public");
+
   if ( png > 0 && mp4 > 0) {
     const [rows1] = await connection1.execute(`SELECT p_name FROM t_behavior_field_mapper`);
     const time_base = getFormattedDate();
@@ -38,8 +42,8 @@ router.post('/sensor/data', async (ctx) => {
     const finalType = type || "实时数据";
     const finalDNo = d_no || null;
     await connection1.execute(`
-      INSERT INTO t_behavior_data(d_no,field1,field2,c_time,type)
-      VALUES ("${finalDNo}","${obj.P}","${obj.V}","${time_base}","${finalType}")
+      INSERT INTO t_behavior_data(d_no,field1,field2,path,c_time,type)
+      VALUES ("${finalDNo}","${obj.P}","${obj.V}","${file_path}","${time_base}","${finalType}")
     `);
   }
   ctx.status = 200;

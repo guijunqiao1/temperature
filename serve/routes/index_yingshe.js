@@ -36,11 +36,9 @@ Router1.get("/yingshe/action",async ctx=>{
     SELECT db_name, f_name ,type,is_show FROM t_behavior_field_mapper;
   `);
   dbResult = dbResult[0];
-
   const objectArray = dbResult.map(row => {
     return { [row.db_name]: row.f_name,type:row.type,is_show:row.is_show };
   });
-
   console.log("yingshe/action" + objectArray);
   ctx.body = objectArray;
 });

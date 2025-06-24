@@ -232,7 +232,7 @@ Router4.get("/History", function _callee2(ctx) {
 
         case 69:
           _context2.next = 71;
-          return regeneratorRuntime.awrap(connection2.execute(query + "WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no=\"".concat(d_no, " \"")) + DESC_query + "LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset, "\n      ")));
+          return regeneratorRuntime.awrap(connection2.execute(query + "WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no=\"".concat(d_no, " \"")) + DESC_query + " LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset, "\n      ")));
 
         case 71:
           _ref13 = _context2.sent;

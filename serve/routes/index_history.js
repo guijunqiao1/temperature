@@ -36,7 +36,6 @@ Router4.get("/History", async ctx => {
       sql_string += x;
     }
   }
-
   //全局sql
   const query = `SELECT d_no,${sql_string }c_time,type FROM t_data `;
   //降序sql
@@ -58,7 +57,7 @@ Router4.get("/History", async ctx => {
     return formattedRows;
   }
   //封装获取数据格式的方法
-  function OFFSET(value1,value2){//value1:currentPage,value2:pageSize
+  function OFFSET(value1,value2){ //value1:currentPage,value2:pageSize
     return (parseInt(value1) - 1) * parseInt(value2);
   }
   function FORMATTIME(value){
@@ -79,8 +78,6 @@ Router4.get("/History", async ctx => {
   function toMap(value){
     return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
   }
-
-
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
     if(page_boolean){
@@ -129,7 +126,7 @@ Router4.get("/History", async ctx => {
     }
     else{
       //直接查询
-      const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query+` LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
       ctx.body = toMap(rows);
     }

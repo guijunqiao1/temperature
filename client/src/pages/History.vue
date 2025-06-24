@@ -49,10 +49,7 @@
     <ECharts :option="chartOption1" style="width:600px; height:400px;display:none;" class="zhuzhuang" />
     <!-- 行为相关内容 -->
 
-    <!-- 行为相关内容 -->
-
     <h2 v-show="Pinia.Action_sign" class="h2_action">不同传感器设备的行为数据记录</h2>
-
     <div class="block2 block" v-show="Pinia.Action_sign">
       <el-date-picker v-model="value2" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime2" />
@@ -116,15 +113,15 @@
     </div>
 
     <!-- 设备行为图像 -->
-    <div class="change2" @click="change1($event)" v-show="Pinia.Action_sign">
+    <!-- <div class="change2" @click="change1($event)" v-show="Pinia.Action_sign">
       <button id="zhexian1" class="active">折线图(默认)</button>
       <button id="zhuzhuang1">柱状图</button>
-    </div>
+    </div> -->
 
-    <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
+    <!-- <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
       v-show="Pinia.Action_sign" />
     <ECharts :option="chartOption11" style="width:600px; height:400px; display:none;" class="zhuzhuang1"
-      v-show="Pinia.Action_sign" />
+      v-show="Pinia.Action_sign" /> -->
 
   </div>
 </template>
@@ -212,20 +209,14 @@ let device_array1: any = ref(null);
 let device_array_action_page_array = ref();//用于行为设备的分页呈现
 let unit_action_array = ref();//行为数据单位数组
 let unitactionlen: any = ref(0);
-
-
-
 // 页数变量
 const currentPage = ref(1);//当前页数变量,当发生自身发生改变的时候就将数据库中对应页码的数据进行单独的databases_array的赋值
 const currentPage1 = ref(1);//用于行为表格分页使用的页数变量
-
 let pageSize = 12;
 const total1 = ref(0)//总数变量,当发生增添事件、删除事件(包括单独删除以及搜索删除)之后进行总量变量的重新计算
 const total2 = ref(0);//总数变量用于计算行为表格中动态的值的总数
 let signzhi: any = ref("null");//记录设备数据编号
 let signzhi1: any = ref("null");//记录书号值
-
-
 //时间选择数据--设备数据
 let value1 = ref([]);
 let start: any = 1;
@@ -461,12 +452,10 @@ function enough() {
           time_array1.push(moment(device_array1.value[i][3]).format('YYYY-MM-DD HH:mm'));
         }
         chartOption0.value.xAxis.data = time_array1;
-
         // 折线清空
         chartOption0.value.series.forEach((item, index) => {
           item.data = [];
         })
-
         //设备赋值
         for (let i = 0; i < device_array1.value.length; i++) {
           // 和映射数组对比判断是否需要将值加入到渲染数组中
@@ -474,12 +463,8 @@ function enough() {
             item.data.push(device_array1.value[i][index + 1]);
           })
         }
-
-
         console.log("行为配置wancheng:");
         console.dir(chartOption0.value);
-
-
         chartOption11.value.series[0].data = [];
         //柱状图(设备生产总量,定义总和变量)
         let sum1 = 0;
@@ -542,32 +527,23 @@ onMounted(async () => {
   yingshe_array.value = result.data;
   const result_action = await axios.get("/api/yingshe/action");
   yingshe_action.value = result_action.data;
-
-
   // 立即执行函数的位置替换后的状态
   // 对上述内容进行同意替换
   update();
   update1();
-
-
-  const result1 = await axios.get("/api/data?start=1&end=1"); 
+  const result1 = await axios.get("/api/data?start=1&end=1");
   date_Array.value = result1.data;
   const result2 = await axios.get("/api/data/action?start=1&end=1");
   date_Array1.value = result2.data;
-
   type_array.value = qu_repeate(date_Array.value);//去重数组的获取
   type_array1.value = qu_repeate(date_Array1.value);//去重数组的获取
   a1_length.value = type_array.value.length;
   b1_length.value = type_array1.value.length;
-
-
   //需要注意的是不要将响应式数据的修改发生在不同的分支下，否则会导致逻辑分支进而导致执行onUpdated钩子的时候另外的数据可能还没有加载会好
   a_length.value = date_Array.value.length;//需要注意的是a_length赋值的内容是总设备的数量(故需要的是date_Array的总数)
   b_length.value = date_Array1.value.length;
-
-  console.log("a_length:"+a_length.value);
-  console.log("b_length:"+b_length.value);
-
+  console.log("a_length:" + a_length.value);
+  console.log("b_length:" + b_length.value);
   //设备维度
   if (a_length.value > 0 && Pinia.Device_sign) {//当且仅当date_Array中存在值且Device_sign为true时才进行处理
     signzhi.value = date_Array.value[0][0];
@@ -892,7 +868,6 @@ onMounted(async () => {
       const resultk = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}`);
       date_Array.value = resultk.data;//分页内容的呈现数组赋值
       type_array.value = qu_repeate(date_Array.value);//去重数组的获取
-
       const resultx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
       now_databasesArray.value = resultx.data;//进行总ok内容的赋值
       device_page_array.value = resultx.data;
@@ -1004,7 +979,6 @@ onMounted(async () => {
       const resultk = await axios.get(`/api/action?start=${boolean_x ? "end" : start1}&end=${end1}`);
       date_Array1.value = resultk.data;//分页内容的呈现数组赋值
       type_array1.value = qu_repeate(date_Array1.value);//去重数组的获取
-
       const resultx = await axios.get(`/api/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}&currentPage=${currentPage1.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
       now_databasesArray1.value = resultx.data;//进行总ok内容的赋值
       device_array_action_page_array.value = resultx.data;
@@ -1015,7 +989,6 @@ onMounted(async () => {
       device_array1.value = resultxx.data;//赋值完毕
       const resultxxx = await axios.get(`/api/action_count?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//将数组的总内容数进行获取用于total1的赋值
       total2.value = resultxxx.data;//进行某设备总值的赋值
-
       console.log("点击了Ok但是还没有进入到enough中的device_array:" + device_array1.value);
       //进行时间段总数据的d_no不重复筛选
       enough();
@@ -1031,11 +1004,9 @@ onMounted(async () => {
         //为选中元素进行样式修改
         zhexian_btn.classList.add("active");
         zhuzhuang_btn.classList.remove("active");
-
         // 对剩余对象进行隐藏
         zhexian.style.display = "block";
         zhuzhuang.style.display = "none";
-
       }
       else if (value.target === zhuzhuang_btn) {
         //为选中元素进行样式修改
@@ -1085,7 +1056,6 @@ onMounted(async () => {
           const result2 = await axios.get(`/api/data/action?start=${start1}&end=${end1}`);
           b_length.value = result2.data.length;//进行设备总数的获取
         }
-
         //进行watch事件的动态执行
         currentPage1.value = 0;
         currentPage1.value = 1;
@@ -1102,11 +1072,9 @@ onMounted(async () => {
       }
       //调用填充函数
       enough();
-
       //对初始文本进行编辑
-      // const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
-      // text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
-
+      const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
+      text_array[0].innerText = `${value[0]}`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
     }
   };
 

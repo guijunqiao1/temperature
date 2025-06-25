@@ -1,6 +1,32 @@
 <template>
   <div class="container">
     <!-- 设备相关内容 -->
+
+    <!-- 设备选择器 -->
+    <div id="timeTotime1" v-if="Pinia.device_sign && Pinia.Device_sign">
+      <el-dropdown v-if="a1_length > 1 && date_Array[0] && date_Array[0][0]">
+        <!-- 当前框只在保底一个的情况下才出现 -->
+        <el-button type="primary">
+          场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <div class="device_list" v-for="item in type_array">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change0(item, $event)">{{ item[0] }}</div>
+              </el-dropdown-item>
+            </div>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现 -->
+      <div class="only" style="border-radius: 5px;background-color: #409eff;"
+        v-if="a1_length === 1 && date_Array[0][0]">
+        {{ date_Array[0][0] }}</div>
+    </div>
+
+
+
     <div class="block1 block" v-show="Pinia.Device_sign">
       <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime1" />
@@ -57,7 +83,7 @@
 
     <!-- 设备选择器 -->
     <div id="timeTotime2" v-if="Pinia.action_sign && Pinia.Action_sign">
-      <el-dropdown v-if="b1_length > 1 && date_Array1[0][0]">
+      <el-dropdown v-if="b1_length > 1 && date_Array1[0] && date_Array1[0][0]">
         <!-- 当前框只在保底一个的情况下才出现 -->
         <el-button type="primary">
           场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
@@ -82,18 +108,19 @@
     <table class="action_table" v-if="Pinia.Action_sign">
       <thead>
         <tr v-if="yingshe_action && unit_action_array">
-          <th>{{ yingshe_action[0].field1 }} ({{ unit_action_array[0] }})</th>
-          <th>{{ yingshe_action[1].field2 }} ({{ unit_action_array[1] }})</th>
+          <th>场景</th>
+          <th>具体资源</th>
           <th>收集时间</th>
+          <th>文件类型</th>
         </tr>
       </thead>
       <tbody>
         <tr v-if="yingshe_action" v-for="item in device_array_action_page_array">
+          <td>{{ item[0] }}</td>
           <td>{{ item[1] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
               @click="start_block(item[1])">查看</button> </td>
-          <td>{{ item[2] }} <button v-show="yingshe_action[1].type !== '0'" class="btn_modal"
-              @click="start_block(item[2])">查看</button> </td>
-          <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ item[3] }}</td>
         </tr>
       </tbody>
     </table>
@@ -113,15 +140,16 @@
     </div>
 
     <!-- 设备行为图像 -->
-    <!-- <div class="change2" @click="change1($event)" v-show="Pinia.Action_sign">
+    <div class="change2" @click="change1($event)"
+      v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show != '0'">
       <button id="zhexian1" class="active">折线图(默认)</button>
       <button id="zhuzhuang1">柱状图</button>
-    </div> -->
+    </div>
 
-    <!-- <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
-      v-show="Pinia.Action_sign" />
+    <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
+      v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show !== '0'" />
     <ECharts :option="chartOption11" style="width:600px; height:400px; display:none;" class="zhuzhuang1"
-      v-show="Pinia.Action_sign" /> -->
+      v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show !== '0'" />
 
   </div>
 </template>
@@ -341,6 +369,7 @@ function qu_repeate(databases) {
   }
   return result;
 }
+
 //专门用于填充图表以及echarts的函数
 function enough() {
   console.log("当前进入成功enough后的device_array:" + device_array.value);
@@ -825,7 +854,6 @@ onMounted(async () => {
       //对signzhi进行重新赋值
       const result111 = await axios.get("/api/data?start=1&end=1");
       type_array.value = qu_repeate(result111.data);//去重数组的获取
-
       if (type_array.value.length > 0) {
         signzhi.value = type_array.value[0][0];
       }
@@ -834,7 +862,6 @@ onMounted(async () => {
       currentPage.value = 0;
       currentPage.value = 1;
       console.log("朱国锋" + device_array.value);
-
       //清空其余的选中的样式
       const option_array: any = document.querySelectorAll(".device_list");
       option_array.forEach((item, index) => {
@@ -845,7 +872,6 @@ onMounted(async () => {
           item.children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
         }
       })
-
       const jiezhi = await axios.get(`/api/data?start=1&end=1`);//data路由在有start\end参与的情况下同样进行查询
       a_length.value = jiezhi.data.length;//进行总设备数量的赋值
       console.log("a_length:" + a_length.value);

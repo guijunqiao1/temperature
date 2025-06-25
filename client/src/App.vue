@@ -19,10 +19,10 @@
           <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
             default-active="2" text-color="#fff">
             <!-- 下方的3、4个el-menu-item标签的路由路径设置为首页(因为要求中只提供了2个路径条件：/t_device、/t-error-msg) -->
-            <el-menu-item index="1-1">
-              <RouterLink to="/t_Container" @click="add2($event)"> 储运箱及物品信息
-              </RouterLink>
-            </el-menu-item>
+            <!-- <el-menu-item index="1-1"> -->
+            <!-- <RouterLink to="/t_Container" @click="add2($event)"> 储运箱及物品信息
+              </RouterLink> -->
+            <!-- </el-menu-item> -->
             <!-- 此处需要注意的是使用了div包裹原先的el-menu-item组件标签中的内容实现整体内容发生插槽优化后的div嵌套原先内容的效果的实现，
             这么做的好处是原先针对这个el-menu-item组件标签而言无法直接对标签进行事件的绑定后的$event进行准确的获取，但是通过这种嵌套的
             方式则能在传递参数的时候的$event进行明确的事件对象进行获取--补充：对于原生事件而言$event一般获取到的是事件对象(针对普通标签，而非组件标签) -->
@@ -38,12 +38,12 @@
               <RouterLink to="/t_error_msg" @click="add2($event)"> 错误内容
               </RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-5">
+            <!-- <el-menu-item index="1-5">
               <RouterLink to="/t_Control" @click="add2($event)"> 指令控制台</RouterLink>
             </el-menu-item>
             <el-menu-item index="1-6">
               <RouterLink to="/ex" @click="add2($event)"> 试验台</RouterLink>
-            </el-menu-item>
+            </el-menu-item> -->
           </el-menu>
         </el-col>
       </el-row>

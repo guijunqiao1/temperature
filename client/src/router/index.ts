@@ -42,11 +42,11 @@ const router = createRouter({
     {
       path: "/ex",
       component: ex
-    },
-    {
-      path: "/t_Container",
-      component: container
     }
+    // {
+    //   path: "/t_Container",
+    //   component: container
+    // }
   ]
 });
 

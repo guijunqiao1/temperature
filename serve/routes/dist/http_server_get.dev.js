@@ -5,147 +5,100 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _koa = _interopRequireDefault(require("koa"));
+var Router = require('koa-router');
 
-var _koaRouter = _interopRequireDefault(require("koa-router"));
+var multer = require('@koa/multer');
 
-var _koaBody = require("koa-body");
+var path = require('path'); // 初始化 Koa 应用和路由
 
-var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _path = _interopRequireDefault(require("path"));
+var router = new Router(); // 配置 Multer 的本地存储
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var storage = multer.diskStorage({
+  destination: function destination(req, file, cb) {
+    // 设置文件存储目录为 uploads/
+    cb(null, 'client/public/');
+  },
+  filename: function filename(req, file, cb) {
+    // 使用时间戳和原始文件名生成唯一文件名
+    var ext = path.extname(file.originalname);
+    cb(null, "".concat(file.originalname.replace(ext, '')).concat(ext));
+  }
+}); // 初始化 Multer，设置存储和文件大小限制（100MB）
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+var upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024
+  } // 限制文件大小为 100MB
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+}); // 路由：处理多文件上传到本地磁盘
 
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-var app = new _koa["default"]();
-var router = new _koaRouter["default"]();
-app.use((0, _koaBody.koaBody)({
-  urlencoded: true,
-  json: true
-}));
-var connection1;
-
-(function _callee() {
+router.post('/upload', upload.array('files', 2), function _callee(ctx) {
+  var files, userId, filesInfo;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          _context.prev = 0;
-          _context.next = 3;
-          return regeneratorRuntime.awrap((0, _indexNode["default"])());
+          files = ctx.files; // 获取上传的文件数组
 
-        case 3:
-          connection1 = _context.sent;
-          console.log("数据库3连接成功");
-          _context.next = 10;
-          break;
+          userId = ctx.request.body.userId; // 获取请求体中的 userId
+          // 检查是否有文件上传
 
-        case 7:
-          _context.prev = 7;
-          _context.t0 = _context["catch"](0);
-          console.log("数据库3连接失败");
-
-        case 10:
-        case "end":
-          return _context.stop();
-      }
-    }
-  }, null, null, [[0, 7]]);
-})(); // HTTP 服务器端点
-
-
-router.post('/sensor/data', function _callee2(ctx) {
-  var _ctx$request$body, d_no, png, mp4, type, file_path, _ref, _ref2, rows1, time_base, obj, finalType, finalDNo;
-
-  return regeneratorRuntime.async(function _callee2$(_context2) {
-    while (1) {
-      switch (_context2.prev = _context2.next) {
-        case 0:
-          _ctx$request$body = ctx.request.body, d_no = _ctx$request$body.d_no, png = _ctx$request$body.png, mp4 = _ctx$request$body.mp4, type = _ctx$request$body.type;
-          console.log("接收到传感器数据", ctx.request.body); // 全局规定文件路径
-
-          file_path = _path["default"].resolve(__dirname, "../", "/clinet", "/public");
-
-          if (!(png > 0 && mp4 > 0)) {
-            _context2.next = 16;
+          if (!(!files || files.length === 0)) {
+            _context.next = 6;
             break;
           }
 
-          _context2.next = 6;
-          return regeneratorRuntime.awrap(connection1.execute("SELECT p_name FROM t_behavior_field_mapper"));
+          ctx.status = 400;
+          ctx.body = {
+            error: '未上传任何文件'
+          };
+          return _context.abrupt("return");
 
         case 6:
-          _ref = _context2.sent;
-          _ref2 = _slicedToArray(_ref, 1);
-          rows1 = _ref2[0];
-          time_base = getFormattedDate();
-          obj = {};
-          rows1.forEach(function (item, index) {
-            if (index === 0) obj[item.p_name] = png;else if (index === 1) obj[item.p_name] = mp4;
-          });
-          finalType = type || "实时数据";
-          finalDNo = d_no || null;
-          _context2.next = 16;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no,field1,field2,path,c_time,type)\n      VALUES (\"".concat(finalDNo, "\",\"").concat(obj.P, "\",\"").concat(obj.V, "\",\"").concat(file_path, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n    ")));
-
-        case 16:
-          ctx.status = 200;
-          ctx.body = 'OK';
-
-        case 18:
-        case "end":
-          return _context2.stop();
-      }
-    }
-  });
-});
-router.post('/miss_data', function _callee3(ctx) {
-  var _ctx$request$body2, d_no, png, mp4, type, _ref3, _ref4, rows1, time_base, obj, finalType, finalDNo;
-
-  return regeneratorRuntime.async(function _callee3$(_context3) {
-    while (1) {
-      switch (_context3.prev = _context3.next) {
-        case 0:
-          _ctx$request$body2 = ctx.request.body, d_no = _ctx$request$body2.d_no, png = _ctx$request$body2.png, mp4 = _ctx$request$body2.mp4, type = _ctx$request$body2.type;
-          console.log("接收到保存数据", ctx.request.body);
-
-          if (!(png > 0 && mp4 > 0)) {
-            _context3.next = 15;
+          if (!(files.length > 2)) {
+            _context.next = 10;
             break;
           }
 
-          _context3.next = 5;
-          return regeneratorRuntime.awrap(connection1.execute("SELECT p_name FROM t_behavior_field_mapper"));
+          ctx.status = 400;
+          ctx.body = {
+            error: '最多允许上传 2 个文件'
+          };
+          return _context.abrupt("return");
 
-        case 5:
-          _ref3 = _context3.sent;
-          _ref4 = _slicedToArray(_ref3, 1);
-          rows1 = _ref4[0];
-          time_base = getFormattedDate();
-          obj = {};
-          rows1.forEach(function (item, index) {
-            if (index === 0) obj[item.p_name] = png;else if (index === 1) obj[item.p_name] = mp4;
-          });
-          finalType = type || "保存数据";
-          finalDNo = d_no || null;
-          _context3.next = 15;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no,field1,field2,c_time,type)\n      VALUES (\"".concat(finalDNo, "\",\"").concat(obj.P, "\",\"").concat(obj.V, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n    ")));
+        case 10:
+          // 返回上传成功的文件信息
+          filesInfo = files.map(function (file) {
+            return {
+              originalName: file.originalname,
+              // 原始文件名
+              fileName: file.filename,
+              // 存储后的文件名
+              path: file.path,
+              // 文件存储路径
+              mimeType: file.mimetype,
+              // 文件 MIME 类型
+              size: file.size,
+              // 文件大小
+              userId: userId // 关联的用户 ID
 
-        case 15:
-          ctx.status = 200;
-          ctx.body = 'OK';
+            };
+          }); // 保存文件信息到数据库中
 
-        case 17:
+          _context.next = 13;
+          return regeneratorRuntime.awrap(connection1.execute("\n  INSERT INTO t_behavior_data(d_no,field1,field2,c_time,is_saved)\n  VALUES (\"".concat(finalDNo, "\",\"").concat(filesInfo[0].originalName.split(".")[1] === "mp4" ? filesInfo[1].fileName : filesInfo[0].fileName, "\",\"").concat(filesInfo[0].originalName.split(".")[1] === "mp4" ? filesInfo[0].fileName : filesInfo[1].fileName, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n  ")));
+
+        case 13:
+          ctx.body = {
+            message: '文件上传成功',
+            filesInfo: filesInfo
+          };
+
+        case 14:
         case "end":
-          return _context3.stop();
+          return _context.stop();
       }
     }
   });

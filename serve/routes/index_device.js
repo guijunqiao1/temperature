@@ -123,7 +123,7 @@ Router2.get("/t_device/first", async ctx => {
   try {
       let query;
       // 处理 undefined 情况
-      query = "SELECT * FROM t_container ORDER BY ctime DESC";
+      query = "SELECT * FROM t_device ORDER BY ctime DESC";
       // ✅ 使用 `await` 进行查询
       const [results] = await connection2.execute(query);
       // 格式化数据

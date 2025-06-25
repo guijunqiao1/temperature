@@ -25,11 +25,12 @@ Router3.get("/t_error_msg/first", async ctx => {
       // 处理 undefined 情况
       if (currentPage === "undefined") {
         if(start === "1"&&end==="1"){//全局查询
-          const query = "SELECT e_msg,c_time FROM t_error_history";
+          const query = "SELECT d_no,e_msg,c_time FROM t_error_msg";
           // ✅ 使用 `await` 进行查询
           const [results] = await connection1.execute(query);
           // 格式化数据
           const formattedResults = results.map(row => [
+              row.d_no,
               row.e_msg,
               row.c_time
           ]);
@@ -40,11 +41,12 @@ Router3.get("/t_error_msg/first", async ctx => {
           const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
           const formattedEnd = formatTime(end);
 
-          const query = `SELECT e_msg, c_time FROM t_error_history WHERE c_time < '${formattedEnd}'`;
+          const query = `SELECT d_no,e_msg, c_time FROM t_error_msg WHERE c_time < '${formattedEnd}'`;
           // ✅ 使用 `await` 进行查询
           const [results] = await connection1.execute(query);
           // 格式化数据
           const formattedResults = results.map(row => [
+              row.d_no,
               row.e_msg,
               row.c_time
           ]);
@@ -59,11 +61,12 @@ Router3.get("/t_error_msg/first", async ctx => {
           console.log("桂start:"+start);
           console.log("桂end:"+end);
           
-          const query = `SELECT e_msg, c_time FROM t_error_history WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'`;
+          const query = `SELECT d_no,e_msg, c_time, FROM t_error_msg WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'`;
           // ✅ 使用 `await` 进行查询
           const [results] = await connection1.execute(query);
           // 格式化数据
           const formattedResults = results.map(row => [
+              row.d_no,
               row.e_msg,
               row.c_time
           ]);
@@ -82,8 +85,8 @@ Router3.get("/t_error_msg/first", async ctx => {
 
         if(start==="1"&&end==="1"){//全局查询
           const [rows] = await connection1.execute(`
-            SELECT e_msg,  c_time
-            FROM t_error_history 
+            SELECT d_no, e_msg,  c_time
+            FROM t_error_msg 
             LIMIT ${size} OFFSET ${offset}
           `);
           //大多数时候请使用字符串拼接的方式书写分页代码以及其他相关的代码
@@ -91,7 +94,8 @@ Router3.get("/t_error_msg/first", async ctx => {
           // 将数据转换为二维数组格式
           const formattedRows = rows.map(row => [
             
-              // 确保所有字段为字符串类型
+            // 确保所有字段为字符串类型
+            row.d_no,
             row.e_msg,
             row.c_time,
           ]);
@@ -102,8 +106,8 @@ Router3.get("/t_error_msg/first", async ctx => {
           const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
           const formattedEnd = formatTime(end);
           const [rows] = await connection1.execute(`
-            SELECT e_msg,  c_time
-            FROM t_error_history 
+            SELECT d_no,e_msg,  c_time
+            FROM t_error_msg 
             WHERE c_time < '${formattedEnd}'
             LIMIT ${size} OFFSET ${offset}
           `);
@@ -111,6 +115,7 @@ Router3.get("/t_error_msg/first", async ctx => {
     
           // 将数据转换为二维数组格式
           const formattedRows = rows.map(row => [
+            row.d_no,
             row.e_msg,
             row.c_time,
           ]);
@@ -122,8 +127,8 @@ Router3.get("/t_error_msg/first", async ctx => {
           const formattedStart = formatTime(start);
           const formattedEnd = formatTime(end);
           const [rows] = await connection1.execute(`
-            SELECT e_msg,  c_time
-            FROM t_error_history 
+            SELECT d_no,e_msg,  c_time
+            FROM t_error_msg 
             WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'
             LIMIT ${size} OFFSET ${offset}
           `);
@@ -132,6 +137,7 @@ Router3.get("/t_error_msg/first", async ctx => {
           // 将数据转换为二维数组格式
           const formattedRows = rows.map(row => [
               // 确保所有字段为字符串类型
+              row.d_no,
             row.e_msg,
             row.c_time,
           ]);
@@ -157,18 +163,18 @@ Router3.get("/t_error_msg/search",async ctx=>{
   if(d_no!=="1"&&e_msg==="1"){//当d_no存在而e_msg不存在的时候
     let query;
     if(start==="1"&&end==="1"){
-      query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
+      query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
     }
     else if(start==="end"&&end!=="1"){
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedEnd = formatTime(end);
-      query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
+      query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
     }
     else{
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedStart = formatTime(start);
       const formattedEnd = formatTime(end);
-      query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
+      query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
     }
     // ✅ 使用 `await` 进行查询
     const [results] = await connection1.execute(query);
@@ -181,7 +187,7 @@ Router3.get("/t_error_msg/search",async ctx=>{
       // 格式化数据
       const formattedResults = results.map(row => [
         
-        
+        row.d_no,
         row.e_msg,
         row.c_time
       ]);
@@ -193,18 +199,18 @@ Router3.get("/t_error_msg/search",async ctx=>{
   else if(d_no==="1"&&e_msg!=="1"){//当d_no不存在而e_msg存在的时候
     let query;
     if(start==="1"&&end==="1"){
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE e_msg='${e_msg}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE e_msg='${e_msg}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
     }
     else if(start==="end"&&end!=="1"){
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedEnd = formatTime(end);
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE e_msg='${e_msg}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE e_msg='${e_msg}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
     }
     else{
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedStart = formatTime(start);
       const formattedEnd = formatTime(end);
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE e_msg='${e_msg}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE e_msg='${e_msg}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
     }
     // ✅ 使用 `await` 进行查询
     const [results] = await connection1.execute(query);
@@ -216,7 +222,7 @@ Router3.get("/t_error_msg/search",async ctx=>{
       // 格式化数据
       const formattedResults = results.map(row => [
         
-        
+        row.d_no,
         row.e_msg,
         row.c_time
       ]);
@@ -228,19 +234,19 @@ Router3.get("/t_error_msg/search",async ctx=>{
   else if(d_no!=="1"&&e_msg!=="1"){//当d_no和e_msg都存在的时候
     let query;
     if(start==="1"&&end==="1"){
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' LIMIT ${size} OFFSET ${offset}`;
 
     }
     else if(start==="end"&&end==="1"){
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedEnd = formatTime(end);
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no, e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' AND c_time<'${formattedEnd}' LIMIT ${size} OFFSET ${offset}`;
     }
     else{
       const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
       const formattedStart = formatTime(start);
       const formattedEnd = formatTime(end);
-       query = `SELECT e_msg, c_time, type FROM t_error_history WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'  LIMIT ${size} OFFSET ${offset}`;
+       query = `SELECT d_no,e_msg, c_time, type FROM t_error_msg WHERE d_no='${d_no}' AND e_msg='${e_msg}' AND type='${type}' AND c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'  LIMIT ${size} OFFSET ${offset}`;
     }
     // ✅ 使用 `await` 进行查询
     const [results] = await connection1.execute(query);
@@ -252,7 +258,7 @@ Router3.get("/t_error_msg/search",async ctx=>{
       // 格式化数据
       const formattedResults = results.map(row => [
         
-        
+        row.d_no,
         row.e_msg,
         row.c_time
       ]);
@@ -267,49 +273,49 @@ Router3.get("/t_error_msg/search",async ctx=>{
 Router3.get("/t_error_msg/count",async ctx=>{
   const { start,end } = ctx.query;
   if(start==="1"&&end==="1"){
-    const [rows] = await connection1.execute("SELECT * FROM t_error_history");//将指定的d_no对应的内容总数进行获取
+    const [rows] = await connection1.execute("SELECT * FROM t_error_msg");//将指定的d_no对应的内容总数进行获取
     ctx.body = ""+rows.length;
   }
   else if(start==="end"&&end!=="1"){
     const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
     const formattedEnd = formatTime(end);
-    const [rows] = await connection1.execute(`SELECT * FROM t_error_history WHERE c_time<'${formattedEnd}'`);//将指定的d_no对应的内容总数进行获取
+    const [rows] = await connection1.execute(`SELECT * FROM t_error_msg WHERE c_time<'${formattedEnd}'`);//将指定的d_no对应的内容总数进行获取
     ctx.body = ""+rows.length;
   }
   else{
     const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
     const formattedStart = formatTime(start);
     const formattedEnd = formatTime(end);
-    const [rows] = await connection1.execute(`SELECT * FROM t_error_history WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'`);//将指定的d_no对应的内容总数进行获取
+    const [rows] = await connection1.execute(`SELECT * FROM t_error_msg WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'`);//将指定的d_no对应的内容总数进行获取
     ctx.body = ""+rows.length;
   }
 })
 
 
 //获取到告警数据
-Router3.get("/alarm",async ctx=>{
-  let level1= `
-  SELECT VStatus
-  FROM t_error_msg
-  `;
-  const [rows_level1] = await connection1.execute(level1);
-  console.log("row_level1:");
-  console.dir(rows_level1);
-  if(rows_level1[0].VStatus!=='0'){
-    let query1 = `
-    SELECT *
-    FROM t_error_msg
-    WHERE e_msg != "未发生告警"
-    ORDER BY c_time DESC
-    `; 
-    const [rows] = await connection1.execute(query1);
-    ctx.body = rows;
-    return;
-  }else {
-    ctx.body = [{e_msg:"所以设备均正常工作"}];
-    return;
-  }
-})
+// Router3.get("/alarm",async ctx=>{
+//   let level1= `
+//   SELECT VStatus
+//   FROM t_error_msg
+//   `;
+//   const [rows_level1] = await connection1.execute(level1);
+//   console.log("row_level1:");
+//   console.dir(rows_level1);
+//   if(rows_level1[0].VStatus!=='0'){
+//     let query1 = `
+//     SELECT *
+//     FROM t_error_msg
+//     WHERE e_msg != "未发生告警"
+//     ORDER BY c_time DESC
+//     `; 
+//     const [rows] = await connection1.execute(query1);
+//     ctx.body = rows;
+//     return;
+//   }else {
+//     ctx.body = [{e_msg:"所以设备均正常工作"}];
+//     return;
+//   }
+// })
 
 
 

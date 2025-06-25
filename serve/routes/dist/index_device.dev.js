@@ -73,7 +73,7 @@ Router2.get("/t_device/first", function _callee2(ctx) {
         case 0:
           _context2.prev = 0;
           // 处理 undefined 情况
-          query = "SELECT * FROM t_container ORDER BY ctime DESC"; // ✅ 使用 `await` 进行查询
+          query = "SELECT * FROM t_device ORDER BY ctime DESC"; // ✅ 使用 `await` 进行查询
 
           _context2.next = 4;
           return regeneratorRuntime.awrap(connection2.execute(query));

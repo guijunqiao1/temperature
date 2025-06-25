@@ -117,7 +117,10 @@ Router.get("/recent/action", async ctx => {
       SELECT 
           t.d_no, 
           GROUP_CONCAT(
-              CONCAT('[', `+sql_string+`'"', t.c_time, '"', 
+              CONCAT('[', 
+              `+sql_string+`
+              '"', t.c_time, '",',
+              '"', t.file_type, '"',
               ']') ORDER BY t.c_time
           ) AS data
       FROM t_behavior_data t
@@ -135,9 +138,9 @@ Router.get("/recent/action", async ctx => {
         let data = JSON.parse(fixedData);
     
         // 遍历 data 数组，修改 c_time 格式（去掉秒数）
-        data = data.map(entry => {
-          return entry;
-        });
+        // data = data.map(entry => {
+        //   return entry;
+        // });
     
         return [row.d_no, data];
       } catch (error) {

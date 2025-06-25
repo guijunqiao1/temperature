@@ -2,17 +2,28 @@
   <div class="content1" v-if="Pinia.Device_sign">
     <!-- 上半部分 -->
     <div class="top_part">
-      <!-- 设备名称  -->
-      <!-- <input type="text" name="d_name" class="in_name" placeholder="错误信息" v-model="e_msg1"> -->
-      <!-- 设备编号  -->
-      <!-- <input type="text" name="d_no" class="in_no" placeholder="设备编号" v-model="d_no1" v-show="Pinia.device_sign"> -->
-      <!-- 设备注释 -->
-      <!-- <select name="remarks" id="remarks" class="se_re" v-model="type1"> -->
-      <!-- <option value="警告">警告</option>
-        <option value="错误">错误</option>
-      </select> -->
-      <!-- 添加按钮 -->
-      <!-- <button @click="search($event)" class="add1">查询</button> -->
+      <div class="container22" v-show="Pinia.device_sign">
+        <el-dropdown>
+          <!-- 当前框只在保底一个的情况下才出现 -->
+          <el-button type="primary">
+            场景<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <div class="device_list" v-for="item in device_array" :key="item[0]">
+                <el-dropdown-item>
+                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item[0] }}</div>
+                </el-dropdown-item>
+              </div>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
+        <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && device_array[0][0]">设备为{{
+          device_array[0][0]
+        }}的信息</div>
+      </div>
+
 
       <!-- 设备表的时间选择器 -->
       <div class="error_date_time">
@@ -28,7 +39,7 @@
       <table>
         <thead>
           <tr>
-            <!-- <th v-show="Pinia.device_sign">设备编号</th> -->
+            <th>场景</th>
             <th>错误信息</th>
             <th>出错时间</th>
           </tr>
@@ -36,9 +47,9 @@
         <tbody>
           <!-- 遍历的是设备数组的内容 -->
           <tr v-for="item in device_array" :key="item.id">
-            <!-- <td v-show="Pinia.device_sign">{{ item[0] }}</td> -->
-            <td>{{ item[0] }}</td>
-            <td>{{ moment(item[1]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+            <td v-show="Pinia.device_sign">{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
           </tr>
         </tbody>
       </table>
@@ -97,135 +108,6 @@ let update = () => { };
 
 //专门用于更新的函数
 update = async () => {//最好别在挂载阶段使用function否则容易提升到最高级导致变量未定义的隐藏错误
-  // if (search_ok === true) {//查询激活成功
-  //   if (e_msg1.value && d_no1.value) {
-  //     //当都满足的时候
-  //     //发送添加add内容到数据库的请求
-  //     if (start.value === end.value && end.value !== 1) {//单向查询
-  //       const result = await axios.get(`/api/t_error_msg/search?start=end&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=end&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else if (start.value === 1 && end.value === 1) {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //   }
-  //   else if (e_msg1.value && !d_no1.value) {
-  //     //将空值进行赋1操作便于后端转化判断
-  //     if (start.value === end.value && end.value !== 1) {//单向查询
-  //       const result = await axios.get(`/api/t_error_msg/search?start=end&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=end&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else if (start.value === 1 && end.value === 1) {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=${e_msg1.value}&d_no=1&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //   }
-  //   else if (!e_msg1.value && d_no1.value) {
-  //     //将空值进行赋1操作便于后端转化判断
-  //     if (start.value === end.value && end.value !== 1) {//单向查询
-  //       const result = await axios.get(`/api/t_error_msg/search?start=end&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=end&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else if (start.value === 1 && end.value === 1) {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-  //     else {
-  //       const result = await axios.get(`/api/t_error_msg/search?start=${start.value}&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);
-  //       const result_count = await axios.get(`/api/t_error_msg/count/search?start=${start.value}&end=${end.value}&e_msg=1&d_no=${d_no1.value}&type=${type1.value}`);//获取总数据
-  //       //对当前呈现内容的数组进行赋值
-  //       device_array.value = result.data;
-  //       //对总页数进行赋值
-  //       total1.value = result_count.data;
-  //     }
-
-  //   }
-  // }
-  // else {
-  //   if (start.value === end.value && end.value !== 1) {//单向查询
-  //     const result = await axios.get(`/api/t_error_msg/first?start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
-  //     //上述为前端发送请求的示例内容
-  //     databases_array.value = result.data;
-  //     //得到type_array
-  //     //得到device_array
-  //     const result2 = await axios.get(`/api/t_error_msg/first?start=end&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
-  //     device_array.value = result2.data;
-
-  //     const result1 = await axios.get(`/api/t_error_msg/count?start=end&end=${end.value}`);//获取总数据
-  //     total1.value = result1.data;
-  //   }
-  //   else if (start.value === 1 && end.value === 1) {
-  //     const result = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
-  //     //上述为前端发送请求的示例内容
-  //     databases_array.value = result.data;
-  //     //得到type_array
-  //     //得到device_array
-  //     const result2 = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
-  //     device_array.value = result2.data;
-
-  //     const result1 = await axios.get(`/api/t_error_msg/count?start=${start.value}&end=${end.value}`);//获取总数据
-  //     total1.value = result1.data;
-  //   }
-  //   else {
-  //     const result = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
-  //     //上述为前端发送请求的示例内容
-  //     databases_array.value = result.data;
-  //     //得到type_array
-  //     //得到device_array
-  //     const result2 = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
-  //     device_array.value = result2.data;
-
-  //     const result1 = await axios.get(`/api/t_error_msg/count?start=${start.value}&end=${end.value}`);//获取总数据
-  //     total1.value = result1.data;
-  //   }
-
-  //   if (update_one === 0) {
-  //     //对初始文本进行编辑
-  //     const text = document.querySelector(".el-button.el-button--primary.el-tooltip__trigger>span") as HTMLElement;
-  //     update_one++;
-  //   }
-  // };
   if (start.value === end.value && end.value !== 1) {//单向查询
     const result = await axios.get(`/api/t_error_msg/first?start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
@@ -272,9 +154,11 @@ update = async () => {//最好别在挂载阶段使用function否则容易提升
 
 
 function submit() {
-  start.value = value1.value[0];
-  end.value = value1.value[1];
-  update();
+  if (value1.value && value1.value[0] && value1.value[1]) {
+    start.value = value1.value[0];
+    end.value = value1.value[1];
+    update();
+  }
 }
 
 //自当前组件创建阶段就对currentPage变量的值进行监视，若发生了修改，则结合上currentPage变量对databases_array赋值(模版为jiezhi_array)
@@ -309,14 +193,14 @@ onMounted(async () => {
     currentPage.value = 1;
 
     // // 挂载阶段对时间组件进行激活
-    // const btn = document.querySelector(".el-icon.el-input__icon.el-range__close-icon.el-range__close-icon--hidden") as HTMLElement;
-    // //进行x按钮的事件绑定
-    // btn.addEventListener("click", (event) => {
-    //   //将start、end重置
-    //   start.value = 1;
-    //   end.value = 1;
-    //   update();
-    // })
+    const btn = document.querySelector(".el-icon.el-input__icon.el-range__close-icon.el-range__close-icon--hidden") as HTMLElement;
+    //进行x按钮的事件绑定
+    btn.addEventListener("click", (event) => {
+      //将start、end重置
+      start.value = 1;
+      end.value = 1;
+      update();
+    })
 
     //对ok按钮进行获取
     // const ok = document.querySelector(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn") as HTMLElement;

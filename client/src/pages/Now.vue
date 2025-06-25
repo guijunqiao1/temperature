@@ -3,10 +3,10 @@
     <!-- 设备相关内容 -->
     <!-- 设备信息  -->
     <div id="latestData" v-show="Pinia.Device_sign">
-      <!-- <div class="container22" v-show="Pinia.device_sign">
-        <el-dropdown> -->
-      <!-- 当前框只在保底一个的情况下才出现 -->
-      <!-- <el-button type="primary" v-show="a_length > 1 && date_Array[0][0]">
+      <div class="container22" v-show="Pinia.device_sign">
+        <el-dropdown>
+          <!-- 当前框只在保底一个的情况下才出现 -->
+          <el-button type="primary" v-show="a_length > 1 && date_Array[0][0]">
             传感器设备选择列表<el-icon class="el-icon--right"><arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
@@ -18,11 +18,11 @@
               </div>
             </el-dropdown-menu>
           </template>
-        </el-dropdown> -->
-      <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
-      <!-- <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && date_Array[0][0]">设备为{{ date_Array[0][0]
+        </el-dropdown>
+        <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
+        <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && date_Array[0][0]">设备为{{ date_Array[0][0]
         }}的信息</div>
-      </div> -->
+      </div>
 
       <!-- 最新信息的提示 -->
       <h2 class="newest_device" v-show="Pinia.Device_sign" style="margin-top:70px;">传感器最新记录表格</h2>
@@ -59,25 +59,6 @@
         <div class="modal_child">
         </div>
       </div>
-
-
-      <!-- <h2>储运箱及物品实时信息表格</h2>
-      <table class="table_device">
-        <thead>
-          <tr>
-            <th>VID</th>
-            <th>PID</th>
-            <th>录入时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ ID_array.VID }}</td>
-            <td>{{ ID_array.PID }}</td>
-            <td>{{ moment(ID_array.ctime).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          </tr>
-        </tbody>
-      </table> -->
     </div>
 
     <!-- 图像切换按钮--使用事件委托完成change事件的执行 -->
@@ -92,9 +73,10 @@
     <ECharts :option="chartOption1" style="width:600px; height:400px;" class="zhuzhuang"
       v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
 
+
     <!-- 行为相关内容 -->
 
-    <h2 v-show="Pinia.action_sign && Pinia.Action_sign">不同传感器设备的最近5分钟的行为数据记录</h2>
+    <h2 v-show="Pinia.action_sign && Pinia.Action_sign">不同场地下的最新资源内容</h2>
 
     <!-- 行为信息 -->
     <div id="latestData" v-if="Pinia.Action_sign">
@@ -102,7 +84,7 @@
         <el-dropdown>
           <!-- 当前框只在保底一个的情况下才出现 -->
           <el-button type="primary" v-show="b_length > 1">
-            选择不同场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -128,19 +110,18 @@
       <table v-if="nowArray1 && nowArray1[1] && nowArray1[1].length > 0 && d_length > 0" class="table_action">
         <thead>
           <tr>
-            <th>场地</th>
-            <th>{{ yingshe_action_array[0].field1 }}</th>
-            <th>{{ yingshe_action_array[1].field2 }}</th>
-            <th>收集时间</th>
+            <th>场景</th>
+            <th>具体资源</th>
+            <th>创建时间</th>
+            <th>文件类型</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>{{ nowArray1[0] }}</td>
+            <td v-if="Pinia.action_sign">{{ nowArray1[0] }}</td>
             <td>{{ nowArray1[1][nowArray1[1].length - 1][0] }} <button v-show="yingshe_action_array[0].type !== '0'"
                 class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][0])">查看</button> </td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }} <button v-show="yingshe_action_array[1].type !== '0'"
-                class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][1])">查看</button></td>
+            <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }}</td>
             <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
           </tr>
         </tbody>
@@ -148,14 +129,16 @@
     </div>
 
     <!-- 图像切换按钮--使用事件委托完成change事件的执行 -->
-    <div class="change" @click="change0($event)" v-if="b_length > 0 && Pinia.Action_sign">
+    <div class="change" @click="change0($event)"
+      v-if="b_length > 0 && yingshe_action_array && yingshe_action_array[0].is_show === '1' && Pinia.Action_sign">
       <button id="zhexian1" class="active">折线图(默认)</button>
       <button id="zhuzhuang1">柱状图</button>
     </div>
     <ECharts :option="chartOption0" style="width: 600px; height: 400px;" class="zhexian1"
-      v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array.is_show === '1'" />
+      v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
     <ECharts :option="chartOption11" style="width: 600px; height:400px;" class="zhuzhuang1"
-      v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array.is_show === '1'" />
+      v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
+
   </div>
 </template>
 
@@ -232,8 +215,6 @@ let d_length = ref();//记录行为映射变量
 let signzhi;
 let signzhi1;
 
-
-
 //定义检测当前切换图像状态的变量 
 let zhexian_device = ref(true);
 let zhexian_action = ref(true);
@@ -242,12 +223,8 @@ let zhexian_action = ref(true);
 let unit_array = ref();
 let unit_action_array = ref();
 
-
 //存储渲染块的变量
 let xuanran_block_device = ref();
-
-
-
 
 //定义弹出框绑定的事件
 async function start_block(value) {
@@ -379,7 +356,6 @@ function y_zhi(value1, value2) {
   console.log("完成所有内容的赋值");
   console.dir(object_chart);
 }
-
 //柱状图值的配置函数
 function y_zhi0(value1, value2) {
   let sum1: any = value2 === "device" ? [[], [], [], []] : [[], []]; // 用于存储 4 个字段的平均值--设备信息
@@ -454,7 +430,7 @@ function y_zhi0(value1, value2) {
   tem_array1.value = [, []];
   tem_array1.value[0] = nowArray1.value[0];
   nowArray1.value[1].forEach((item, index) => {
-    item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+    item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
     tem_array1.value[1].push(item);
   })
 
@@ -845,16 +821,16 @@ onMounted(async () => {
   change2 = async (value, value1) => {
     //点击了设备按钮之后对样式进行修改
     //对所有内容进行统一的设计
-    if (b_length.value > 1) {
-      const option_array: any = document.querySelectorAll(".device_list");
-      option_array.forEach(item => {
-        item.children[0].style.color = "black";
-        item.children[0].style.backgroundColor = "white";
-      })
-      value1.target.parentNode.style.color = "#409eff";
-      value1.target.parentNode.style.backgroundColor = "rgb(235.9, 245.3, 255)";
-    }
-    else { }
+    // if (b_length.value > 1) {
+    //   const option_array: any = document.querySelectorAll(".device_list");
+    //   option_array.forEach(item => {
+    //     item.children[0].style.color = "black";
+    //     item.children[0].style.backgroundColor = "white";
+    //   })
+    //   value1.target.parentNode.style.color = "#409eff";
+    //   value1.target.parentNode.style.backgroundColor = "rgb(235.9, 245.3, 255)";
+    // }
+    // else { }
     signzhi1 = value[0];
     clearInterval(y);
     const jiezhi_object = zhexian_device.value ? chartOption0 : chartOption11;
@@ -867,7 +843,7 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+        item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       // console.log("tem_array:" + tem_array.value);
@@ -909,15 +885,15 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+        item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       re_xuanran();
     }, 2000);
 
     //对初始文本进行编辑
-    const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
-    text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
+    // const text_array: any = document.querySelectorAll(".el-button.el-button--primary.el-tooltip__trigger>span");
+    // text_array[0].innerText = `设备编号为${value[0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
   }
 
   x = setInterval(async () => {
@@ -968,7 +944,7 @@ onMounted(async () => {
     tem_array1.value = [, []];
     tem_array1.value[0] = nowArray1.value[0];
     nowArray1.value[1].forEach((item, index) => {
-      item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+      item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
       tem_array1.value[1].push(item);
     })
     //渲染折线图
@@ -1230,7 +1206,7 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+        item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       console.log("tem_array1:" + tem_array1.value);
@@ -1279,7 +1255,7 @@ onMounted(async () => {
         tem_array1.value = [, []];
         tem_array1.value[0] = nowArray1.value[0];
         nowArray1.value[1].forEach((item, index) => {
-          item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+          item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
           tem_array1.value[1].push(item);
         })
         console.log("tem_array1:" + tem_array1.value);
@@ -1334,7 +1310,7 @@ onMounted(async () => {
       tem_array1.value = [, []];
       tem_array1.value[0] = nowArray1.value[0];
       nowArray1.value[1].forEach((item, index) => {
-        item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+        item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
         tem_array1.value[1].push(item);
       })
       console.log("tem_array1:" + tem_array1.value);
@@ -1382,7 +1358,7 @@ onMounted(async () => {
         tem_array1.value = [, []];
         tem_array1.value[0] = nowArray1.value[0];
         nowArray1.value[1].forEach((item, index) => {
-          item[2] = moment(item[2]).format('YYYY-MM-DD HH:mm:ss');
+          item[1] = moment(item[1]).format('YYYY-MM-DD HH:mm:ss');
           tem_array1.value[1].push(item);
         })
         console.log("tem_array1:" + tem_array1.value);
@@ -1422,28 +1398,28 @@ onMounted(async () => {
 let cc = 0;//设备渲染
 let ccc = 0;//行为渲染
 onUpdated(() => {//使用updated钩子解决onMounted无法动态挂载完随响应式数据变化而变化的dom,并且此处仅要求执行一次,否则定时器一直运行导致当前的一号为的内容同样一直运行
-  if (cc === 0) {
-    if (a_length.value > 1) {//当显示的不是only的时候
-      const option_array: any = document.querySelectorAll(".device_list");
-      console.log("guijunqiao")
-      option_array[0].children[0].style.color = "#409eff";
-      option_array[0].children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
-      cc++;
-    }
-  }
-  else { }
+  // if (cc === 0) {
+  //   if (a_length.value > 1) {//当显示的不是only的时候
+  //     const option_array: any = document.querySelectorAll(".device_list");
+  //     console.log("guijunqiao")
+  //     option_array[0].children[0].style.color = "#409eff";
+  //     option_array[0].children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
+  //     cc++;
+  //   }
+  // }
+  // else { }
 
 
-  if (ccc === 0) {
-    if (b_length.value > 1) {//当显示的不是only的时候
-      const option_array: any = document.querySelectorAll(".device_list1");
-      console.log("guijunqiao1")
-      option_array[0].children[0].style.color = "#409eff";
-      option_array[0].children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
-      ccc++;
-    }
-  }
-  else { }
+  // if (ccc === 0) {
+  //   if (b_length.value > 1) {//当显示的不是only的时候
+  //     const option_array: any = document.querySelectorAll(".device_list1");
+  //     console.log("guijunqiao1")
+  //     option_array[0].children[0].style.color = "#409eff";
+  //     option_array[0].children[0].style.backgroundColor = "rgb(235.9, 245.3, 255)";
+  //     ccc++;
+  //   }
+  // }
+  // else { }
 })
 // 上述代码需要注意的是：这个语句（setup语法糖的部分中包含了onMounted()和onUpdated()的情况）中，在多次的标签元素的动态修改的时候
 //(由外部互动产生的标签元素),在onUpdated这个钩子会因每次的标签元素发生动态的改变而多次执行而setup()本身的内容(例如let i=0)和onMOounted仅执行一次,并且需要注意的是每次onUpdated执行的位置发生在原先的位置的地方进行叠加

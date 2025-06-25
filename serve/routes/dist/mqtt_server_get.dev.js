@@ -81,7 +81,7 @@ var tem = 0; //设备存储
 // 方式：传感器直接支持MQTT
 // 控制台客户端对象         192.168.218.141'
 
-var client = _mqtt["default"].connect('mqtt://192.168.1.100', {
+var client = _mqtt["default"].connect('mqtt://127.0.0.1', {
   clientId: "client_control" //唯一标识符
 
 }); //定义延时函数
@@ -360,10 +360,12 @@ client.on('message', function _callee2(topic, message) {
             break;
           }
 
-          _context4.next = 3;
+          console.log("成功接收到消息"); //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
+
+          _context4.next = 4;
           return regeneratorRuntime.awrap(connection1.execute("\n      SELECT p_name \n      FROM t_field_mapper\n      "));
 
-        case 3:
+        case 4:
           _ref = _context4.sent;
           _ref2 = _slicedToArray(_ref, 1);
           rows1 = _ref2[0];
@@ -399,12 +401,11 @@ client.on('message', function _callee2(topic, message) {
 
           if (!d_no) {
             d_no = null;
-          }
+          } // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
 
-          console.log("T1:" + obj.TI); // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
 
           _context4.next = 18;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)\n      VALUES (\"".concat(d_no, "\",\"").concat(obj.TI, "\",\"").concat(obj.TO, "\",\"").concat(obj.L, "\",\"1\",\"").concat(time_base, "\",\"").concat(type, "\")\n      ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)\n      VALUES (\"".concat(d_no, "\",\"").concat(obj.T, "\",\"").concat(obj.S, "\",\"").concat(obj.L, "\",\"1\",\"").concat(time_base, "\",\"").concat(type, "\")\n      ")));
 
         case 18:
           _ref3 = _context4.sent;

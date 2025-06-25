@@ -16,10 +16,10 @@ import Router2 from './routes/index_device.js';
 import Router3 from './routes/index_error_msg.js';
 import Router4 from './routes/index_history.js';
 import Router5 from './routes/index_action.js';
-import Router_direct from './routes/direct.js';  
+import Router_direct from './routes/direct.js';
 import Router_direct_control from './routes/direct_control.js';
 // 导入和YOLOV5的沟通模块 
-import Router_http from "./routes/http_server_get.js";
+// import Router_http from "./routes/http_server_get.js";
 
 // 创建 Koa 应用实例
 const app = new Koa();
@@ -61,7 +61,7 @@ router.use(Router5.routes(), Router5.allowedMethods());
 router.use( Router_direct.routes(), Router_direct.allowedMethods());
 router.use( Router_direct_control.routes(), Router_direct_control.allowedMethods());
 // 应用和YOLO服务端的沟通http路由
-router.use( Router_http.routes(), Router_http.allowedMethods());
+// router.use( Router_http.routes(), Router_http.allowedMethods());
 
 
 // 应用主路由器

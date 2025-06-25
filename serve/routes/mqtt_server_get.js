@@ -57,7 +57,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://192.168.1.100',{
+export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
 }); 
 
@@ -268,6 +268,7 @@ client.on('disconnect', () => {
 client.on('message', async (topic, message) => {
   //告警
   if(topic === "sensor/data"){
+    console.log("成功接收到消息");
     //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
     const [rows1] = await connection1.execute(`
       SELECT p_name 
@@ -303,11 +304,10 @@ client.on('message', async (topic, message) => {
       if(!d_no){
         d_no = null;
       }
-      console.log("T1:"+obj.TI);
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
       INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)
-      VALUES ("${d_no}","${obj.TI}","${obj.TO}","${obj.L}","1","${time_base}","${type}")
+      VALUES ("${d_no}","${obj.T}","${obj.S}","${obj.L}","1","${time_base}","${type}")
       `);
     }
   }

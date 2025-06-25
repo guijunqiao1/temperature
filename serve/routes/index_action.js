@@ -35,7 +35,7 @@ Router5.get("/action", async ctx => {
   }
 
   //全局sql
-  const query = `SELECT d_no , ${sql_string } c_time,is_saved FROM t_behavior_data `;
+  const query = `SELECT d_no , ${sql_string } c_time,is_saved,file_type FROM t_behavior_data `;
   //降序sql
   const DESC_query = `ORDER BY c_time DESC`;
   //页数有效值判断布尔变量
@@ -46,9 +46,9 @@ Router5.get("/action", async ctx => {
     const formattedRows = value.map(row => [
       row.d_no,
       row.field1.toString(),  // 确保所有字段为字符串类型
-      row.field2.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-      row.is_saved
+      row.is_saved,
+      row.file_type
     ]);
     return formattedRows;
   }
@@ -72,7 +72,7 @@ Router5.get("/action", async ctx => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, row.field2, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.is_saved])
+    return value.map(row => [row.d_no, row.field1, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.file_type,row.is_saved])
   }
 
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
@@ -121,7 +121,7 @@ Router5.get("/action", async ctx => {
     }
     else{
       //直接查询
-      const [rows] = await connection.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query+`LIMIT ${parseInt(pageSize)} OFFSET ${offset}
+      const [rows] = await connection.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query+` LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
       ctx.body = toMap(rows);
     }
@@ -188,7 +188,7 @@ Router5.get("/action_count", async ctx => {
   // res.send("1");
 
   //模拟有0组数据返回的情况
-  // res.send("0");
+  // res.send("0"); 
 });
 
 Router5.get("/data/action", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
@@ -212,7 +212,8 @@ Router5.get("/data/action", async ctx => {//对data路由进行修改并且接�
         GROUP_CONCAT(
           CONCAT('[', `
           +sql_string+
-          `'"', c_time, '"', 
+          `'"', c_time, '",', 
+          '"', file_type, '"', 
           ']') ORDER BY c_time
         ) AS data
       FROM t_behavior_data

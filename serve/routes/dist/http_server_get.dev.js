@@ -5,103 +5,140 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var Router = require('koa-router');
+var _express = _interopRequireDefault(require("express"));
 
-var multer = require('@koa/multer');
+var _multer = _interopRequireDefault(require("multer"));
 
-var path = require('path'); // 初始化 Koa 应用和路由
+var _path = _interopRequireDefault(require("path"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+// const Router = require('koa-router');
+// const multer = require('@koa/multer');
+// const path = require('path');
+// const router = new Router();
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'uploads/');
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = path.extname(file.originalname);
+//     cb(null, `${Date.now()}-${file.originalname.replace(ext, '')}${ext}`);
+//   }
+// });
+// const upload = multer({
+//   storage,
+//   limits: { fileSize: 100 * 1024 * 1024 }
+// });
+// router.post('/upload', upload.single('file'), async (ctx) => {
+//   const file = ctx.file;
+//   let { userId,d_no } = ctx.request.body;
+//   // 判断场景
+//   d_no = d_no?d_no:null;
+//   if (!file) {
+//     ctx.status = 400;
+//     ctx.body = { error: '未上传文件' };
+//     return;
+//   }
+//   const fileInfo = {
+//     originalName: file.originalname,
+//     fileName: file.filename,
+//     path: file.path,
+//     mimeType: file.mimetype,
+//     size: file.size,
+//     userId
+//   };
+//   // 保存文件信息到数据库中
+//   await connection1.execute(`
+//   INSERT INTO t_behavior_data(d_no,field1,c_time,is_saved,file_type)
+//   VALUES ("${d_no}","${fileName}","${new Date()}","实时数据","${fileName.split('.')[1]==='mp4'?'video':'picture'}")
+//   `);
+//   ctx.body = {
+//     message: '文件上传成功',
+//     fileInfo
+//   };
+// });
+// export default router;
+var router = _express["default"].Router(); // 设置存储方式
 
 
-var router = new Router(); // 配置 Multer 的本地存储
-
-var storage = multer.diskStorage({
+var storage = _multer["default"].diskStorage({
   destination: function destination(req, file, cb) {
-    // 设置文件存储目录为 uploads/
-    cb(null, 'client/public/');
+    cb(null, 'uploads/');
   },
   filename: function filename(req, file, cb) {
-    // 使用时间戳和原始文件名生成唯一文件名
-    var ext = path.extname(file.originalname);
-    cb(null, "".concat(file.originalname.replace(ext, '')).concat(ext));
-  }
-}); // 初始化 Multer，设置存储和文件大小限制（100MB）
+    var ext = _path["default"].extname(file.originalname);
 
-var upload = multer({
+    cb(null, "".concat(Date.now(), "-").concat(file.originalname.replace(ext, '')).concat(ext));
+  }
+}); // 初始化 multer
+
+
+var upload = (0, _multer["default"])({
   storage: storage,
   limits: {
     fileSize: 100 * 1024 * 1024
-  } // 限制文件大小为 100MB
+  }
+}); // 处理上传请求
 
-}); // 路由：处理多文件上传到本地磁盘
+router.post('/upload', upload.single('file'), function _callee(req, res) {
+  var file, _req$body, userId, d_no, fileInfo;
 
-router.post('/upload', upload.array('files', 2), function _callee(ctx) {
-  var files, userId, filesInfo;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          files = ctx.files; // 获取上传的文件数组
+          file = req.file;
+          _req$body = req.body, userId = _req$body.userId, d_no = _req$body.d_no; // 判断场景
 
-          userId = ctx.request.body.userId; // 获取请求体中的 userId
-          // 检查是否有文件上传
+          d_no = d_no ? d_no : null;
 
-          if (!(!files || files.length === 0)) {
-            _context.next = 6;
+          if (file) {
+            _context.next = 5;
             break;
           }
 
-          ctx.status = 400;
-          ctx.body = {
-            error: '未上传任何文件'
-          };
-          return _context.abrupt("return");
+          return _context.abrupt("return", res.status(400).json({
+            error: '未上传文件'
+          }));
 
-        case 6:
-          if (!(files.length > 2)) {
-            _context.next = 10;
-            break;
-          }
+        case 5:
+          fileInfo = {
+            originalName: file.originalname,
+            fileName: file.filename,
+            path: file.path,
+            mimeType: file.mimetype,
+            size: file.size,
+            userId: userId
+          }; // 保存文件信息到数据库中
 
-          ctx.status = 400;
-          ctx.body = {
-            error: '最多允许上传 2 个文件'
-          };
-          return _context.abrupt("return");
+          _context.prev = 6;
+          _context.next = 9;
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no, field1, c_time, is_saved, file_type)\n      VALUES (\"".concat(d_no, "\", \"").concat(file.filename, "\", \"").concat(new Date(), "\", \"\u5B9E\u65F6\u6570\u636E\", \"").concat(file.filename.split('.')[1] === 'mp4' ? 'video' : 'picture', "\")\n    ")));
 
-        case 10:
-          // 返回上传成功的文件信息
-          filesInfo = files.map(function (file) {
-            return {
-              originalName: file.originalname,
-              // 原始文件名
-              fileName: file.filename,
-              // 存储后的文件名
-              path: file.path,
-              // 文件存储路径
-              mimeType: file.mimetype,
-              // 文件 MIME 类型
-              size: file.size,
-              // 文件大小
-              userId: userId // 关联的用户 ID
+        case 9:
+          _context.next = 14;
+          break;
 
-            };
-          }); // 保存文件信息到数据库中
-
-          _context.next = 13;
-          return regeneratorRuntime.awrap(connection1.execute("\n  INSERT INTO t_behavior_data(d_no,field1,field2,c_time,is_saved)\n  VALUES (\"".concat(finalDNo, "\",\"").concat(filesInfo[0].originalName.split(".")[1] === "mp4" ? filesInfo[1].fileName : filesInfo[0].fileName, "\",\"").concat(filesInfo[0].originalName.split(".")[1] === "mp4" ? filesInfo[0].fileName : filesInfo[1].fileName, "\",\"").concat(time_base, "\",\"").concat(finalType, "\")\n  ")));
-
-        case 13:
-          ctx.body = {
-            message: '文件上传成功',
-            filesInfo: filesInfo
-          };
+        case 11:
+          _context.prev = 11;
+          _context.t0 = _context["catch"](6);
+          return _context.abrupt("return", res.status(500).json({
+            error: '保存文件信息失败'
+          }));
 
         case 14:
+          res.json({
+            message: '文件上传成功',
+            fileInfo: fileInfo
+          });
+
+        case 15:
         case "end":
           return _context.stop();
       }
     }
-  });
+  }, null, null, [[6, 11]]);
 });
 var _default = router;
 exports["default"] = _default;

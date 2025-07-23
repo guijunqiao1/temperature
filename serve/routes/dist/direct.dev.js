@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _koaRouter = _interopRequireDefault(require("koa-router"));
+var _express = _interopRequireDefault(require("express"));
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
@@ -21,7 +21,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-var Router_direct = new _koaRouter["default"](); //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
+var Router_direct = (0, _express["default"])(); //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 
 //此处获取到数据库链接配置对象
 var connection; //定义数据库连接对象
@@ -55,15 +55,16 @@ var connection; //定义数据库连接对象
 })(); //额外绑定获取所有数据的路由
 
 
-Router_direct.get("/zhiling", function _callee2(ctx) {
-  var mode, result, rowx;
+Router_direct.get("/zhiling", function _callee2(req, res) {
+  var _req$query, mode, d_no, result, rowx;
+
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          mode = ctx.query.mode;
+          _req$query = req.query, mode = _req$query.mode, d_no = _req$query.d_no;
           _context2.next = 3;
-          return regeneratorRuntime.awrap(connection.execute("\n  SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou,t.value,c.label_boolean,c.label\n  FROM t_direct t,t_direct_config c\n  WHERE c.id = t.config_id\n  AND ok in (\"yes\",\"yes1\")\n  AND c.mode = \"".concat(mode, "\"\n  ORDER BY CASE f_type\n      WHEN '1' THEN 1\n      WHEN '5' THEN 2\n      WHEN '3' THEN 3\n      ELSE 4\n    END;\n  ")));
+          return regeneratorRuntime.awrap(connection.execute("\n  SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou,t.value,c.label_boolean,c.label,t.d_no\n  FROM t_direct t,t_direct_config c\n  WHERE c.id = t.config_id\n  AND ok in (\"yes\",\"yes1\")\n  AND c.mode = \"".concat(mode, "\"\n  AND t.d_no = \"").concat(d_no ? d_no : 'null', "\"\n  ORDER BY CASE f_type\n      WHEN '1' THEN 1\n      WHEN '5' THEN 2\n      WHEN '3' THEN 3\n      ELSE 4\n    END;\n  ")));
 
         case 3:
           result = _context2.sent;
@@ -82,7 +83,7 @@ Router_direct.get("/zhiling", function _callee2(ctx) {
               item.value = Number(item.value);
             }
           });
-          ctx.body = rowx;
+          res.send(rowx);
           return _context2.abrupt("return");
 
         case 8:
@@ -93,15 +94,15 @@ Router_direct.get("/zhiling", function _callee2(ctx) {
   });
 }); //修改关联boolean的路由
 
-Router_direct.get("/label_boolean", function _callee3(ctx) {
-  var _ctx$query, content, id, _ref, _ref2, result0, _ref3, _ref4, result, _ref5, _ref6, _result;
+Router_direct.get("/label_boolean", function _callee3(req, res) {
+  var _req$query2, content, id, _ref, _ref2, result0, _ref3, _ref4, result, _ref5, _ref6, _result;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
           console.log("成功进入路由");
-          _ctx$query = ctx.query, content = _ctx$query.content, id = _ctx$query.id;
+          _req$query2 = req.query, content = _req$query2.content, id = _req$query2.id;
           id = Number(id);
           console.log("TYPE:id" + _typeof(id));
           _context3.next = 6;
@@ -140,11 +141,32 @@ Router_direct.get("/label_boolean", function _callee3(ctx) {
           _result = _ref6[0];
 
         case 25:
-          ctx.body = "ok";
+          res.send("ok");
 
         case 26:
         case "end":
           return _context3.stop();
+      }
+    }
+  });
+});
+Router_direct.get("/type_device", function _callee4(req, res) {
+  var result;
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.next = 2;
+          return regeneratorRuntime.awrap(connection.execute("\n    SELECT d_no\n    FROM t_direct \n    WHERE config_id = 12\n    AND d_no != 'null';\n  "));
+
+        case 2:
+          result = _context4.sent;
+          res.send(result[0]);
+          return _context4.abrupt("return");
+
+        case 5:
+        case "end":
+          return _context4.stop();
       }
     }
   });

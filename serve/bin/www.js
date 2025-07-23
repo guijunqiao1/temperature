@@ -1,26 +1,21 @@
-#!/usr/bin/env node
-/**
- * Module dependencies.
- */
 
-import app from "../app_koa.js";
+import app from "../app_koa.js"; // 改为你的 Express 应用文件名
 import debug from 'debug';
 const log = debug('serve1:server');
 import http from "http";
+
 /**
  * Get port from environment and store in Express.
  */
 
 const port = normalizePort(process.env.PORT || '9000');
-// app.set('port', port);//express写法
+app.set('port', port); // Express 写法
 
 /**
  * Create HTTP server.
  */
 
-// var server = http.createServer(app);//express写法
-var server = http.createServer(app.callback());//koa写法
-
+var server = http.createServer(app); // Express 写法
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -88,4 +83,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  console.log(`Server is running on ${bind}`); // 可选：添加控制台输出
 }

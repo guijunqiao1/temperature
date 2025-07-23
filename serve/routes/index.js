@@ -9,8 +9,8 @@ let connection2;//首先定义一个用于存储连接数据库的实例对象,�
 // 同时需要注意的是connection就算初始化未被赋值的情况下如果使用的是const关键字进行定义的话则在后续赋值则会被视作为错误，则提前进行全局变量的定义不能使用const关键字
 // let connection2;
 
-import Router1 from "koa-router";
-const Router = new Router1();
+import Router1 from "express";
+const Router = Router1();
 //引入数据库链接函数
 
 
@@ -29,7 +29,7 @@ const Router = new Router1();
 
 
 //设备最新数据
-Router.get("/recent", async (ctx) => {
+Router.get("/recent", async (req,res) => {
   try {
     await connection2.query("SET SESSION group_concat_max_len = 1000000");
 
@@ -82,14 +82,14 @@ Router.get("/recent", async (ctx) => {
       }
     });
     //允许所有的来源
-    ctx.set("Access-Control-Allow-Origin", "*");//简单请求
-    ctx.body = formattedResult;
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 允许所有来源
+    res.send(formattedResult);
   } catch (err) {
     console.error("数据库查询失败", err);
   }
 });
 //行为最新数据
-Router.get("/recent/action", async ctx => {
+Router.get("/recent/action", async (req,res) => {
   try {
     await connection2.query("SET SESSION group_concat_max_len = 1000000");
     //获取实时表字段
@@ -105,8 +105,6 @@ Router.get("/recent/action", async ctx => {
         sql_string += x;
       }
     }
-
-
 
     const [results] = await connection2.query(`
       WITH latest_time_per_dno AS (
@@ -148,19 +146,19 @@ Router.get("/recent/action", async ctx => {
         return [row.d_no, []];
       }
     });
-    ctx.body =formattedResult;
+    res.send(formattedResult);
   } catch (err) {
     console.error("数据库查询失败", err);
   }
 });
 //设备ID最新记录--映射列表对象路由
-Router.get("/recent/list_obj",async ctx=>{
+Router.get("/recent/list_obj",async (req,res)=>{
   const [rows] = await connection2.query(`
   SELECT *
   FROM t_container
   ORDER BY ctime DESC
   `);
-  ctx.body = rows[0];
+  res.send(rows[0]);
 })
 
 export default Router;

@@ -7,7 +7,7 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _koaRouter = _interopRequireDefault(require("koa-router"));
+var _express = _interopRequireDefault(require("express"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -26,7 +26,7 @@ var connection2; //首先定义一个用于存储连接数据库的实例对象,
 // 同时需要注意的是connection就算初始化未被赋值的情况下如果使用的是const关键字进行定义的话则在后续赋值则会被视作为错误，则提前进行全局变量的定义不能使用const关键字
 // let connection2;
 
-var Router = new _koaRouter["default"](); //引入数据库链接函数
+var Router = (0, _express["default"])(); //引入数据库链接函数
 //下方语句用于实现数据库1的连接
 
 (function _callee() {
@@ -60,7 +60,7 @@ var Router = new _koaRouter["default"](); //引入数据库链接函数
 //设备最新数据
 
 
-Router.get("/recent", function _callee2(ctx) {
+Router.get("/recent", function _callee2(req, res) {
   var _ref, _ref2, result_now, sql_string, item, x, _ref3, _ref4, results, formattedResult;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
@@ -112,9 +112,9 @@ Router.get("/recent", function _callee2(ctx) {
             }
           }); //允许所有的来源
 
-          ctx.set("Access-Control-Allow-Origin", "*"); //简单请求
+          res.setHeader('Access-Control-Allow-Origin', '*'); // 允许所有来源
 
-          ctx.body = formattedResult;
+          res.send(formattedResult);
           _context2.next = 23;
           break;
 
@@ -131,7 +131,7 @@ Router.get("/recent", function _callee2(ctx) {
   }, null, null, [[0, 20]]);
 }); //行为最新数据
 
-Router.get("/recent/action", function _callee3(ctx) {
+Router.get("/recent/action", function _callee3(req, res) {
   var _ref5, _ref6, result_now, sql_string, item, x, _ref7, _ref8, results, formattedResult;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
@@ -161,7 +161,7 @@ Router.get("/recent/action", function _callee3(ctx) {
           }
 
           _context3.next = 12;
-          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n        SELECT d_no, MAX(c_time) AS max_time \n        FROM t_behavior_data\n        GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', " + sql_string + "'\"', t.c_time, '\"', \n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_behavior_data t\n      JOIN latest_time_per_dno l\n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
+          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n        SELECT d_no, MAX(c_time) AS max_time \n        FROM t_behavior_data\n        GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', \n              " + sql_string + "\n              '\"', t.c_time, '\",',\n              '\"', t.file_type, '\"',\n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_behavior_data t\n      JOIN latest_time_per_dno l\n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
 
         case 12:
           _ref7 = _context3.sent;
@@ -172,17 +172,17 @@ Router.get("/recent/action", function _callee3(ctx) {
               if (!row.data) return [row.d_no, []];
               var fixedData = "[".concat(row.data, "]");
               var data = JSON.parse(fixedData); // 遍历 data 数组，修改 c_time 格式（去掉秒数）
+              // data = data.map(entry => {
+              //   return entry;
+              // });
 
-              data = data.map(function (entry) {
-                return entry;
-              });
               return [row.d_no, data];
             } catch (error) {
               console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
               return [row.d_no, []];
             }
           });
-          ctx.body = formattedResult;
+          res.send(formattedResult);
           _context3.next = 22;
           break;
 
@@ -199,7 +199,7 @@ Router.get("/recent/action", function _callee3(ctx) {
   }, null, null, [[0, 19]]);
 }); //设备ID最新记录--映射列表对象路由
 
-Router.get("/recent/list_obj", function _callee4(ctx) {
+Router.get("/recent/list_obj", function _callee4(req, res) {
   var _ref9, _ref10, rows;
 
   return regeneratorRuntime.async(function _callee4$(_context4) {
@@ -213,7 +213,7 @@ Router.get("/recent/list_obj", function _callee4(ctx) {
           _ref9 = _context4.sent;
           _ref10 = _slicedToArray(_ref9, 1);
           rows = _ref10[0];
-          ctx.body = rows[0];
+          res.send(rows[0]);
 
         case 6:
         case "end":

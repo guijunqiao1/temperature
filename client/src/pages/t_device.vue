@@ -28,7 +28,7 @@
     </div>
 
     <!-- 表格部分 -->
-    <div class="bottom_part">
+    <div class="bottom_part"> 
       <table>
         <thead>
           <tr>

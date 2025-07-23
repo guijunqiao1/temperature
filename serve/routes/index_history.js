@@ -5,8 +5,8 @@ import Config4 from "../indexNode2.js";//此处获取到数据库链接配置对
 import dayjs from "dayjs";//引入提供format使用环境的组件
 import { json } from "express";
 let connection2;//定义数据库连接对象
-import Router from "koa-router";
-const Router4= new Router();
+import Router from "express";
+const Router4=  Router();
 
 (async ()=>{
   try{
@@ -21,8 +21,8 @@ const Router4= new Router();
 })();
 
 //表格的呈现-图像的呈现路由
-Router4.get("/History", async ctx => {
-  let { start,end,currentPage,pageSize,d_no } = ctx.query;
+Router4.get("/History", async (req,res) => {
+  let { start,end,currentPage,pageSize,d_no } = req.query;
   // 动态获取到字段
   const [result_now] = await connection2.query(`
     SELECT * 
@@ -51,6 +51,7 @@ Router4.get("/History", async ctx => {
       row.field2.toString(),
       row.field3.toString(),
       row.field4.toString(),
+      row.field5.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
       row.type
     ]);
@@ -76,7 +77,7 @@ Router4.get("/History", async ctx => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
+    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field5,dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
   }
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
@@ -85,7 +86,7 @@ Router4.get("/History", async ctx => {
       const [rows] = await connection2.execute(query+(d_no==="null"?"":` WHERE d_no="${d_no} "`)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows); 
+      res.send(JSON.stringify(formattedRows));
     }
     else{
       console.log("当前总输出结果："+query+(d_no==="null"?"":` WHERE d_no="${d_no} "`)+DESC_query+`
@@ -95,7 +96,7 @@ Router4.get("/History", async ctx => {
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
   }
   else if(start === "end" && end !=="1"){
@@ -104,14 +105,14 @@ Router4.get("/History", async ctx => {
         const [rows] = await connection2.execute(query+one_query+DESC_query); 
         const formattedRows = toTwoArray(rows);
         // 直接使用 res.send() 返回数据
-        ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
     else{
       //直接查询
       const [rows] = await connection2.execute(query+one_query+DESC_query+`
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
-      ctx.body = toMap(rows);
+      res.send(toMap(rows));
     }
   }
   else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
@@ -122,13 +123,13 @@ Router4.get("/History", async ctx => {
         WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
     else{
       //直接查询
       const [rows] = await connection2.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no="${d_no} "`)+DESC_query+` LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
-      ctx.body = toMap(rows);
+      res.send(toMap(rows));
     }
   }
 
@@ -139,8 +140,8 @@ Router4.get("/History", async ctx => {
   // res.send([]);
 });
 //表格的呈现路由
-Router4.get("/History_count", async ctx => {
-  const {start,end,d_no} = ctx.query;
+Router4.get("/History_count", async (req,res) => {
+  const {start,end,d_no} = req.query;
   try{
     console.log("判断布尔结构是否存在问题");
     console.log("start:"+typeof start);
@@ -161,7 +162,7 @@ Router4.get("/History_count", async ctx => {
       ` + (d_no==="null"?"":`WHERE d_no = "${d_no}"`));
       // 直接返回数组长度
       console.log("观察返回的结构");
-      ctx.body = ""+rows[0].total.toString();
+      res.send(""+rows[0].total.toString());
     }
     else if(start === "end" && end !=="1"){
       //格式化时间值
@@ -174,7 +175,7 @@ Router4.get("/History_count", async ctx => {
         WHERE c_time < "${formattedEnd}"
       `+(d_no==="null"?"":`AND d_no = "${d_no}"`));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      res.send(""+rows[0].total.toString());
     }
     else {//进行分页查询后计算大小
       console.log("start:"+start);
@@ -190,7 +191,7 @@ Router4.get("/History_count", async ctx => {
         FROM t_data 
         WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":`AND d_no="${d_no}" `));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      res.send(""+rows[0].total.toString());
     }
   }
   catch{
@@ -205,8 +206,8 @@ Router4.get("/History_count", async ctx => {
   // res.send("0");
 });
 //告警历史数据
-// Router4.get("/History/alarm",asyncctx=>{
-//   const {start,end} = ctx.query;
+// Router4.get("/History/alarm",async (req,res)=>{
+//   const {start,end} = req.query;
 //   const [results] = await connection2.query(`
 //     SELECT 
 //   `);
@@ -214,8 +215,8 @@ Router4.get("/History_count", async ctx => {
 
 // })
 // //储运箱入库历史数据
-// Router4.get("/History/container",async ctx=>{
-//   const {start,end} = ctx.query;
+// Router4.get("/History/container",async (req,res)=>{
+//   const {start,end} = req.query;
 //   const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
 //   const formattedStart = formatTime(start);
 //   const formattedEnd = formatTime(end);
@@ -231,13 +232,13 @@ Router4.get("/History_count", async ctx => {
 //       row.VID,
 //       row.ctime
 //   ]);
-//   ctx.body = formattedResults;
+    // res.send(formattedResults);
 // })
 
 
 //设备选项列表相关路由
-Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
-  const { start,end } = ctx.query;
+Router4.get("/data", async (req,res) => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
+  const { start,end } = req.query;
   //动态获取到filed字段
   const [result_now] = await connection2.query(`
     SELECT * 
@@ -312,8 +313,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
     // 处理查询结果
     formattedResult = search_result(results);
   }
-
-  ctx.body = formattedResult; 
+  res.send(formattedResult);
 
 
   //模拟只返回一组数据的情况
@@ -324,7 +324,7 @@ Router4.get("/data", async ctx => {//对data路由进行修改并且接纳上sta
 });
 
 //用于获取单位列的路由--设备数据
-Router4.get("/device_unit",async (ctx)=>{
+Router4.get("/device_unit",async (req,res)=>{
   try{
     // 查询数据库，获取 t_behavior_field_mapper 表中的 unit 列
     // 并按照 id 排序
@@ -341,14 +341,14 @@ Router4.get("/device_unit",async (ctx)=>{
     // 从每一行对象中提取 unit 值
     const unitArray = rows.map(row => row.unit);
     // 返回字符串数组结果
-    ctx.body = unitArray;
+    res.send(unitArray);
   }catch(error){
     console.log("当前发生错误");
   }
 })
 
 //用于获取单位列的路由--行为数据
-Router4.get("/action_unit",async ctx=>{
+Router4.get("/action_unit",async (req,res)=>{
   // 查询数据库，获取 t_behavior_field_mapper 表中的 unit 列
   // 并按照 id 排序
   const query = `
@@ -363,7 +363,7 @@ Router4.get("/action_unit",async ctx=>{
   // 从每一行对象中提取 unit 值
   const unitArray = rows.map(row => row.unit);
   // 返回字符串数组结果
-  ctx.body = unitArray;
+  res.send(unitArray);
 })
 
 

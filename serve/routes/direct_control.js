@@ -1,12 +1,12 @@
 
 // 用于接受映射数组获取请求的路由文件
-import Router from "koa-router";
-const Router_direct_response = new Router();
+import Router from "express";
+const Router_direct_response = Router();
 
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 // import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
 import Config from "../indexNode3.js";//此处获取到数据库链接配置对象
-let connection;//定义数据库连接对象 
+let connection;//定义数据库连接对象
 //导入mqtt模块--用于指令的正确发送响应 
 import { beifen } from "./mqtt_server_get.js";
 
@@ -14,7 +14,7 @@ import { beifen } from "./mqtt_server_get.js";
   try{
     //异步执行Config，用于连接数据库,后续可对connection数据库链接对象进行数据库语法操作用于对数据库本身进行操作
     connection = await Config();
-    console.log("数据库连接成功");  
+    console.log("数据库连接成功");
     // const result = await connection.execute(`
     //   SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou,t.value
     //   FROM t_direct t,t_direct_config c
@@ -37,15 +37,15 @@ import { beifen } from "./mqtt_server_get.js";
         END;
     `);
     const rowx = result[0];
-    console.log("成功进入外层");
+    console.log("成功进入外层");  
     console.dir(rowx);
     //遍历完成全局路由绑定 
-    rowx.forEach((item,index)=>{
+    rowx.forEach(async (item,index)=>{
       console.log("item:"+item.luyou);
       //需要注意content控制存入库中的值，tem11为指令值
-      Router_direct_response.get("/zhiling/"+item.luyou,async ctx=>{
+      Router_direct_response.get("/zhiling/"+item.luyou,async(req,res)=>{
         console.log("成功进入32行阶段");
-        let {content,d_no} = ctx.query;
+        let {content,d_no} = req.query;
         //备份内容的封装
         const obj1 = {};
         let tem1;
@@ -91,7 +91,7 @@ import { beifen } from "./mqtt_server_get.js";
               FROM t_direct,t_direct_config
               WHERE t_direct_config.id = t_direct.config_id
               AND t_direct_config.id = ${item.id}
-              AND d_no = "${d_no==="null"||!d_no?"null":`${d_no}`}"
+              AND d_no = "${d_no==="null"?"null":`${d_no}`}"
               `);
             if(item.f_type==="4"){//为时间值的情况下将
               tem11 = rowsx[0].value.split(" ")[1];
@@ -102,14 +102,17 @@ import { beifen } from "./mqtt_server_get.js";
              }
            }
            topic = item.topic;
+            if(item.id===12){
+              tem11 = 'on'+d_no+'_'+content;
+            }
            obj1[tem1] = tem11;
         }
         //指令发送以及是否备份的判断
         if(d_no){
-          console.log("即将更新");
-          const template = d_no==="null" ? topic:`${topic}:${d_no}`;
+          console.log("即将更新:"+d_no);
+          const template = topic;
           console.log("tem:"+template);
-          // beifen(Number(d_no),[template,obj1]);//在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
+          beifen(d_no,[template,obj1]);//在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
           //首先判断是否存在编号对应的内容
           const [row] = await connection.execute(`
           SELECT config_id
@@ -128,8 +131,11 @@ import { beifen } from "./mqtt_server_get.js";
           `);
         }
         // res.send(!d_no ? item : "ok");
-        ctx.body = "ok";
+        res.send("ok");
         return;
+      });
+      Router_direct_response.get('/test111',(req,res)=>{
+        res.send('ok');
       });
     })
   }

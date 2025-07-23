@@ -1,6 +1,6 @@
 <template>
   <div class="control">
-    <div class="all">
+    <div v-if="Pinia.all" class="all">
       <h1>全局指令</h1>
       <!-- 同步时间    -->
       <div v-for="item in control_array">
@@ -26,7 +26,7 @@
           <div class="containerx">
             <text>最小值：{{ item.min }}</text>
             <el-slider v-model="item.value" @change="submit(item)" :min="Number(item.min)" :max="Number(item.max)"
-              size="small" :disabled="!Boolean(item.label_boolean)" />
+              size="small" :disabled="!Boolean(item.label_boolean)"/>
             <text>最大值：{{ item.max }}</text>
           </div>
         </div>
@@ -50,18 +50,124 @@
       </div>
 
     </div>
+    <h2>当前场景:{{ signzhi }}</h2>
+    <div v-if="Pinia.device" class="device">
+      <h1>设备指令</h1>
+      <div class="container">
+        <el-dropdown>
+          <!-- 当前框只在保底一个的情况下才出现 -->
+          <el-button type="primary" v-show="changjing_array && LLL && LLL > 1">
+            场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <div class="device_list1" v-for="item in changjing_array" :key="item.d_no">
+                <el-dropdown-item>
+                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item.d_no }}
+                  </div>
+                </el-dropdown-item>
+              </div>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
+        <div class="only1" style="border-radius: 5px;" v-if="LLL === 1">{{ changjing_array[0].d_no }}
+        </div>
+      </div>
+
+
+
+      <!-- 同步时间-->
+      <div v-for="item in control_array">
+        <!-- 类型1： -->
+        <div class="switch" v-if="item.f_type === '1'">
+          {{ item.t_name }}：
+          <el-switch @change="submit(item)" v-model="item.value" :active-text="xuanran1(item.f_value)"
+            :inactive-text="xuanran2(item.f_value)" :active-value="xuanran1(item.f_value)"
+            :inactive-value="xuanran2(item.f_value)" :disabled="!Boolean(item.label_boolean)" />
+        </div>
+
+        <!-- 类型2： -->
+        <div class="input" v-if="item.f_type === '2'">
+          {{ item.t_name }}：
+          <input type="text" v-model="item.value" @focus="handleInputFocus(item)" @blur="handleInputBlur"
+            :disabled="!Boolean(item.label_boolean)">
+          <button class="input_submit" @click="submit(item)">提交</button>
+        </div>
+
+        <!-- 类型3： -->
+        <div class="slider-demo-block" v-if="item.f_type === '3'">
+          {{ item.t_name }}：
+          <div class="containerx">
+            <text>最小值：{{ item.min }}</text>
+            <el-slider v-model="item.value" @change="submit(item)" :min="Number(item.min)" :max="Number(item.max)"
+              size="small"/>
+            <text>最大值：{{ item.max }}</text>
+          </div>
+        </div>
+
+        <!-- 类型4： -->
+        <div class="timepicker" style="margin-top:10px;"
+          v-if="item.f_type === '4'">
+          {{ item.t_name }}：
+          <el-time-picker v-model="item.value" @blur="submit(item)" placeholder="时间选择" size="small"
+            :disabled="!Boolean(item.label_boolean)" />
+        </div>
+
+        <!-- 类型5： -->
+        <div class="radio" v-if="item.f_type === '5'">
+          {{ item.t_name }}：
+          <el-radio-group v-model="item.value" @change="submit(item)" :disabled="!Boolean(item.label_boolean)">
+            <el-radio :value="xuanran1(item.f_value)" size="large">{{ xuanran1(item.f_value) }}</el-radio>
+            <el-radio :value="xuanran2(item.f_value)" size="large">{{ xuanran2(item.f_value) }}</el-radio>
+          </el-radio-group>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, onUnmounted } from "vue";
 import axios from "axios";
-// import { ArrowDown } from '@element-plus/icons-vue'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from "../store/curt";
 const Pinia = useUserStore();
 //获取到渲染数组
 //全局数组变量
 const control_array: any = ref();
+
+//设备相关变量
+let LLL = 0;
+let changjing_array = ref();
+let change1;
+let signzhi = ref();
+
+
+
+
+change1 = async(value)=>{
+  signzhi.value = value.d_no;
+  console.log("signnnnnnnnnnnnnn:"+signzhi.value);
+      console.log("定时器正常运转");
+    const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
+    // 更新control_array时保留正在编辑的输入框的值
+    if (currentFocusedInput.value) {
+      const focusedInputId = currentFocusedInput.value.id;
+      const currentValue = currentFocusedInput.value.value;
+      control_array.value = result.data.map((item: any) => {
+        if (item.id === focusedInputId && currentFocusedInput.value && (currentFocusedInput.value.f_type === '2' || currentFocusedInput.value.f_type === "3" || currentFocusedInput.value.f_type === "4")) {
+          return { ...item, value: currentValue };
+        }
+        return item;
+      });
+    } else {
+      control_array.value = result.data;
+    }
+    console.log("control_array:" + control_array.value);
+}
+
 
 //定时器变量
 let x;
@@ -73,7 +179,7 @@ const currentFocusedInput: any = ref(null);
 function setInter() {
   return setInterval(async () => {
     console.log("定时器正常运转");
-    const result = await axios.get("/api/zhiling?mode=1");
+    const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
     // 更新control_array时保留正在编辑的输入框的值
     if (currentFocusedInput.value) {
       const focusedInputId = currentFocusedInput.value.id;
@@ -109,23 +215,50 @@ function xuanran2(value) {
 }
 
 (async () => {
-  const result = await axios.get("/api/zhiling?mode=1");
+  //获取到总设备种类
+  const result0 =  await axios.get("/api/type_device");
+  changjing_array.value = result0.data;
+  LLL = changjing_array.value.length;
+  if(LLL!==0){
+    signzhi.value = changjing_array.value[0].d_no;
+  }
+  const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
   control_array.value = result.data;
+  console.log("control_array:");
+  console.dir(control_array.value);
+
+
+  //立即执行一次定时器内容
+  console.log("定时器正常运转");
+  const resultx = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
+  // 更新control_array时保留正在编辑的输入框的值
+
+
+  if (currentFocusedInput.value) {
+    const focusedInputId = currentFocusedInput.value.id;
+    const currentValue = currentFocusedInput.value.value;
+    control_array.value = resultx.data.map((item: any) => {
+      if (item.id === focusedInputId && currentFocusedInput.value && (currentFocusedInput.value.f_type === '2' || currentFocusedInput.value.f_type === "3" || currentFocusedInput.value.f_type === "4")) {
+        return { ...item, value: currentValue };
+      }
+      return item;
+    });
+  } else {
+    control_array.value = resultx.data;
+  }
   console.log("control_array:" + control_array.value);
-
-
   //立即创建定时器
   x = setInter();
 })()
 // 开关(包括时间、开关、单选、输入、滚动)方法
 async function submit(value) {
+  console.log("成功出发");
   //重置定时器
   clearInterval(x);
   x = setInter();
-
   if (value.f_type === '2') {
     if (Number(value.value) <= Number(value.max) && Number(value.value) >= Number(value.min)) {
-      const result = await axios.get(`/api/zhiling/${value.luyou}?d_no=${value.mode === '1' ? "null" : value.d_no}&topic=${value.topic}&content=${value.value}`);
+      const result = await axios.get(`/api/zhiling/${value.luyou}?d_no=${value.mode === '1' ? "null" : signzhi.value}&topic=${value.topic}&content=${value.value}`);
       alert(value.t_name + "成功修改为" + value.value);
     }
     else {
@@ -133,12 +266,13 @@ async function submit(value) {
     }
   }
   else {
-    //对自动手动控件特殊处理，后续尽量不要动主题
-    const result = await axios.get(`/api/zhiling/${value.luyou}?d_no=${value.mode === '1' ? "null" : value.d_no}&topic=${value.topic}&content=${value.value}`);
-    if (value.id === 15) {//空调开关附属内容
-      const result = await axios.get(`/api/zhiling/kongtiaoM?d_no=${value.mode === '1' ? "null" : value.d_no}&topic=${value.topic}&content=${control_array.value[4].value}`);
-      // const result1 = await axios.get(`/api/zhiling/kongtiaoP?d_no=${value.mode === '1' ? "null" : value.d_no}&topic=${value.topic}&content=${control_array.value[7].value}`);
-    }
+    // //对自动手动控件特殊处理，后续尽量不要动主题
+    // const result = await axios.get(`/api/zhiling/${value.luyou}?d_no=${value.mode === '1' ? "null" : signzhi.value}&topic=${value.topic}&content=${value.value}`);
+    // if (value.id === 15) {//空调开关附属内容
+    //   const result = await axios.get(`/api/zhiling/kongtiaoM?d_no=${value.mode === '1' ? "null" : signzhi.value}&topic=${value.topic}&content=${control_array.value[4].value}`);
+    //   // const result1 = await axios.get(`/api/zhiling/kongtiaoP?d_no=${value.mode === '1' ? "null" : value.d_no}&topic=${value.topic}&content=${control_array.value[7].value}`);
+    // }
+    const result = await axios.get(`/api/zhiling/${value.luyou}?d_no=${signzhi.value}&topic=${value.topic}&content=${value.value}`);
 
 
 
@@ -282,4 +416,14 @@ onMounted(async () => {
 .el-slider.el-slider--small {
   width: 50%;
 }
+
+.only1 {
+  width:78px;
+  height:32px;
+  background-color: #409eff;
+  text-align: center;
+  line-height:32px;
+  font-size:14px;
+}
+
 </style>

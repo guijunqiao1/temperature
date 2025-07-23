@@ -7,7 +7,7 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _koaRouter = _interopRequireDefault(require("koa-router"));
+var _express = _interopRequireDefault(require("express"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -16,7 +16,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //此处获取到数据库链接配置对象
 var connection2; //定义数据库连接对象
 
-var Router1 = new _koaRouter["default"]();
+var Router1 = (0, _express["default"])();
 
 (function _callee() {
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -46,7 +46,7 @@ var Router1 = new _koaRouter["default"]();
   }, null, null, [[0, 7]]);
 })();
 
-Router1.get("/yingshe", function _callee2(ctx) {
+Router1.get("/yingshe", function _callee2(req, res) {
   var dbResult, objectArray;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -64,7 +64,7 @@ Router1.get("/yingshe", function _callee2(ctx) {
           });
           console.log("yingshe");
           console.dir(objectArray);
-          ctx.body = objectArray;
+          res.send(objectArray);
 
         case 9:
         case "end":
@@ -74,7 +74,7 @@ Router1.get("/yingshe", function _callee2(ctx) {
   });
 }); //行为映射表
 
-Router1.get("/yingshe/action", function _callee3(ctx) {
+Router1.get("/yingshe/action", function _callee3(req, res) {
   var dbResult, objectArray;
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
@@ -93,7 +93,7 @@ Router1.get("/yingshe/action", function _callee3(ctx) {
             return _ref2 = {}, _defineProperty(_ref2, row.db_name, row.f_name), _defineProperty(_ref2, "type", row.type), _defineProperty(_ref2, "is_show", row.is_show), _ref2;
           });
           console.log("yingshe/action" + objectArray);
-          ctx.body = objectArray;
+          res.send(objectArray);
 
         case 8:
         case "end":

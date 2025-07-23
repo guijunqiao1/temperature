@@ -1,8 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
 "use strict";
 
 var _app_koa = _interopRequireDefault(require("../app_koa.js"));
@@ -13,19 +8,22 @@ var _http = _interopRequireDefault(require("http"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+// 改为你的 Express 应用文件名
 var log = (0, _debug["default"])('serve1:server');
 
 /**
  * Get port from environment and store in Express.
  */
-var port = normalizePort(process.env.PORT || '9000'); // app.set('port', port);//express写法
+var port = normalizePort(process.env.PORT || '9000');
+
+_app_koa["default"].set('port', port); // Express 写法
 
 /**
  * Create HTTP server.
  */
-// var server = http.createServer(app);//express写法
 
-var server = _http["default"].createServer(_app_koa["default"].callback()); //koa写法
+
+var server = _http["default"].createServer(_app_koa["default"]); // Express 写法
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -90,4 +88,5 @@ function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   (0, _debug["default"])('Listening on ' + bind);
+  console.log("Server is running on ".concat(bind)); // 可选：添加控制台输出
 }

@@ -10,9 +10,9 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <div class="device_list" v-for="item in device_array" :key="item[0]">
+              <div class="device_list" v-for="item in type_array" :key="item">
                 <el-dropdown-item>
-                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item[0] }}</div>
+                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item }}</div>
                 </el-dropdown-item>
               </div>
             </el-dropdown-menu>
@@ -20,7 +20,7 @@
         </el-dropdown>
         <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
         <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && device_array[0][0]">设备为{{
-          device_array[0][0]
+          type[0][0]
         }}的信息</div>
       </div>
 
@@ -76,6 +76,7 @@ const Pinia = useUserStore();
 
 //数据
 let device_array = ref();//存放被d_no筛选后的数组
+let type_array = ref();//设备选择器依据数组
 //定义全局数据库内容对象，用于响应式重渲染的设计
 const databases_array = ref();//需要注意的是响应式数据只会通过在程序中的改变进行前端的内容的响应式修改，而不会因为本身赋值依据的改变导致本身的动态的改变，需要明确的赋值才会发生改变
 //此处为刚开始点击进入到t_device组件中进行呈现的根据表格信息的获取--立即执行函数发送获取数据库信息的请求
@@ -87,8 +88,7 @@ const total1 = ref()//总数变量,当发生增添事件、删除事件(包括�
 //定义三个响应式变量用于动态接收add参数
 // let type1 = ref("警告");//设备注释
 // let e_msg1 = ref();//错误信息
-// let d_no1 = ref();//设备编号
-// let search_ok = false;//用于标记当前是否处于查询激活状态
+let d_no1 = ref("空地");//设备编号
 // let update_one = 0;//用于控制update函数中执行编辑的只能是一次
 let value1 = ref();//用于将时间值进行动态获取的变量
 // 定义时间选择相关的变量
@@ -101,7 +101,6 @@ const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0
 
 
 //方法
-// let search = (value) => { };//button的查询方法
 let update = () => { };
 
 
@@ -109,39 +108,38 @@ let update = () => { };
 //专门用于更新的函数
 update = async () => {//最好别在挂载阶段使用function否则容易提升到最高级导致变量未定义的隐藏错误
   if (start.value === end.value && end.value !== 1) {//单向查询
-    const result = await axios.get(`/api/t_error_msg/first?start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?start=end&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=end&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
-
-    const result1 = await axios.get(`/api/t_error_msg/count?start=end&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=end&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
   else if (start.value === 1 && end.value === 1) {
-    const result = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
 
-    const result1 = await axios.get(`/api/t_error_msg/count?start=${start.value}&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=${start.value}&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
   else {
-    const result = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
 
-    const result1 = await axios.get(`/api/t_error_msg/count?start=${start.value}&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=${start.value}&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
 
@@ -170,24 +168,40 @@ currentPage.value = 1;//该代码块的执行应当放置在setup中，否则会
 
 //专门用于将数组去重复化的函数--赋值type_array
 function qu_repeate(databases) {
-  const result: any[] = [];
-  const seen: Set<string> = new Set(); // 用来记录已经出现过的设备编号
+  const seen = new Set(); // 用来记录已经出现过的 d_no
 
-  // 遍历数据库数组
+  // 遍历输入数组并收集唯一的 d_no
   for (let i = 0; i < databases.length; i++) {
-    const [deviceId, data] = databases[i];
-
-    // 如果设备编号未出现过，添加到结果数组中
-    if (!seen.has(deviceId)) {
-      result.push([deviceId, data]);
-      seen.add(deviceId); // 标记该设备编号为已出现
-    }
+    const d_no = databases[i].d_no;
+    seen.add(d_no);
   }
-  return result;
+
+  // 将 Set 转换为数组
+  return Array.from(seen);
 }
+
+// 为选择组件项目绑定上具体的方法
+const change1 = (value) => {
+  console.log("成功触发当前事件");
+  console.log("d_no1.value:" + d_no1.value);
+  console.log("value:" + value);
+  if (d_no1.value !== value) {
+    d_no1.value = value;
+    update();
+  }
+}
+
 
 //在onMounted方法中定义add_td方法便于后续使用DOM进行tbody标签中的tr、td标签的创建以及添加操作
 onMounted(async () => {
+
+  // 初始化阶段完成总type_array固定内容的获取
+  const result = await axios.get("/api/t_error_msg/all");
+  type_array.value = qu_repeate(result.data);
+  console.log("当前type:");
+  console.dir(type_array.value);
+
+
   if (Pinia.Device_sign) {
     currentPage.value = 0;
     currentPage.value = 1;
@@ -203,12 +217,15 @@ onMounted(async () => {
     })
 
     //对ok按钮进行获取
-    // const ok = document.querySelector(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn") as HTMLElement;
-    // ok.addEventListener("click", (event) => {
-    //   start.value = value1.value[0];
-    //   end.value = value1.value[1];
-    //   update();
-    // })
+    const ok = document.querySelector(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn") as HTMLElement;
+    ok.addEventListener("click", (event) => {
+      start.value = value1.value[0];
+      end.value = value1.value[1];
+      console.log("当前时间取值为:");
+      console.log("start:" + start.value);
+      console.log("end:" + end.value);
+      update();
+    })
 
     //挂载阶段对search函数进行赋值
     // search = async (value) => {
@@ -472,7 +489,9 @@ table tbody>tr>td {
 /* 为设备列表盒子进行样式设计 */
 .el-dropdown {
   position: absolute;
-  left: 390px;
+  left: 200px;
+  top: -9px;
+  height: 10px;
 }
 
 /* 为时间选择器进行样式设计 */
@@ -504,6 +523,11 @@ input[type="checkbox"]:hover {
   position: relative;
   top: -2px;
   left: 400px;
+}
+
+/* 屏蔽icon */
+.el-icon.el-icon--right {
+  display: none !important;
 }
 </style>
 

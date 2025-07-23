@@ -57,7 +57,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://127.0.0.1',{
+export const client = mqtt.connect('mqtt://192.168.1.102',{
   clientId:"client_control",//唯一标识符
 }); 
 
@@ -88,20 +88,20 @@ function getTongbu() {
  
 // 心跳检测器
 // 制作一个定时器用于定期向设备层订阅的主题中发送消息，并且设备层在接受到消息之后则响应相同的消息到应用层，用于检测设备层和应用层是不是直接的连接
-setInterval(()=>{
-  console.log("心跳正常发送");
-  // 单设备
-  active = false;
-  client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  //多设备
-  //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
-  // active_array.forEach((item,index)=>{
-  //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
-  //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
-  //   item[1] = false;
-  //   console.log("成功发送消息到主题direct:"+item[0]);
-  // })
-},5000);//每5s进行一次心跳的检测
+// setInterval(()=>{
+//   console.log("心跳正常发送");
+//   // 单设备
+//   active = false;
+//   client.publish(`direct`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
+//   //多设备
+//   //首先对整个beifen数组进行缓存，并且根据其中的首元素的个数进行对应的主题的发送
+//   // active_array.forEach((item,index)=>{
+//   //   //在当前的item(某个不同的设备)中完成心跳的发送的操作并且将此时对应上的active标记
+//   //   client.publish(`direct:${item[0]}`,JSON.stringify({heartTest_client:"start"}),{qos:1});//多设备情况下考虑的文本内容得添加上设备的具体编号
+//   //   item[1] = false;
+//   //   console.log("成功发送消息到主题direct:"+item[0]);
+//   // })
+// },5000);//每5s进行一次心跳的检测
 
 
 
@@ -153,7 +153,7 @@ async function republish(){
     }
     await delay(3000);//单位为ms
   }
-}  
+}
 
 //定义备份函数--value2中的topic必须带上d_no的信息
 export async function beifen(value1,value2){//一号位参数用于确定发送的指令类对应的编号、二号位参数用于传递给具体的报文信息
@@ -182,40 +182,40 @@ client.on('connect', () => {
   console.log("接收方连接成功");
   //当客户端连接成功之后订阅对应的主题
   //用于检测传感器数据的主题
-  client.subscribe('sensor/data',{qos:1},(err)=>{
-    if(err){
-      console.log("sensor/data主题订阅失败");
-    }
-    else{
-      console.log("sensor/data主题订阅成功")
-    }
-  });
-  //用于检测告警信息发送过来的主题
-  client.subscribe('sensor/alarm',{qos:1}, (err) => {
-    if (!err) {
-      console.log('成功订阅 sensor/alarm');
-    } else {
-      console.log('失败订阅 sensor/alarm');
-    }
-  });
-  //主动订阅保存状态下的传感器数据主题
-  client.subscribe('miss_data',{qos:1},(err)=>{
-    if(err){
-      console.log("miss_data主题订阅失败");
-    }
-    else{
-      console.log("miss_data主题订阅成功")
-    }
-  });
-  //主动订阅心跳主题
-  client.subscribe('heartbeat',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅sensor/heartTest_device主题失败");
-    }
-    else{
-      console.log("订阅sensor/heartTest_device主题成功");
-    }
-  });
+  // client.subscribe('sensorData',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("sensorData主题订阅失败");
+  //   }
+  //   else{
+  //     console.log("sensorData主题订阅成功");
+  //   }
+  // });
+  // //用于检测告警信息发送过来的主题
+  // client.subscribe('sensor/alarm',{qos:1}, (err) => {
+  //   if (!err) {
+  //     console.log('成功订阅 sensor/alarm');
+  //   } else {
+  //     console.log('失败订阅 sensor/alarm');
+  //   }
+  // });
+  // //主动订阅保存状态下的传感器数据主题
+  // client.subscribe('miss_data',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("miss_data主题订阅失败");
+  //   }
+  //   else{
+  //     console.log("miss_data主题订阅成功")
+  //   }
+  // });
+  // //主动订阅心跳主题
+  // client.subscribe('heartbeat',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("订阅sensor/heartTest_device主题失败");
+  //   }
+  //   else{
+  //     console.log("订阅sensor/heartTest_device主题成功");
+  //   }
+  // });
   //主动订阅自动模式下修改控件的监听主题
   // client.subscribe('veiw',{qos:1},(err)=>{
   //   if(err){
@@ -226,38 +226,38 @@ client.on('connect', () => {
   //   }
   // });
   //主动订阅入库主题
-  client.subscribe('direct1',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅direct1主题失败");
-    }
-    else{
-      console.log("订阅direct1主题成功");
-    }
-  });
-  client.subscribe('alarm',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅alarm主题失败");
-    }
-    else{
-      console.log("订阅alarm主题成功");
-    }
-  });
-  client.subscribe('alarm1',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅alarm1主题失败");
-    }
-    else{
-      console.log("订阅alarm1主题成功");
-    }
-  });
-  client.subscribe('chonglian',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅chonglian主题失败");
-    }
-    else{
-      console.log("订阅chonglian主题成功");
-    }
-  });
+  // client.subscribe('direct1',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("订阅direct1主题失败");
+  //   }
+  //   else{
+  //     console.log("订阅direct1主题成功");
+  //   }
+  // });
+  // client.subscribe('alarm',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("订阅alarm主题失败");
+  //   }
+  //   else{
+  //     console.log("订阅alarm主题成功");
+  //   }
+  // });
+  // client.subscribe('alarm1',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("订阅alarm1主题失败");
+  //   }
+  //   else{
+  //     console.log("订阅alarm1主题成功");
+  //   }
+  // });
+  // client.subscribe('chonglian',{qos:1},(err)=>{
+  //   if(err){
+  //     console.log("订阅chonglian主题失败");
+  //   }
+  //   else{
+  //     console.log("订阅chonglian主题成功");
+  //   }
+  // });
 });
 
 client.on('disconnect', () => {
@@ -265,35 +265,35 @@ client.on('disconnect', () => {
 });
 
 //监听控制台客户端对象收到的消息--接收方完成即可
-client.on('message', async (topic, message) => {
+client.on('message',async (topic, message)=>{
+    console.log("成功接收到消息");
   //告警
-  if(topic === "sensor/data"){
+  if(topic === "sensorData"){
     console.log("成功接收到消息");
     //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
     const [rows1] = await connection1.execute(`
-      SELECT p_name 
+      SELECT p_name
       FROM t_field_mapper
       `);//为{ p_name:TI,p_name:TO,p_name:L}的结构
-
-    // 首先获取到指标变量的内容 
+    // 首先获取到指标变量的内容
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
-    let { d_no,waibuwendu,neibuwendu,guangzhao,type} = JSON.parse(message);
+    let { d_no,temperature1,temperature2,temperature3,humidity1,humidity2,humidity3,light1,light2,light3,I,V,type} = JSON.parse(message);
     //首先判断值是否合法后进行插入
-    if(waibuwendu>0&&neibuwendu>0&&guangzhao>0){
+    if(temperature1>0&&humidity1>0&&light1>0){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
       const obj = {};
       rows1.forEach((item,index)=>{
         if(index===0){
-          obj[item.p_name] = neibuwendu;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
+          obj[item.p_name] = temperature1;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = waibuwendu;
+          obj[item.p_name] = humidity1;
         }
         else if(index===2){
-          obj[item.p_name] = guangzhao;
+          obj[item.p_name] = light1;
         }
       })
       // 将传感器数据存入到t_data中
@@ -306,52 +306,111 @@ client.on('message', async (topic, message) => {
       }
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)
-      VALUES ("${d_no}","${obj.T}","${obj.S}","${obj.L}","1","${time_base}","${type}")
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
+      VALUES ("区域1","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
+      `);
+    }
+    if(temperature2>0&&humidity2>0&&light2>0){
+      //基础时间值获取
+      const time_base = getFormattedDate();
+      //数据库中映射字段的使用
+      const obj = {};
+      rows1.forEach((item,index)=>{
+        if(index===0){
+          obj[item.p_name] = temperature2;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
+        }
+        else if(index===1){
+          obj[item.p_name] = humidity2;
+        }
+        else if(index===2){
+          obj[item.p_name] = light2;
+        }
+      })
+      // 将传感器数据存入到t_data中
+      if(!type){
+        type="实时数据";
+      }
+      // 当d_no不存在时：
+      if(!d_no){
+        d_no = null;
+      }
+      // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
+      const [rows] = await connection1.execute(`
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
+      VALUES ("区域2","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
+      `);
+    }
+    if(temperature3>0&&humidity3>0&&light3>0){
+      //基础时间值获取
+      const time_base = getFormattedDate();
+      //数据库中映射字段的使用
+      const obj = {};
+      rows1.forEach((item,index)=>{
+        if(index===0){
+          obj[item.p_name] = temperature3;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
+        }
+        else if(index===1){
+          obj[item.p_name] = humidity3;
+        }
+        else if(index===2){
+          obj[item.p_name] = light3;
+        }
+      })
+      // 将传感器数据存入到t_data中
+      if(!type){
+        type="实时数据";
+      }
+      // 当d_no不存在时：
+      if(!d_no){
+        d_no = null;
+      }
+      const [rows] = await connection1.execute(`
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
+      VALUES ("区域3","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
       `);
     }
   }
   //重发数据
-  else if(topic === "miss_data"){
-    console.log("接收到了");
-    let { d_no,neibuwendu,waibuwendu,guangzhao,type,hour,minute,second} = JSON.parse(message);
-    if(neibuwendu>0&&waibuwendu>0&&guangzhao>0){
-      const [rows1] = await connection1.execute(`
-      SELECT p_name
-      FROM t_field_mapper
-      `);//为{ p_name:S1,p_name:S2,p_name:I}的结构
-      // 首先获取到指标变量的内容
-      console.log("接收到传感器数据");
-      console.log(JSON.parse(message));
-      //基础时间值获取
-      const time_base = getFormattedDate();
-      //数据库中映射字段的使用
-      const obj = {}; 
-      rows1.forEach((item,index)=>{
-        if(index===0){
-          obj[item.p_name] = neibuwendu;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
-        }
-        else if(index===1){
-          obj[item.p_name] = waibuwendu;
-        }
-        else if(index===2){
-          obj[item.p_name] = guangzhao;
-        }
-      })
-      // //将传感器数据存入到t_data中
-      if(!type){
-        type="保存数据";
-      }
-      if(!d_no){
-        d_no = null;
-      }
-      const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
-      const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)
-      VALUES ("${d_no}","${obj.TI}","${obj.TO}","${obj.L}","1","${time}","${type}")
-      `);
-    }
-  } 
+  // else if(topic === "miss_data"){
+  //   console.log("接收到了");
+  //   let { d_no,neibuwendu,waibuwendu,guangzhao,type,hour,minute,second} = JSON.parse(message);
+  //   if(neibuwendu>0&&waibuwendu>0&&guangzhao>0){
+  //     const [rows1] = await connection1.execute(`
+  //     SELECT p_name
+  //     FROM t_field_mapper
+  //     `);//为{ p_name:S1,p_name:S2,p_name:I}的结构
+  //     // 首先获取到指标变量的内容
+  //     console.log("接收到传感器数据");
+  //     console.log(JSON.parse(message));
+  //     //基础时间值获取
+  //     const time_base = getFormattedDate();
+  //     //数据库中映射字段的使用
+  //     const obj = {}; 
+  //     rows1.forEach((item,index)=>{
+  //       if(index===0){
+  //         obj[item.p_name] = neibuwendu;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
+  //       }
+  //       else if(index===1){
+  //         obj[item.p_name] = waibuwendu;
+  //       }
+  //       else if(index===2){
+  //         obj[item.p_name] = guangzhao;
+  //       }
+  //     })
+  //     // //将传感器数据存入到t_data中
+  //     if(!type){
+  //       type="保存数据";
+  //     }
+  //     if(!d_no){
+  //       d_no = null;
+  //     }
+  //     const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
+  //     const [rows] = await connection1.execute(`
+  //     INSERT INTO t_data(d_no,field1,field2,field3,field4,c_time,type)
+  //     VALUES ("${d_no}","${obj.TI}","${obj.TO}","${obj.L}","1","${time}","${type}")
+  //     `);
+  //   }
+  // } 
   else if(topic==="heartbeat"){//当发送的心跳消息得到响应的时候的主题消息的内容的执行 --心跳信息中应当存在设备编号的信息
     console.log("收到底层心跳");
     // 单设备
@@ -386,69 +445,69 @@ client.on('message', async (topic, message) => {
   //     `);
   //   }
   // }
-  else if (topic==="alarm"){
-    const { Vstatus } = JSON.parse(message);
-    const [rows] = await connection1.execute(`
-      UPDATE t_error_msg
-      SET e_msg = "${Vstatus==="1"?"空调故障": (Vstatus==="2"?"风扇故障": Vstatus==="3"?"危险气体浓度超标":Vstatus==="4"? "湿度超标":"储运箱断电时间过长")}", c_time = "${getFormattedDate()}"
-      WHERE id = ${Number(Vstatus)};
-    `);
-    const [rows0] = await connection1.execute(`
-      UPDATE t_error_msg
-      SET VStatus = "1"; 
-    `);
-    //添加错误历史记录 
-    const [rows1] = await connection1.execute(`
-    INSERT INTO t_error_history(e_msg,c_time)
-    VALUES ("${Vstatus==="1"?"空调故障": (Vstatus==="2"?"风扇故障": Vstatus==="3"?"危险气体浓度超标":Vstatus==="4"? "湿度超标":"储运箱断电时间过长")}","${getFormattedDate()}")
-    `); 
-  }
-  else if(topic==="alarm1"){
-    console.log("alarm1成功触发");
-    const {OK} = JSON.parse(message);
-      const [rows] = await connection1.execute(`
-      UPDATE t_error_msg
-      SET e_msg = "未发生告警", c_time = "${getFormattedDate()}" 
-      WHERE id = ${Number(OK)};
-    `); 
-    //判断是否都恢复正常
-    const [rows1] = await connection1.execute(`
-      SELECT e_msg
-      FROM t_error_msg 
-    `);
-    console.dir("rows1:"+rows1); 
-    //遍历判断e_msg值
-    let sum = 0;
-    for(let i=0 ;i<5;i++){
-      if(rows1[i].e_msg==="未发生告警"){
-        sum++;
-      }
-      else{
-        break;
-      }
-    }
-    if(sum===5){
-      const [rows2] = await connection1.execute(`
-      UPDATE t_error_msg
-      SET VStatus = "0";
-    `);
-    }
-  }
-  else if(topic === "chonglian"){
-    // 同步系统时间到设备层 now_time NowTime:...
-    console.log("当前接收到重连消息");
-    setTimeout(()=>{
-      beifen(0,["chonglian1",{time:`${getTongbu()}`}]);//发布当前时间信息到同步时间相关的主题中
-    },10000);
-  } 
-  //接收到储物箱存储的消息
-  else if(topic === "direct1"){
-    const {PID,VID} = JSON.parse(message);
-    const [rows] = await connection1.execute(`
-    INSERT INTO t_container(VID,ctime,PID)
-    VALUES ("${VID}","${getFormattedDate()}","${PID}")
-    `);
-  } 
+  // else if (topic==="alarm"){
+  //   const { Vstatus } = JSON.parse(message);
+  //   const [rows] = await connection1.execute(`
+  //     UPDATE t_error_msg
+  //     SET e_msg = "${Vstatus==="1"?"空调故障": (Vstatus==="2"?"风扇故障": Vstatus==="3"?"危险气体浓度超标":Vstatus==="4"? "湿度超标":"储运箱断电时间过长")}", c_time = "${getFormattedDate()}"
+  //     WHERE id = ${Number(Vstatus)};
+  //   `);
+  //   const [rows0] = await connection1.execute(`
+  //     UPDATE t_error_msg
+  //     SET VStatus = "1"; 
+  //   `);
+  //   //添加错误历史记录 
+  //   const [rows1] = await connection1.execute(`
+  //   INSERT INTO t_error_history(e_msg,c_time)
+  //   VALUES ("${Vstatus==="1"?"空调故障": (Vstatus==="2"?"风扇故障": Vstatus==="3"?"危险气体浓度超标":Vstatus==="4"? "湿度超标":"储运箱断电时间过长")}","${getFormattedDate()}")
+  //   `); 
+  // }
+  // else if(topic==="alarm1"){
+  //   console.log("alarm1成功触发");
+  //   const {OK} = JSON.parse(message);
+  //     const [rows] = await connection1.execute(`
+  //     UPDATE t_error_msg
+  //     SET e_msg = "未发生告警", c_time = "${getFormattedDate()}" 
+  //     WHERE id = ${Number(OK)};
+  //   `); 
+  //   //判断是否都恢复正常
+  //   const [rows1] = await connection1.execute(`
+  //     SELECT e_msg
+  //     FROM t_error_msg 
+  //   `);
+  //   console.dir("rows1:"+rows1); 
+  //   //遍历判断e_msg值
+  //   let sum = 0;
+  //   for(let i=0 ;i<5;i++){
+  //     if(rows1[i].e_msg==="未发生告警"){
+  //       sum++;
+  //     }
+  //     else{
+  //       break;
+  //     }
+  //   }
+  //   if(sum===5){
+  //     const [rows2] = await connection1.execute(`
+  //     UPDATE t_error_msg
+  //     SET VStatus = "0";
+  //   `);
+  //   }
+  // }
+  // else if(topic === "chonglian"){
+  //   // 同步系统时间到设备层 now_time NowTime:...
+  //   console.log("当前接收到重连消息");
+  //   setTimeout(()=>{
+  //     beifen(0,["chonglian1",{time:`${getTongbu()}`}]);//发布当前时间信息到同步时间相关的主题中
+  //   },10000);
+  // } 
+  // //接收到储物箱存储的消息
+  // else if(topic === "direct1"){
+  //   const {PID,VID} = JSON.parse(message);
+  //   const [rows] = await connection1.execute(`
+  //   INSERT INTO t_container(VID,ctime,PID)
+  //   VALUES ("${VID}","${getFormattedDate()}","${PID}")
+  //   `);
+  // } 
 });
 
 

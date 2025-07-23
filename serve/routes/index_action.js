@@ -3,9 +3,9 @@
 import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
 
 let connection;//定义数据库连接对象
-import Router from "koa-router";
+import Router from "express";
 import dayjs from "dayjs";//引入提供format使用环境的组件
-const Router5 = new Router();
+const Router5 = Router();
 (async ()=>{
   try{
     //异步执行Config，用于连接数据库,后续可对connection数据库链接对象进行数据库语法操作用于对数据库本身进行操作
@@ -18,8 +18,8 @@ const Router5 = new Router();
 })();
 
 //表格的呈现-图像的呈现路由
-Router5.get("/action", async ctx => {
-  let { start,end,currentPage,pageSize,d_no } = ctx.query;
+Router5.get("/action", async (req,res) => {
+  let { start,end,currentPage,pageSize,d_no } = req.query;
   // 动态获取到字段
   const [result_now] = await connection.query(`
     SELECT * 
@@ -82,7 +82,7 @@ Router5.get("/action", async ctx => {
       const [rows] = await connection.execute(query+(d_no==="null"?"":` WHERE d_no = "${d_no}" `)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
     else{
       //直接查询
@@ -90,7 +90,7 @@ Router5.get("/action", async ctx => {
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
   }
   else if(start === "end" && end !=="1"){
@@ -99,14 +99,14 @@ Router5.get("/action", async ctx => {
         const [rows] = await connection.execute(query+one_query+DESC_query); 
         const formattedRows = toTwoArray(rows);
         // 直接使用 res.send() 返回数据
-        ctx.body = JSON.stringify(formattedRows);
+        res.send(JSON.stringify(formattedRows));
     }
     else{
       //直接查询
       const [rows] = await connection.execute(query+one_query+DESC_query+`
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
-      ctx.body = toMap(rows);
+      res.send(toMap(rows));
     }
   }
   else{//change1、分页后的事件的执行--内容获取--需要在start到end的基础上结合currentPage分页以及d_no的指定查询
@@ -117,13 +117,13 @@ Router5.get("/action", async ctx => {
         WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` +(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query);
       const formattedRows = toTwoArray(rows);
       // 直接使用 res.send() 返回数据
-      ctx.body = JSON.stringify(formattedRows);
+      res.send(JSON.stringify(formattedRows));
     }
     else{
       //直接查询
       const [rows] = await connection.execute(query+`WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}" `)+DESC_query+` LIMIT ${parseInt(pageSize)} OFFSET ${offset}
       `);
-      ctx.body = toMap(rows);
+      res.send(toMap(rows));
     }
   }
 
@@ -134,8 +134,8 @@ Router5.get("/action", async ctx => {
   // res.send([]);
 });
 //表格的呈现路由
-Router5.get("/action_count", async ctx => {
-  const {start,end,d_no} = ctx.query;
+Router5.get("/action_count", async (req,res) => {
+  const {start,end,d_no} = req.query;
   try{
     //首先判断是否已经激活了ok
     if(start==="1" && end==="1"){//初始状态直接算
@@ -145,7 +145,7 @@ Router5.get("/action_count", async ctx => {
         FROM t_behavior_data
       `+(d_no==="null"?"":`WHERE d_no = "${d_no}"`));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      res.send(""+rows[0].total.toString());
     }
     else if(start === "end" && end !=="1"){
       //格式化时间值
@@ -159,7 +159,7 @@ Router5.get("/action_count", async ctx => {
       
       `+(d_no==="null"?"":`AND d_no = "${d_no}"`));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      res.send(""+rows[0].total.toString());
     }
     else {//进行分页查询后计算大小
       console.log("start:"+start);
@@ -176,7 +176,7 @@ Router5.get("/action_count", async ctx => {
         WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"
       `+(d_no==="null"?"":` AND d_no="${d_no}" `));
       // 直接返回数组长度
-      ctx.body = ""+rows[0].total.toString()
+      res.send(""+rows[0].total.toString());
     }
   }
   catch{
@@ -191,8 +191,8 @@ Router5.get("/action_count", async ctx => {
   // res.send("0"); 
 });
 
-Router5.get("/data/action", async ctx => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
-  const { start,end } = ctx.query;
+Router5.get("/data/action", async (req,res) => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
+  const { start,end } = req.query;
   //动态获取到filed字段
   const [result_now] = await connection.query(`
     SELECT * 
@@ -269,7 +269,7 @@ Router5.get("/data/action", async ctx => {//对data路由进行修改并且接�
     formattedResult = search_result(results);
   }
 
-  ctx.body = formattedResult; 
+  res.send(formattedResult);
 
 
   //模拟只返回一组数据的情况

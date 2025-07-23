@@ -7,7 +7,7 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _koaRouter = _interopRequireDefault(require("koa-router"));
+var _express = _interopRequireDefault(require("express"));
 
 var _dayjs = _interopRequireDefault(require("dayjs"));
 
@@ -25,7 +25,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var connection; //定义数据库连接对象
 
 //引入提供format使用环境的组件
-var Router5 = new _koaRouter["default"]();
+var Router5 = (0, _express["default"])();
 
 (function _callee() {
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -56,8 +56,8 @@ var Router5 = new _koaRouter["default"]();
 })(); //表格的呈现-图像的呈现路由
 
 
-Router5.get("/action", function _callee2(ctx) {
-  var _ctx$query, start, end, currentPage, pageSize, d_no, _ref, _ref2, result_now, sql_string, item, x, query, DESC_query, page_boolean, toTwoArray, OFFSET, FORMATTIME, formattedStart, formattedEnd, one_query, offset, toMap, _ref3, _ref4, rows, formattedRows, _ref5, _ref6, _rows, _formattedRows, _ref7, _ref8, _rows2, _formattedRows2, _ref9, _ref10, _rows3, _ref11, _ref12, _rows4, _formattedRows3, _ref13, _ref14, _rows5;
+Router5.get("/action", function _callee2(req, res) {
+  var _req$query, start, end, currentPage, pageSize, d_no, _ref, _ref2, result_now, sql_string, item, x, query, DESC_query, page_boolean, toTwoArray, OFFSET, FORMATTIME, formattedStart, formattedEnd, one_query, offset, toMap, _ref3, _ref4, rows, formattedRows, _ref5, _ref6, _rows, _formattedRows, _ref7, _ref8, _rows2, _formattedRows2, _ref9, _ref10, _rows3, _ref11, _ref12, _rows4, _formattedRows3, _ref13, _ref14, _rows5;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -65,7 +65,7 @@ Router5.get("/action", function _callee2(ctx) {
         case 0:
           toMap = function _ref18(value) {
             return value.map(function (row) {
-              return [row.d_no, row.field1, row.field2, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), row.is_saved];
+              return [row.d_no, row.field1, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), row.file_type, row.is_saved];
             });
           };
 
@@ -86,13 +86,13 @@ Router5.get("/action", function _callee2(ctx) {
             // 将数据转换为二维数组格式
             var formattedRows = value.map(function (row) {
               return [row.d_no, row.field1.toString(), // 确保所有字段为字符串类型
-              row.field2.toString(), (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), // 已经格式化为ISO 8601标准时间字符串
-              row.is_saved];
+              (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), // 已经格式化为ISO 8601标准时间字符串
+              row.is_saved, row.file_type];
             });
             return formattedRows;
           };
 
-          _ctx$query = ctx.query, start = _ctx$query.start, end = _ctx$query.end, currentPage = _ctx$query.currentPage, pageSize = _ctx$query.pageSize, d_no = _ctx$query.d_no; // 动态获取到字段
+          _req$query = req.query, start = _req$query.start, end = _req$query.end, currentPage = _req$query.currentPage, pageSize = _req$query.pageSize, d_no = _req$query.d_no; // 动态获取到字段
 
           _context2.next = 7;
           return regeneratorRuntime.awrap(connection.query("\n    SELECT * \n    FROM t_behavior_data \n  "));
@@ -112,7 +112,7 @@ Router5.get("/action", function _callee2(ctx) {
           } //全局sql
 
 
-          query = "SELECT d_no , ".concat(sql_string, " c_time,is_saved FROM t_behavior_data "); //降序sql
+          query = "SELECT d_no , ".concat(sql_string, " c_time,is_saved,file_type FROM t_behavior_data "); //降序sql
 
           DESC_query = "ORDER BY c_time DESC"; //页数有效值判断布尔变量
 
@@ -148,7 +148,7 @@ Router5.get("/action", function _callee2(ctx) {
           rows = _ref4[0];
           formattedRows = toTwoArray(rows); // 直接使用 res.send() 返回数据
 
-          ctx.body = JSON.stringify(formattedRows);
+          res.send(JSON.stringify(formattedRows));
           _context2.next = 37;
           break;
 
@@ -162,7 +162,7 @@ Router5.get("/action", function _callee2(ctx) {
           _rows = _ref6[0];
           _formattedRows = toTwoArray(_rows); // 直接使用 res.send() 返回数据
 
-          ctx.body = JSON.stringify(_formattedRows);
+          res.send(JSON.stringify(_formattedRows));
 
         case 37:
           _context2.next = 74;
@@ -188,7 +188,7 @@ Router5.get("/action", function _callee2(ctx) {
           _rows2 = _ref8[0];
           _formattedRows2 = toTwoArray(_rows2); // 直接使用 res.send() 返回数据
 
-          ctx.body = JSON.stringify(_formattedRows2);
+          res.send(JSON.stringify(_formattedRows2));
           _context2.next = 56;
           break;
 
@@ -200,7 +200,7 @@ Router5.get("/action", function _callee2(ctx) {
           _ref9 = _context2.sent;
           _ref10 = _slicedToArray(_ref9, 1);
           _rows3 = _ref10[0];
-          ctx.body = toMap(_rows3);
+          res.send(toMap(_rows3));
 
         case 56:
           _context2.next = 74;
@@ -221,19 +221,19 @@ Router5.get("/action", function _callee2(ctx) {
           _rows4 = _ref12[0];
           _formattedRows3 = toTwoArray(_rows4); // 直接使用 res.send() 返回数据
 
-          ctx.body = JSON.stringify(_formattedRows3);
+          res.send(JSON.stringify(_formattedRows3));
           _context2.next = 74;
           break;
 
         case 68:
           _context2.next = 70;
-          return regeneratorRuntime.awrap(connection.execute(query + "WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no = \"".concat(d_no, "\" ")) + DESC_query + "LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset, "\n      ")));
+          return regeneratorRuntime.awrap(connection.execute(query + "WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no = \"".concat(d_no, "\" ")) + DESC_query + " LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset, "\n      ")));
 
         case 70:
           _ref13 = _context2.sent;
           _ref14 = _slicedToArray(_ref13, 1);
           _rows5 = _ref14[0];
-          ctx.body = toMap(_rows5);
+          res.send(toMap(_rows5));
 
         case 74:
         case "end":
@@ -243,14 +243,14 @@ Router5.get("/action", function _callee2(ctx) {
   });
 }); //表格的呈现路由
 
-Router5.get("/action_count", function _callee3(ctx) {
-  var _ctx$query2, start, end, d_no, _ref19, _ref20, rows, formatTime, formattedEnd, _ref21, _ref22, _rows6, _formatTime, formattedStart, _formattedEnd, _ref23, _ref24, _rows7;
+Router5.get("/action_count", function _callee3(req, res) {
+  var _req$query2, start, end, d_no, _ref19, _ref20, rows, formatTime, formattedEnd, _ref21, _ref22, _rows6, _formatTime, formattedStart, _formattedEnd, _ref23, _ref24, _rows7;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
-          _ctx$query2 = ctx.query, start = _ctx$query2.start, end = _ctx$query2.end, d_no = _ctx$query2.d_no;
+          _req$query2 = req.query, start = _req$query2.start, end = _req$query2.end, d_no = _req$query2.d_no;
           _context3.prev = 1;
 
           if (!(start === "1" && end === "1")) {
@@ -266,7 +266,7 @@ Router5.get("/action_count", function _callee3(ctx) {
           _ref20 = _slicedToArray(_ref19, 1);
           rows = _ref20[0];
           // 直接返回数组长度
-          ctx.body = "" + rows[0].total.toString();
+          res.send("" + rows[0].total.toString());
           _context3.next = 34;
           break;
 
@@ -291,7 +291,7 @@ Router5.get("/action_count", function _callee3(ctx) {
           _ref22 = _slicedToArray(_ref21, 1);
           _rows6 = _ref22[0];
           // 直接返回数组长度
-          ctx.body = "" + _rows6[0].total.toString();
+          res.send("" + _rows6[0].total.toString());
           _context3.next = 34;
           break;
 
@@ -316,7 +316,7 @@ Router5.get("/action_count", function _callee3(ctx) {
           _ref24 = _slicedToArray(_ref23, 1);
           _rows7 = _ref24[0];
           // 直接返回数组长度
-          ctx.body = "" + _rows7[0].total.toString();
+          res.send("" + _rows7[0].total.toString());
 
         case 34:
           _context3.next = 41;
@@ -336,8 +336,8 @@ Router5.get("/action_count", function _callee3(ctx) {
     }
   }, null, null, [[1, 36]]);
 });
-Router5.get("/data/action", function _callee4(ctx) {
-  var _ctx$query3, start, end, _ref25, _ref26, result_now, sql_string, item, x, query, FORMATTIME, groupbyd_no, toBig, formattedStart, formattedEnd, search_result, formattedResult, _ref27, _ref28, results, _ref29, _ref30, _results, _ref31, _ref32, _results2;
+Router5.get("/data/action", function _callee4(req, res) {
+  var _req$query3, start, end, _ref25, _ref26, result_now, sql_string, item, x, query, FORMATTIME, groupbyd_no, toBig, formattedStart, formattedEnd, search_result, formattedResult, _ref27, _ref28, results, _ref29, _ref30, _results, _ref31, _ref32, _results2;
 
   return regeneratorRuntime.async(function _callee4$(_context5) {
     while (1) {
@@ -382,7 +382,7 @@ Router5.get("/data/action", function _callee4(ctx) {
           };
 
           //对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
-          _ctx$query3 = ctx.query, start = _ctx$query3.start, end = _ctx$query3.end; //动态获取到filed字段
+          _req$query3 = req.query, start = _req$query3.start, end = _req$query3.end; //动态获取到filed字段
 
           _context5.next = 6;
           return regeneratorRuntime.awrap(connection.query("\n    SELECT * \n    FROM t_behavior_data\n  "));
@@ -402,7 +402,7 @@ Router5.get("/data/action", function _callee4(ctx) {
           } //全局sql
 
 
-          query = "SELECT d_no, \n        GROUP_CONCAT(\n          CONCAT('[', " + sql_string + "'\"', c_time, '\"', \n          ']') ORDER BY c_time\n        ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'";
+          query = "SELECT d_no, \n        GROUP_CONCAT(\n          CONCAT('[', " + sql_string + "'\"', c_time, '\",', \n          '\"', file_type, '\"', \n          ']') ORDER BY c_time\n        ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'";
           //按照d_no分组-sql
           groupbyd_no = "GROUP BY d_no"; //扩容sql方法
 
@@ -460,7 +460,7 @@ Router5.get("/data/action", function _callee4(ctx) {
           formattedResult = search_result(_results2);
 
         case 41:
-          ctx.body = formattedResult; //模拟只返回一组数据的情况
+          res.send(formattedResult); //模拟只返回一组数据的情况
           // res.send([["2021","11","22","23","61","2019-01-01 15:40","实时数据"]]);
           //模拟返回0组数据的情况
           // res.send([]);

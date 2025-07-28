@@ -70,7 +70,7 @@ Router4.get("/History", function _callee2(req, res) {
         case 0:
           toMap = function _ref18(value) {
             return value.map(function (row) {
-              return [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field5, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), row.type];
+              return [row.d_no, row.field1, row.field2, row.field3, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss')];
             });
           };
 
@@ -91,8 +91,8 @@ Router4.get("/History", function _callee2(req, res) {
             // 将数据转换为二维数组格式
             var formattedRows = value.map(function (row) {
               return [row.d_no, row.field1.toString(), // 确保所有字段为字符串类型
-              row.field2.toString(), row.field3.toString(), row.field4.toString(), row.field5.toString(), (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss'), // 已经格式化为ISO 8601标准时间字符串
-              row.type];
+              row.field2.toString(), row.field3.toString(), (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss') // 已经格式化为ISO 8601标准时间字符串
+              ];
             });
             return formattedRows;
           };
@@ -117,7 +117,7 @@ Router4.get("/History", function _callee2(req, res) {
           } //全局sql
 
 
-          query = "SELECT d_no,".concat(sql_string, "c_time,type FROM t_data "); //降序sql
+          query = "SELECT d_no,".concat(sql_string, "c_time FROM t_data "); //降序sql
 
           DESC_query = "ORDER BY c_time DESC"; //页数有效值判断布尔变量
 
@@ -399,7 +399,7 @@ Router4.get("/data", function _callee4(req, res) {
               var data = JSON.parse(fixedData); // 解析 JSON 数据
 
               data.forEach(function (entry) {
-                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
+                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
               });
             });
             return formattedResult;

@@ -37,7 +37,7 @@ Router4.get("/History", async (req,res) => {
     }
   }
   //全局sql
-  const query = `SELECT d_no,${sql_string }c_time,type FROM t_data `;
+  const query = `SELECT d_no,${sql_string }c_time FROM t_data `;
   //降序sql
   const DESC_query = `ORDER BY c_time DESC`;
   //页数有效值判断布尔变量
@@ -50,10 +50,7 @@ Router4.get("/History", async (req,res) => {
       row.field1.toString(),  // 确保所有字段为字符串类型
       row.field2.toString(),
       row.field3.toString(),
-      row.field4.toString(),
-      row.field5.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
-      row.type
     ]);
     return formattedRows;
   }
@@ -77,7 +74,7 @@ Router4.get("/History", async (req,res) => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,row.field4,row.field5,dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.type])
+    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss')])
   }
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
@@ -284,7 +281,7 @@ Router4.get("/data", async (req,res) => {//对data路由进行修改并且接纳
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
       });
     });
     return formattedResult;

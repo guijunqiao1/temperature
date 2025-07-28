@@ -160,14 +160,6 @@
     console.log("当前device_array_length：" + device_array.value.length);
     //每执行一次update函数都对实际的文本的内容进行一次更新
     // }
-    if (update_one === 0) {
-      //对初始文本进行编辑
-      const text = document.querySelector(".el-button.el-button--primary.el-tooltip__trigger>span") as HTMLElement;
-      if (type_array.value[0] && type_array.value[0][0]) {
-        text.innerText = `设备编号为${type_array.value[0][0]}的信息`;//需要注意的是当标签中的Content中包含文本加上标签时，DOM操作获取到后的innerHTML以及innerText分别对应全部内容、文本内容
-        update_one++;
-      }
-    }
   }
 
 

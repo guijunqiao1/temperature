@@ -39,13 +39,14 @@ Router5.get("/action", async (req,res) => {
   //降序sql
   const DESC_query = `ORDER BY c_time DESC`;
   //页数有效值判断布尔变量
-  const page_boolean = currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined;
+  const page_boolean = (!pageSize || !currentPage || currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined);
   //封装转化为数组的方法
   function toTwoArray(value){
     // 将数据转换为二维数组格式
     const formattedRows = value.map(row => [
       row.d_no,
       row.field1.toString(),  // 确保所有字段为字符串类型
+      row.field2.toString(),  // 确保所有字段为字符串类型
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
       row.is_saved,
       row.file_type
@@ -63,6 +64,8 @@ Router5.get("/action", async (req,res) => {
   //全局解构赋值
   const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
   const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
+  console.log("formattedStart:"+formattedStart);
+  console.log("formattedEnd:"+formattedEnd);
   //单向限制sql
   const one_query = `WHERE c_time < "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}"`);
   let offset;
@@ -72,12 +75,13 @@ Router5.get("/action", async (req,res) => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.file_type,row.is_saved])
+    return value.map(row => [row.d_no, row.field1,row.field2, dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss') ,row.file_type,row.is_saved])
   }
 
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
     if(page_boolean){
+      console.log("进入的是第一个");
       // 执行查询并格式化结果
       const [rows] = await connection.execute(query+(d_no==="null"?"":` WHERE d_no = "${d_no}" `)+DESC_query);
       const formattedRows = toTwoArray(rows);
@@ -85,6 +89,7 @@ Router5.get("/action", async (req,res) => {
       res.send(JSON.stringify(formattedRows));
     }
     else{
+      console.log("进入的是第2个");
       //直接查询
       const [rows] = await connection.execute(query+(d_no==="null"?"":` WHERE d_no = "${d_no}" `)+DESC_query+`
         LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
@@ -192,7 +197,7 @@ Router5.get("/action_count", async (req,res) => {
 });
 
 Router5.get("/data/action", async (req,res) => {//对data路由进行修改并且接纳上start和end，若接受失败则进行总的数据的返回
-  const { start,end } = req.query;
+  const { start,end,d_no } = req.query;
   //动态获取到filed字段
   const [result_now] = await connection.query(`
     SELECT * 
@@ -206,18 +211,36 @@ Router5.get("/data/action", async (req,res) => {//对data路由进行修改并�
       sql_string += x;
     }
   }
+  let query;
 
-  //全局sql
-  const query = `SELECT d_no, 
-        GROUP_CONCAT(
-          CONCAT('[', `
-          +sql_string+
-          `'"', c_time, '",', 
-          '"', file_type, '"', 
-          ']') ORDER BY c_time
-        ) AS data
-      FROM t_behavior_data
-      WHERE is_saved = '实时数据'`;
+  if(!d_no){
+    //全局sql
+    query = `SELECT d_no, 
+          GROUP_CONCAT(
+            CONCAT('[', `
+            +sql_string+
+            `'"', c_time, '",', 
+            '"', file_type, '"', 
+            ']') ORDER BY c_time
+          ) AS data
+        FROM t_behavior_data
+        WHERE is_saved = '实时数据'`;
+  }else{
+    //全局sql
+    query = `SELECT d_no, 
+          GROUP_CONCAT(
+            CONCAT('[', `
+            +sql_string+
+            `'"', c_time, '",', 
+            '"', file_type, '"', 
+            ']') ORDER BY c_time
+          ) AS data
+        FROM t_behavior_data
+        WHERE is_saved = '实时数据'
+        AND d_no = "${d_no}"`;
+  }
+
+
   function FORMATTIME(value){
     const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
     return formatTime(value);
@@ -239,7 +262,7 @@ Router5.get("/data/action", async (req,res) => {//对data路由进行修改并�
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2],entry[3]]);
       });
     });
     return formattedResult;

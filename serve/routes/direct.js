@@ -96,6 +96,7 @@ Router_direct.get("/label_boolean",async (req,res)=>{
   res.send("ok");
 });
 
+//获取控件中机房总类型数量的路由
 Router_direct.get("/type_device",async (req,res)=>{
   const result = await connection.execute(`
     SELECT d_no
@@ -106,6 +107,18 @@ Router_direct.get("/type_device",async (req,res)=>{
   res.send(result[0]);
   return;
 })
+
+//机房历史记录查询路由
+Router_direct.get("/operate_history",async(req,res)=>{
+  const {d_no} = req.query;
+  const [row] = await connection.execute(`
+  SELECT *
+  FROM operate_history
+  WHERE place = '${d_no}'
+  `);
+  res.send(row);
+})
+
 
 export default Router_direct;
 

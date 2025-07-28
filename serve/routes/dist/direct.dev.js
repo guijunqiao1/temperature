@@ -149,7 +149,8 @@ Router_direct.get("/label_boolean", function _callee3(req, res) {
       }
     }
   });
-});
+}); //获取控件中机房总类型数量的路由
+
 Router_direct.get("/type_device", function _callee4(req, res) {
   var result;
   return regeneratorRuntime.async(function _callee4$(_context4) {
@@ -167,6 +168,31 @@ Router_direct.get("/type_device", function _callee4(req, res) {
         case 5:
         case "end":
           return _context4.stop();
+      }
+    }
+  });
+}); //机房历史记录查询路由
+
+Router_direct.get("/operate_history", function _callee5(req, res) {
+  var d_no, _ref7, _ref8, row;
+
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          d_no = req.query.d_no;
+          _context5.next = 3;
+          return regeneratorRuntime.awrap(connection.execute("\n  SELECT *\n  FROM operate_history\n  WHERE place = '".concat(d_no, "'\n  ")));
+
+        case 3:
+          _ref7 = _context5.sent;
+          _ref8 = _slicedToArray(_ref7, 1);
+          row = _ref8[0];
+          res.send(row);
+
+        case 7:
+        case "end":
+          return _context5.stop();
       }
     }
   });

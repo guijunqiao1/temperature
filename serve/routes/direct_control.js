@@ -10,6 +10,19 @@ let connection;//定义数据库连接对象
 //导入mqtt模块--用于指令的正确发送响应 
 import { beifen } from "./mqtt_server_get.js";
 
+//定义获取当前时间并且为特定格式的方法
+function getFormattedDate() {
+  const now = new Date(); 
+  const year = now.getFullYear();  
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+} 
+
+
 (async ()=>{
   try{
     //异步执行Config，用于连接数据库,后续可对connection数据库链接对象进行数据库语法操作用于对数据库本身进行操作
@@ -112,7 +125,16 @@ import { beifen } from "./mqtt_server_get.js";
           console.log("即将更新:"+d_no);
           const template = topic;
           console.log("tem:"+template);
+          //发送指令，同时完成指令备份
           beifen(d_no,[template,obj1]);//在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
+
+
+          //指令历史的记录
+          await connection.execute(`
+          INSERT INTO operate_history(place,device,operate,ctime)
+          VALUES('${d_no}','${item.t_name}','修改为${content}','${getFormattedDate()}')
+          `);
+
           //首先判断是否存在编号对应的内容
           const [row] = await connection.execute(`
           SELECT config_id

@@ -3,6 +3,7 @@ import path from 'path';
 import logger from 'morgan';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import "./routes/websocket_test.js";
 
 
 // 导入自定义路由模块

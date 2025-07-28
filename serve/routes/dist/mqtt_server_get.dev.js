@@ -81,7 +81,7 @@ var tem = 0; //设备存储
 // 方式：传感器直接支持MQTT
 // 控制台客户端对象         192.168.218.141'
 
-var client = _mqtt["default"].connect('mqtt://192.168.1.102', {
+var client = _mqtt["default"].connect('mqtt://127.0.0.1', {
   clientId: "client_control" //唯一标识符
 
 }); //定义延时函数
@@ -334,7 +334,7 @@ client.on('disconnect', function () {
 }); //监听控制台客户端对象收到的消息--接收方完成即可
 
 client.on('message', function _callee2(topic, message) {
-  var _ref, _ref2, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, humidity1, humidity2, humidity3, light1, light2, light3, I, V, type, time_base, obj, _ref3, _ref4, rows, _time_base, _obj, _ref5, _ref6, _rows, _time_base2, _obj2, _ref7, _ref8, _rows2, _JSON$parse2, _d_no;
+  var _ref, _ref2, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, smog1, smog2, smog3, waterlevel1, waterlevel2, waterlevel3, I, V, type, time_base, obj, _ref3, _ref4, rows, _time_base, _obj, _ref5, _ref6, _rows, _time_base2, _obj2, _ref7, _ref8, _rows2, _JSON$parse2, _d_no;
 
   return regeneratorRuntime.async(function _callee2$(_context4) {
     while (1) {
@@ -360,9 +360,9 @@ client.on('message', function _callee2(topic, message) {
           // 首先获取到指标变量的内容
           console.log("接收到传感器数据");
           console.log(JSON.parse(message));
-          _JSON$parse = JSON.parse(message), d_no = _JSON$parse.d_no, temperature1 = _JSON$parse.temperature1, temperature2 = _JSON$parse.temperature2, temperature3 = _JSON$parse.temperature3, humidity1 = _JSON$parse.humidity1, humidity2 = _JSON$parse.humidity2, humidity3 = _JSON$parse.humidity3, light1 = _JSON$parse.light1, light2 = _JSON$parse.light2, light3 = _JSON$parse.light3, I = _JSON$parse.I, V = _JSON$parse.V, type = _JSON$parse.type; //首先判断值是否合法后进行插入
+          _JSON$parse = JSON.parse(message), d_no = _JSON$parse.d_no, temperature1 = _JSON$parse.temperature1, temperature2 = _JSON$parse.temperature2, temperature3 = _JSON$parse.temperature3, smog1 = _JSON$parse.smog1, smog2 = _JSON$parse.smog2, smog3 = _JSON$parse.smog3, waterlevel1 = _JSON$parse.waterlevel1, waterlevel2 = _JSON$parse.waterlevel2, waterlevel3 = _JSON$parse.waterlevel3, I = _JSON$parse.I, V = _JSON$parse.V, type = _JSON$parse.type; //首先判断值是否合法后进行插入
 
-          if (!(temperature1 > 0 && humidity1 > 0 && light1 > 0)) {
+          if (!(temperature1 > 0 && smog1 > 0 && waterlevel1 > 0)) {
             _context4.next = 22;
             break;
           }
@@ -375,9 +375,9 @@ client.on('message', function _callee2(topic, message) {
             if (index === 0) {
               obj[item.p_name] = temperature1; //由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
             } else if (index === 1) {
-              obj[item.p_name] = humidity1;
+              obj[item.p_name] = smog1;
             } else if (index === 2) {
-              obj[item.p_name] = light1;
+              obj[item.p_name] = waterlevel1;
             }
           }); // 将传感器数据存入到t_data中
 
@@ -392,7 +392,7 @@ client.on('message', function _callee2(topic, message) {
 
 
           _context4.next = 19;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF1\",\"".concat(obj.T, "\",\"").concat(obj.S, "\",\"").concat(obj.L, "\",\"").concat(I, "\",\"").concat(V, "\",\"").concat(time_base, "\",\"").concat(type, "\")\n      ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF1\",\"".concat(obj.T, "\",\"").concat(obj.S, "\",\"").concat(obj.L, "\",\"", 1, "\",\"", 1, "\",\"").concat(time_base, "\",\"").concat(type, "\")\n      ")));
 
         case 19:
           _ref3 = _context4.sent;
@@ -400,7 +400,7 @@ client.on('message', function _callee2(topic, message) {
           rows = _ref4[0];
 
         case 22:
-          if (!(temperature2 > 0 && humidity2 > 0 && light2 > 0)) {
+          if (!(temperature2 > 0 && smog2 > 0 && waterlevel2 > 0)) {
             _context4.next = 33;
             break;
           }
@@ -413,9 +413,9 @@ client.on('message', function _callee2(topic, message) {
             if (index === 0) {
               _obj[item.p_name] = temperature2; //由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
             } else if (index === 1) {
-              _obj[item.p_name] = humidity2;
+              _obj[item.p_name] = smog2;
             } else if (index === 2) {
-              _obj[item.p_name] = light2;
+              _obj[item.p_name] = waterlevel2;
             }
           }); // 将传感器数据存入到t_data中
 
@@ -430,7 +430,7 @@ client.on('message', function _callee2(topic, message) {
 
 
           _context4.next = 30;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF2\",\"".concat(_obj.T, "\",\"").concat(_obj.S, "\",\"").concat(_obj.L, "\",\"").concat(I, "\",\"").concat(V, "\",\"").concat(_time_base, "\",\"").concat(type, "\")\n      ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF2\",\"".concat(_obj.T, "\",\"").concat(_obj.S, "\",\"").concat(_obj.L, "\",\"", 1, "\",\"", 1, "\",\"").concat(_time_base, "\",\"").concat(type, "\")\n      ")));
 
         case 30:
           _ref5 = _context4.sent;
@@ -438,7 +438,7 @@ client.on('message', function _callee2(topic, message) {
           _rows = _ref6[0];
 
         case 33:
-          if (!(temperature3 > 0 && humidity3 > 0 && light3 > 0)) {
+          if (!(temperature3 > 0 && smog3 > 0 && waterlevel3 > 0)) {
             _context4.next = 44;
             break;
           }
@@ -451,9 +451,9 @@ client.on('message', function _callee2(topic, message) {
             if (index === 0) {
               _obj2[item.p_name] = temperature3; //由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
             } else if (index === 1) {
-              _obj2[item.p_name] = humidity3;
+              _obj2[item.p_name] = smog3;
             } else if (index === 2) {
-              _obj2[item.p_name] = light3;
+              _obj2[item.p_name] = waterlevel3;
             }
           }); // 将传感器数据存入到t_data中
 
@@ -467,7 +467,7 @@ client.on('message', function _callee2(topic, message) {
           }
 
           _context4.next = 41;
-          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF3\",\"".concat(_obj2.T, "\",\"").concat(_obj2.S, "\",\"").concat(_obj2.L, "\",\"").concat(I, "\",\"").concat(V, "\",\"").concat(_time_base2, "\",\"").concat(type, "\")\n      ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)\n      VALUES (\"\u533A\u57DF3\",\"".concat(_obj2.T, "\",\"").concat(_obj2.S, "\",\"").concat(_obj2.L, "\",\"", 1, "\",\"", 1, "\",\"").concat(_time_base2, "\",\"").concat(type, "\")\n      ")));
 
         case 41:
           _ref7 = _context4.sent;

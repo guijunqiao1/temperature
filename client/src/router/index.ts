@@ -1,7 +1,7 @@
 //1、引入createRouter
 import { createRouter, createWebHistory } from "vue-router";
 //引入一个一个可能要呈现的组件
-// import Device from "../pages/t_device";
+import Device from "../pages/t_device.vue";
 import Error_message from "../pages/t_error_msg.vue";
 import Home from "../pages/Home.vue";
 import History from "../pages/History.vue";
@@ -15,17 +15,17 @@ import container from "../pages/t_container.vue";
 const router = createRouter({
   history: createWebHistory(),   //路由器的工作模式（稍后讲解）
   routes: [ //一个一个的路由规则
-    // {
-    //   path: "/t_device",
-    //   component: Device
-    // },
+    {
+      path: "/t_device",
+      component: Device
+    },
     {
       path: "/t_error_msg",
       component: Error_message
     },
     {
       path: "/",
-      component: Home
+      component: Device
     },
     {
       path: "/New",

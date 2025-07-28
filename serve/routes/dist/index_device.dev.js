@@ -65,7 +65,7 @@ var Router2 = (0, _express["default"])();
 
 
 Router2.get("/t_device/first", function _callee2(req, res) {
-  var query, _ref, _ref2, results, _formattedResults;
+  var query, _ref, _ref2, results, formattedResults;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -73,7 +73,7 @@ Router2.get("/t_device/first", function _callee2(req, res) {
         case 0:
           _context2.prev = 0;
           // 处理 undefined 情况
-          query = "SELECT * FROM t_container ORDER BY ctime DESC"; // ✅ 使用 `await` 进行查询
+          query = "SELECT * FROM t_container ORDER BY ctime DESC"; // ✅ 使用 `await` 进行查询 
 
           _context2.next = 4;
           return regeneratorRuntime.awrap(connection2.execute(query));
@@ -82,13 +82,13 @@ Router2.get("/t_device/first", function _callee2(req, res) {
           _ref = _context2.sent;
           _ref2 = _slicedToArray(_ref, 1);
           results = _ref2[0];
-          // 格式化数据
-          _formattedResults = results.map(function (row) {
+          // 格式化数据 
+          formattedResults = results.map(function (row) {
             return [row.PID, row.VID, row.ctime];
           });
           console.log("rows:" + results);
           res.setHeader("Content-Type", "application/json");
-          res.send(JSON.stringify(_formattedResults));
+          res.send(JSON.stringify(formattedResults));
           _context2.next = 17;
           break;
 
@@ -109,7 +109,7 @@ Router2.get("/t_device/first", function _callee2(req, res) {
 }); // 不需要分页的路由--多设备表格
 
 Router2.get("/t_device", function _callee3(req, res) {
-  var query, _ref3, _ref4, results;
+  var query, _ref3, _ref4, results, formattedResults;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
@@ -120,7 +120,7 @@ Router2.get("/t_device", function _callee3(req, res) {
           query = "SELECT * FROM t_device"; // ✅ 使用 `await` 进行查询
 
           _context3.next = 4;
-          return regeneratorRuntime.awrap(connection1.execute(query));
+          return regeneratorRuntime.awrap(connection2.execute(query));
 
         case 4:
           _ref3 = _context3.sent;
@@ -129,24 +129,27 @@ Router2.get("/t_device", function _callee3(req, res) {
           // 格式化数据
           console.log("rows:" + results);
           res.setHeader("Content-Type", "application/json");
+          formattedResults = results.map(function (row) {
+            return [row.device_name, row.number];
+          });
           res.send(JSON.stringify(formattedResults));
-          _context3.next = 16;
+          _context3.next = 17;
           break;
 
-        case 12:
-          _context3.prev = 12;
+        case 13:
+          _context3.prev = 13;
           _context3.t0 = _context3["catch"](0);
           console.error("查询失败:", _context3.t0);
           res.status(500).json({
             error: "数据库查询失败"
           });
 
-        case 16:
+        case 17:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 12]]);
+  }, null, null, [[0, 13]]);
 });
 var _default = Router2; //记得将查询条件中的一定为实时数据进行修改了,所有的数据都可以
 //记得在所有的没有使用try包裹的语句添加上try\catch语句用于对start为undefined的情况进行捕获

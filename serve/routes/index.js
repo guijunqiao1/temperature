@@ -161,5 +161,20 @@ Router.get("/recent/list_obj",async (req,res)=>{
   res.send(rows[0]);
 })
 
+//最新图片资源记录路由
+Router.get("/recent/img",async (req,res)=>{
+  const {d_no} = req.query;
+  const [rows] = await connection2.execute(`
+    SELECT *
+    FROM t_behavior_data
+    WHERE d_no = '${d_no}'
+    ORDER BY c_time DESC
+    LIMIT 1
+    `);
+  //封装查询结果
+  res.send(rows[0]);
+})
+
+
 export default Router;
 

@@ -28,6 +28,19 @@ var Router_direct_response = (0, _express["default"])(); //在当前需要对Mys
 var connection; //定义数据库连接对象
 //导入mqtt模块--用于指令的正确发送响应 
 
+//定义获取当前时间并且为特定格式的方法
+function getFormattedDate() {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
+
+  var day = String(now.getDate()).padStart(2, '0');
+  var hours = String(now.getHours()).padStart(2, '0');
+  var minutes = String(now.getMinutes()).padStart(2, '0');
+  var seconds = String(now.getSeconds()).padStart(2, '0');
+  return "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
+}
+
 (function _callee3() {
   var result, rowx;
   return regeneratorRuntime.async(function _callee3$(_context3) {
@@ -166,55 +179,60 @@ var connection; //定义数据库连接对象
 
                             case 33:
                               if (!d_no) {
-                                _context.next = 55;
+                                _context.next = 57;
                                 break;
                               }
 
                               console.log("即将更新:" + d_no);
                               template = topic;
-                              console.log("tem:" + template);
+                              console.log("tem:" + template); //发送指令，同时完成指令备份
+
                               (0, _mqtt_server_get.beifen)(d_no, [template, obj1]); //在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
-                              //首先判断是否存在编号对应的内容
+                              //指令历史的记录
 
                               _context.next = 40;
-                              return regeneratorRuntime.awrap(connection.execute("\n          SELECT config_id\n          FROM t_direct,t_direct_config\n          WHERE t_direct_config.id = t_direct.config_id\n          AND t_direct_config.id = ".concat(item.id, "\n          AND d_no = \"").concat(d_no, "\"\n          ")));
+                              return regeneratorRuntime.awrap(connection.execute("\n          INSERT INTO operate_history(place,device,operate,ctime)\n          VALUES('".concat(d_no, "','").concat(item.t_name, "','\u4FEE\u6539\u4E3A").concat(content, "','").concat(getFormattedDate(), "')\n          ")));
 
                             case 40:
+                              _context.next = 42;
+                              return regeneratorRuntime.awrap(connection.execute("\n          SELECT config_id\n          FROM t_direct,t_direct_config\n          WHERE t_direct_config.id = t_direct.config_id\n          AND t_direct_config.id = ".concat(item.id, "\n          AND d_no = \"").concat(d_no, "\"\n          ")));
+
+                            case 42:
                               _ref3 = _context.sent;
                               _ref4 = _slicedToArray(_ref3, 1);
                               row = _ref4[0];
 
                               if (row[0]) {
-                                _context.next = 49;
+                                _context.next = 51;
                                 break;
                               }
 
-                              _context.next = 46;
+                              _context.next = 48;
                               return regeneratorRuntime.awrap(connection.execute("\n          INSERT INTO t_direct(config_id,value,d_no)\n          VALUE(".concat(item.id, ",\"").concat(content, "\",\"").concat(d_no, "\")\n          ")));
 
-                            case 46:
+                            case 48:
                               _context.t0 = _context.sent;
-                              _context.next = 52;
+                              _context.next = 54;
                               break;
 
-                            case 49:
-                              _context.next = 51;
+                            case 51:
+                              _context.next = 53;
                               return regeneratorRuntime.awrap(connection.execute("\n          UPDATE t_direct\n          SET value = \"".concat(content, "\"\n          WHERE config_id = ").concat(item.id, "\n          ")));
 
-                            case 51:
+                            case 53:
                               _context.t0 = _context.sent;
 
-                            case 52:
+                            case 54:
                               _ref5 = _context.t0;
                               _ref6 = _slicedToArray(_ref5, 1);
                               rows = _ref6[0];
 
-                            case 55:
+                            case 57:
                               // res.send(!d_no ? item : "ok");
                               res.send("ok");
                               return _context.abrupt("return");
 
-                            case 57:
+                            case 59:
                             case "end":
                               return _context.stop();
                           }

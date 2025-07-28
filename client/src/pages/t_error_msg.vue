@@ -2,29 +2,6 @@
   <div class="content1" v-if="Pinia.Device_sign">
     <!-- 上半部分 -->
     <div class="top_part">
-      <div class="container22" v-show="Pinia.device_sign">
-        <el-dropdown>
-          <!-- 当前框只在保底一个的情况下才出现 -->
-          <el-button type="primary">
-            场景<el-icon class="el-icon--right"><arrow-down /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <div class="device_list" v-for="item in type_array" :key="item">
-                <el-dropdown-item>
-                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item }}</div>
-                </el-dropdown-item>
-              </div>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
-        <div class="only" style="border-radius: 5px;" v-if="a_length === 1 && device_array[0][0]">设备为{{
-          type[0][0]
-        }}的信息</div>
-      </div>
-
-
       <!-- 设备表的时间选择器 -->
       <div class="error_date_time">
         <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
@@ -88,7 +65,7 @@ const total1 = ref()//总数变量,当发生增添事件、删除事件(包括�
 //定义三个响应式变量用于动态接收add参数
 // let type1 = ref("警告");//设备注释
 // let e_msg1 = ref();//错误信息
-let d_no1 = ref("空地");//设备编号
+let d_no1 = ref(Pinia.signzhi);//设备编号
 // let update_one = 0;//用于控制update函数中执行编辑的只能是一次
 let value1 = ref();//用于将时间值进行动态获取的变量
 // 定义时间选择相关的变量
@@ -178,17 +155,6 @@ function qu_repeate(databases) {
 
   // 将 Set 转换为数组
   return Array.from(seen);
-}
-
-// 为选择组件项目绑定上具体的方法
-const change1 = (value) => {
-  console.log("成功触发当前事件");
-  console.log("d_no1.value:" + d_no1.value);
-  console.log("value:" + value);
-  if (d_no1.value !== value) {
-    d_no1.value = value;
-    update();
-  }
 }
 
 

@@ -50,33 +50,9 @@
       </div>
 
     </div>
-    <h2>当前场景:{{ signzhi }}</h2>
+    <h2>当前场景:{{ Pinia.signzhi }}</h2>
     <div v-if="Pinia.device" class="device">
       <h1>设备指令</h1>
-      <div class="container">
-        <el-dropdown>
-          <!-- 当前框只在保底一个的情况下才出现 -->
-          <el-button type="primary" v-show="changjing_array && LLL && LLL > 1">
-            场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <div class="device_list1" v-for="item in changjing_array" :key="item.d_no">
-                <el-dropdown-item>
-                  <div style="border-radius: 5px;" @click="change1(item, $event)">{{ item.d_no }}
-                  </div>
-                </el-dropdown-item>
-              </div>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现--需要注意的是直接进行渲染的响应式数据所绑定的标签必须使用当前响应式数据存在作为判断条件 -->
-        <div class="only1" style="border-radius: 5px;" v-if="LLL === 1">{{ changjing_array[0].d_no }}
-        </div>
-      </div>
-
-
-
       <!-- 同步时间-->
       <div v-for="item in control_array">
         <!-- 类型1： -->
@@ -123,7 +99,30 @@
           </el-radio-group>
         </div>
       </div>
+    </div>
 
+    <h1>设备操作历史记录</h1>
+
+    <!-- 操作历史  -->
+    <div class="control_history">
+      <table class="history_table">
+        <thead class="history_thead">
+          <tr>
+            <th>机房</th>
+            <th>操作的设备</th>
+            <th>操作内容</th>
+            <th>操作时间</th>
+          </tr>
+        </thead>
+        <tbody class="history_tbody">
+          <tr v-for="item in operate_history_array">
+            <td>{{ item.place }}</td> 
+            <td>{{ item.device }}</td> 
+            <td>{{ item.operate }}</td> 
+            <td>{{ moment(item.ctime).format('YYYY-MM-DD HH:mm:ss') }}</td> 
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -133,6 +132,8 @@ import { ref, onMounted, nextTick, onUnmounted } from "vue";
 import axios from "axios";
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from "../store/curt";
+import moment from "moment";
+
 const Pinia = useUserStore();
 //获取到渲染数组
 //全局数组变量
@@ -142,31 +143,11 @@ const control_array: any = ref();
 let LLL = 0;
 let changjing_array = ref();
 let change1;
-let signzhi = ref();
+let signzhi = ref(Pinia.signzhi);
 
+//机房设备记录数组
+let operate_history_array = ref();
 
-
-
-change1 = async(value)=>{
-  signzhi.value = value.d_no;
-  console.log("signnnnnnnnnnnnnn:"+signzhi.value);
-      console.log("定时器正常运转");
-    const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
-    // 更新control_array时保留正在编辑的输入框的值
-    if (currentFocusedInput.value) {
-      const focusedInputId = currentFocusedInput.value.id;
-      const currentValue = currentFocusedInput.value.value;
-      control_array.value = result.data.map((item: any) => {
-        if (item.id === focusedInputId && currentFocusedInput.value && (currentFocusedInput.value.f_type === '2' || currentFocusedInput.value.f_type === "3" || currentFocusedInput.value.f_type === "4")) {
-          return { ...item, value: currentValue };
-        }
-        return item;
-      });
-    } else {
-      control_array.value = result.data;
-    }
-    console.log("control_array:" + control_array.value);
-}
 
 
 //定时器变量
@@ -215,13 +196,7 @@ function xuanran2(value) {
 }
 
 (async () => {
-  //获取到总设备种类
-  const result0 =  await axios.get("/api/type_device");
-  changjing_array.value = result0.data;
-  LLL = changjing_array.value.length;
-  if(LLL!==0){
-    signzhi.value = changjing_array.value[0].d_no;
-  }
+  signzhi.value = Pinia.signzhi;
   const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
   control_array.value = result.data;
   console.log("control_array:");
@@ -288,14 +263,23 @@ async function submit(value) {
     //   }
     // } 
   }
-
   //启用子元素或者禁用子元素
   if (value.id === 11 || value.id === 13 || value.id === 15 || value.id === 0) {
     const result = await axios.get(`/api/label_boolean?content=${value.value}&id=${value.id}`);
   }
+
+  //完成表格的重置
+  const result = await axios.get(`/api/operate_history?d_no=${signzhi.value}`);
+  operate_history_array.value = result.data;
 }
 
 onMounted(async () => {
+  //完成内容赋值
+  const result = await axios.get(`/api/operate_history?d_no=${signzhi.value}`);
+  operate_history_array.value = result.data;
+
+
+
 })
 </script>
 
@@ -425,5 +409,50 @@ onMounted(async () => {
   line-height:32px;
   font-size:14px;
 }
+
+
+/* 为设备历史表格进行样式设计 */
+.history_table {
+  margin-top: 18px;
+  border-top: 5px solid gray;
+  width: 100%;
+  height: 66px;
+  /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
+  border-spacing: 0;
+  /* 下方设置使得table标签变得其中的th、td标签不会随着内容的变化而发生变化 */
+  table-layout: fixed;
+}
+.history_thead {
+  min-height: 0;
+  width: 1020px;
+  height: 33px;
+  background-color: #cecece;
+}
+.history_tbody {
+  min-height: 0;
+  width: 1020px;
+  height: 33px;
+  background-color: rgb(206, 206, 206);
+}
+
+
+
+table thead>tr,
+table tbody>tr {
+  width: 1020px;
+  height: 32px;
+}
+
+table thead>tr>th,
+table tbody>tr>td {
+  width: 154.1px;
+  height: 32px;
+  color: black;
+  font-size: 14px;
+  border: 1px solid #9DA79F;
+  font-weight: 800;
+  text-align: center;
+}
+
 
 </style>

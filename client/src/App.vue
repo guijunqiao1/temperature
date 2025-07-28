@@ -20,30 +20,30 @@
             default-active="2" text-color="#fff">
             <!-- 下方的3、4个el-menu-item标签的路由路径设置为首页(因为要求中只提供了2个路径条件：/t_device、/t-error-msg) -->
             <el-menu-item index="1-1">
-            <RouterLink to="/t_device" @click="add2($event)"> 机房导航
+            <RouterLink to="/t_device"> 机房导航
               </RouterLink>
             </el-menu-item>
             <!-- 此处需要注意的是使用了div包裹原先的el-menu-item组件标签中的内容实现整体内容发生插槽优化后的div嵌套原先内容的效果的实现，
             这么做的好处是原先针对这个el-menu-item组件标签而言无法直接对标签进行事件的绑定后的$event进行准确的获取，但是通过这种嵌套的
             方式则能在传递参数的时候的$event进行明确的事件对象进行获取--补充：对于原生事件而言$event一般获取到的是事件对象(针对普通标签，而非组件标签) -->
             <el-menu-item index="1-2">
-              <RouterLink to="/New" @click="add2($event)">
+              <RouterLink to="/New">
                 实时数据
               </RouterLink>
             </el-menu-item>
             <el-menu-item index="1-3">
-              <RouterLink to="/History" @click="add2($event)"> 历史数据</RouterLink>
+              <RouterLink to="/History"> 历史数据</RouterLink>
             </el-menu-item>
             <el-menu-item index="1-4">
-              <RouterLink to="/t_error_msg" @click="add2($event)"> 错误内容
+              <RouterLink to="/t_error_msg"> 错误内容
               </RouterLink>
             </el-menu-item>
             <el-menu-item index="1-5">
-              <RouterLink to="/t_Control" @click="add2($event)"> 指令控制台</RouterLink>
+              <RouterLink to="/t_Control"> 指令控制台</RouterLink>
             </el-menu-item>
-            <!-- <el-menu-item index="1-6">
-              <RouterLink to="/ex" @click="add2($event)"> 试验台</RouterLink>
-            </el-menu-item> -->
+            <el-menu-item index="1-6">
+              <RouterLink to="/ex"> 监控室</RouterLink>
+            </el-menu-item>
           </el-menu>
         </el-col>
       </el-row>
@@ -83,7 +83,6 @@ const add = ref();
 
 //定义add1变量存储一个空方法，由于是let定义的变量则能够进行正常的函数内容的重写，若为function定义的函数则直接提升变量到模版中直接进行使用而无法进行重写完成标签内容的修改
 let add1 = (value) => { };
-let add2 = (value) => { };
 let change = (value) => { };
 
 //方法
@@ -120,17 +119,6 @@ function new_string(string) {
 //onMounted中执行的const title = ref()则无法获取到对象--本质还是作用域的问题
 
 onMounted(async () => {//此处在setup中设置onMounted()的回调
-  add1 = (value) => {//和setup中的方法进行对应，同样是typescript中的语法
-    // 向显示栏目中动态添加修改内容
-    //当仅有首页层级的时候
-    if (value.target.innerHTML)
-      add.value.innerHTML = `主页 / ${new_string(value.target.innerHTML)}`;
-  }
-  add2 = (value) => {
-    if (value.target.innerHTML) {
-      add.value.innerHTML = `主页 / ${new_string(value.target.innerHTML)}`;
-    }
-  }
   //此处需要对整个script标签使用setup语法糖以及正常的setup钩子的含义进行解析：
   //首先本身setup方法本身的含义就是组件创建的时候立即执行的方法(也就是程序的入口)，所以在这个方法的内容进行
   //其他生命周期方法的使用是合理的，并且需要注意的是function定义函数的方式以及其他的变量的定义方式(包括返回方式)
@@ -241,6 +229,7 @@ li.el-menu-item>a {
   justify-content: center;
   /* 开启相对定位，用于后续的container的绝对定位的设置 */
   position: relative;
+  /* left: 53px; */
 }
 
 /* 需要注意的是样式中进行属性的赋值的时候如果需要使用连串的方式进行值的赋取必须使用特殊的表达式进行操作，而不能像：width:100vw - 40px;这样 */

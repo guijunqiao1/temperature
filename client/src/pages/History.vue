@@ -1,32 +1,6 @@
 <template>
   <div class="container">
     <!-- 设备相关内容 -->
-
-    <!-- 设备选择器 -->
-    <div id="timeTotime1" v-if="Pinia.device_sign && Pinia.Device_sign">
-      <el-dropdown v-if="a1_length > 1">
-        <!-- 当前框只在保底一个的情况下才出现 -->
-        <el-button type="primary">
-          场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div class="device_list" v-for="item in type_array">
-              <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change0(item, $event)">{{ item[0] }}</div>
-              </el-dropdown-item>
-            </div>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现 -->
-      <div class="only" style="border-radius: 5px;background-color: #409eff;"
-        v-if="a1_length === 1 && date_Array[0][0]">
-        {{ date_Array[0][0] }}</div>
-    </div>
-
-
-
     <div class="block1 block" v-show="Pinia.Device_sign">
       <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime1" />
@@ -39,25 +13,21 @@
       <thead v-if="yingshe_array && unit_array">
         <tr>
           <!-- 直接考虑是否为多设备的情况 -->
-          <!-- <th>设备编号</th> -->
+          <th>场景</th>
           <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
           <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
           <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
-          <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
-          <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
           <th>收集时间</th>
           <!-- <th>数据类型</th> -->
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in device_page_array">
-          <!-- <td>{{ item[0] }}</td> -->
+          <td>{{ item[0] }}</td>
           <td>{{ item[1] }}</td>
           <td>{{ item[2] }}</td>
           <td>{{ item[3] }}</td>
-          <td>{{ item[4] }}</td>
-          <td>{{ item[5] }}</td>
-          <td>{{ moment(item[6]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ moment(item[4]).format('YYYY-MM-DD HH:mm:ss') }}</td>
         </tr>
       </tbody>
     </table>
@@ -75,42 +45,18 @@
     <ECharts :option="chartOption" style="width: 600px; height: 400px; display:block;" class="zhexian" />
     <ECharts :option="chartOption1" style="width:600px; height:400px;display:none;" class="zhuzhuang" />
     <!-- 行为相关内容 -->
-
     <h2 v-show="Pinia.Action_sign" class="h2_action">不同传感器设备的行为数据记录</h2>
     <div class="block2 block" v-show="Pinia.Action_sign">
       <el-date-picker v-model="value2" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime2" />
     </div>
-
-    <!-- 设备选择器 -->
-    <div id="timeTotime2" v-if="Pinia.action_sign && Pinia.Action_sign">
-      <el-dropdown>
-        <!-- 当前框只在保底一个的情况下才出现 -->
-        <el-button type="primary">
-          场地<el-icon class="el-icon--right"><arrow-down /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div class="device_list" v-for="item in type_array1">
-              <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change2(item, $event)">{{ item[0] }}</div>
-              </el-dropdown-item>
-            </div>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <!-- 当检查得到的数组的长度为1的时候进行当前的div的呈现 -->
-      <div class="only" style="border-radius: 5px;background-color: #409eff;"
-        v-if="b1_length === 1 && date_Array1[0][0]">
-        {{ date_Array1[0][0] }}</div>
-    </div>
-
     <!-- 行为表格 -->
     <table class="action_table" v-if="Pinia.Action_sign">
       <thead>
         <tr v-if="yingshe_action && unit_action_array">
           <th>场景</th>
-          <th>具体资源</th>
+          <th>具体资源(原)</th>
+          <th>具体资源(后)</th>
           <th>收集时间</th>
           <th>文件类型</th>
         </tr>
@@ -120,8 +66,10 @@
           <td>{{ item[0] }}</td>
           <td>{{ item[1] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
               @click="start_block(item[1])">查看</button> </td>
-          <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          <td>{{ item[3] }}</td>
+          <td>{{ item[2] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
+          @click="start_block(item[2])">查看</button> </td>
+          <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ item[4] }}</td>
         </tr>
       </tbody>
     </table>
@@ -244,8 +192,8 @@ const currentPage1 = ref(1);//用于行为表格分页使用的页数变量
 let pageSize = 12;
 const total1 = ref(0)//总数变量,当发生增添事件、删除事件(包括单独删除以及搜索删除)之后进行总量变量的重新计算
 const total2 = ref(0);//总数变量用于计算行为表格中动态的值的总数
-let signzhi: any = ref("null");//记录设备数据编号
-let signzhi1: any = ref("null");//记录书号值
+let signzhi: any = ref(Pinia.signzhi);//记录设备数据编号
+let signzhi1: any = ref(Pinia.signzhi);//记录书号值
 //时间选择数据--设备数据
 let value1 = ref([]);
 let start: any = 1;
@@ -391,7 +339,7 @@ function enough() {
       if (device_array && device_array.value && device_array.value.length > 0) {
         //时间轴赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          time_array.push(moment(device_array.value[i][6]).format('YYYY-MM-DD HH:mm'));
+          time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
         }
         chartOption.value.xAxis.data = time_array;
 
@@ -409,8 +357,6 @@ function enough() {
             item.data.push(device_array.value[i][index + 1]);
           })
         }
-
-
         console.log("当前成功图像的：");
         console.dir(chartOption.value);
 
@@ -420,23 +366,17 @@ function enough() {
         let sum1 = 0;
         let sum2 = 0;
         let sum3 = 0;
-        let sum4 = 0;
-        let sum5 = 0;
         //设备信息
         for (let i = 0; i < device_array.value.length; i++) {
           console.log("当前设备为：" + device_array.value[i]);
           sum1 += Number(device_array.value[i][1]);
           sum2 += Number(device_array.value[i][2]);
           sum3 += Number(device_array.value[i][3]);
-          sum4 += Number(device_array.value[i][4]);
-          sum5 += Number(device_array.value[i][5]);
         }
         //设备赋值
         chartOption1.value.series[0].data.push(sum1);
         chartOption1.value.series[0].data.push(sum2);
         chartOption1.value.series[0].data.push(sum3);
-        chartOption1.value.series[0].data.push(sum4);
-        chartOption1.value.series[0].data.push(sum5);
 
         //修改柱状图标题
         //设备判断
@@ -505,8 +445,8 @@ function enough() {
         //设备信息
         for (let i = 0; i < device_array1.value.length; i++) {
           console.log("当前设备为：" + device_array1.value[i]);
-          sum1 += Number(device_array1.value[i][4]);
-          sum2 += Number(device_array1.value[i][5]);
+          sum1 += Number(device_array1.value[i][1]);
+          sum2 += Number(device_array1.value[i][2]);
         }
         //设备赋值
         chartOption11.value.series[0].data.push(sum1);
@@ -579,7 +519,6 @@ onMounted(async () => {
   console.log("b_length:" + b_length.value);
   //设备维度
   if (a_length.value > 0 && Pinia.Device_sign) {//当且仅当date_Array中存在值且Device_sign为true时才进行处理
-    signzhi.value = date_Array.value[0][0];
     //在监视阶段进行currentPage的赋值用于进行初次切割的验证
     currentPage.value = 1;
     const result2 = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}`);//此处同理将指定d_No的起始位置以及最终位置进行定位
@@ -702,8 +641,6 @@ onMounted(async () => {
   //行为维度
   if (b_length.value > 0 && Pinia.Action_sign) {
     console.log("此处完成行为架构hhhhhhhhhhhhhhhhhhhhhhhhhhh");
-
-    signzhi1.value = date_Array1.value[0][0];
     //在监视阶段进行currentPage的赋值用于进行初次切割的验证
     currentPage1.value = 1;
     const result2 = await axios.get(`/api/data/action?start=${start1}&end=${end1}&d_no=${signzhi1.value}`);//此处同理将指定d_No的起始位置以及最终位置进行定位
@@ -858,11 +795,6 @@ onMounted(async () => {
       //对signzhi进行重新赋值
       const result111 = await axios.get("/api/data?start=1&end=1");
       type_array.value = qu_repeate(result111.data);//去重数组的获取
-      if (type_array.value.length > 0) {
-        signzhi.value = type_array.value[0][0];
-      }
-      //将cc清为0
-      cc = 0;
       currentPage.value = 0;
       currentPage.value = 1;
       console.log("朱国锋" + device_array.value);
@@ -891,9 +823,6 @@ onMounted(async () => {
       jiezhi = await axios.get(`/api/data?start=${boolean_x ? "end" : start}&end=${end}`);//data路由在有start\end参与的情况下同样进行查询
       a_length.value = jiezhi.data.length;//进行总设备数量的赋值
       currentPage.value = 1;
-      if (a_length.value > 0) {
-        signzhi.value = jiezhi.data[0][0];
-      }
       //当点击ok的时候则对date_array进行获取
       const resultk = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}`);
       date_Array.value = resultk.data;//分页内容的呈现数组赋值
@@ -902,9 +831,6 @@ onMounted(async () => {
       now_databasesArray.value = resultx.data;//进行总ok内容的赋值
       device_page_array.value = resultx.data;
       const resultxx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
-      if (resultxx.data.length > 0) {
-        signzhi.value = resultxx.data[0][0];//记录编号
-      }
       device_array.value = resultxx.data;//赋值完毕
       const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
       total1.value = resultxxx.data;//进行某设备总值的赋值
@@ -958,8 +884,6 @@ onMounted(async () => {
 
       //首先判断signzhi是否发生改变
       if (signzhi.value !== value[0]) {//改变则进行device_array的从新请求赋值
-        //进行signzhi的转换
-        signzhi.value = value[0];
         if (start !== 1 && end !== 1 && start.getTime() === end.getTime()) {
           const result = await axios.get(`/api/History?&start=end&end=${end}&d_no=${signzhi.value}`);
           device_array.value = result.data;
@@ -1006,28 +930,21 @@ onMounted(async () => {
     let btn;
     let ok;
     // 判断有几个x按钮之后再进行x按钮对象的获取
-    if (b_length.value > 0) {
-      //为x按钮绑定上清空事件
-      const btn_array = document.querySelectorAll(".el-icon.el-input__icon.el-range__close-icon.el-range__close-icon--hidden");
-      btn = btn_array[1];
-      //在当前组件进行呈现的时候立即进行映射数组的发送的请求
-      const ok_array = document.querySelectorAll(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn");
-      ok = ok_array[1];
-    }
+    //为x按钮绑定上清空事件
+    const btn_array = document.querySelectorAll(".el-icon.el-input__icon.el-range__close-icon.el-range__close-icon--hidden");
+    btn = btn_array[1];
+    //在当前组件进行呈现的时候立即进行映射数组的发送的请求
+    const ok_array = document.querySelectorAll(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn");
+    ok = ok_array[1];
     //设备信息
     btn.addEventListener("click", async (event) => {
       //将start、end清空并且完成内容重置的效果
       start1 = 1;
       end1 = 1;
       //对signzhi进行重新赋值
-      const result111 = await axios.get("/api/data/action?start=1&end=1");
+      const result111 = await axios.get(`/api/data/action?start=1&end=1&d_no=${signzhi1.value}`);
       type_array1.value = qu_repeate(result111.data);//去重数组的获取
 
-      if (type_array1.value.length > 0) {
-        signzhi1.value = type_array1.value[0][0];
-      }
-      //将cc清为0
-      cc = 0;
       currentPage1.value = 0;
       currentPage1.value = 1;
       console.log("朱国锋" + device_array1.value);
@@ -1055,23 +972,18 @@ onMounted(async () => {
       end1 = value2.value[1];
       let jiezhi;
       let boolean_x = start1 !== 1 && end1 !== 1 && start1.getTime() === end1.getTime();
-      jiezhi = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}`);//data路由在有start\end参与的情况下同样进行查询
+      jiezhi = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//data路由在有start\end参与的情况下同样进行查询
       b_length.value = jiezhi.data.length;//进行总设备数量的赋值
+      console.log("b_length:"+b_length.value);
       currentPage1.value = 1;
-      if (b_length.value > 0) {
-        signzhi1.value = jiezhi.data[0][0];
-      }
       //当点击ok的时候则对date_array进行获取
-      const resultk = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}`);
+      const resultk = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);
       date_Array1.value = resultk.data;//分页内容的呈现数组赋值
       type_array1.value = qu_repeate(date_Array1.value);//去重数组的获取
       const resultx = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}&currentPage=${currentPage1.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
       now_databasesArray1.value = resultx.data;//进行总ok内容的赋值
       device_array_action_page_array.value = resultx.data;
       const resultxx = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
-      if (resultxx.data.length > 0) {
-        signzhi1.value = resultxx.data[0][0];//记录编号
-      }
       device_array1.value = resultxx.data;//赋值完毕
       const resultxxx = await axios.get(`/api/action_count?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//将数组的总内容数进行获取用于total1的赋值
       total2.value = resultxxx.data;//进行某设备总值的赋值
@@ -1123,15 +1035,15 @@ onMounted(async () => {
 
       //首先判断signzhi是否发生改变
       if (signzhi1.value !== value[0]) {//改变则进行device_array的从新请求赋值
-        //进行signzhi的转换
-        signzhi1.value = value[0];
         if (start1 !== 1 && end1 !== 1 && start1.getTime() === end1.getTime()) {
           const result = await axios.get(`/api/action?&start=end&end=${end1}&d_no=${signzhi1.value}`);
           device_array1.value = result.data;
           const result11 = await axios.get(`/api/action_count?start=end&end=${end1}&d_no=${signzhi1.value}`);
           total2.value = result11.data;//进行某设备总数的获取
-          const result2 = await axios.get(`/api/action?start=end&end=${end1}`);
+          const result2 = await axios.get(`/api/action?start=end&end=${end1}&d_no=${signzhi1.value}`);
           b_length.value = result2.data.length;//进行设备总数的获取
+          console.log("b_length:"+b_length.value);
+
           device_array_action_page_array.value = result.data;
         }
         else {
@@ -1159,14 +1071,6 @@ onMounted(async () => {
   };
 
 });
-//初始化第一个选项
-let cc = 0;
-//需要注意和New之间的区别，此处的.device_list并不会同时存在，因为同时存在意味着同时悬浮，故无法同时进行操作，只能根据一次的响应式的dom出现进行单次的判断
-onUpdated(() => {//使用updated钩子解决onMounted无法动态挂载完随响应式数据变化而变化的dom,并且此处仅要求执行一次,否则定时器一直运行导致当前的一号为的内容同样一直运行
-  if (cc < 1) {
-  }
-  else { }
-})
 
 </script>
 

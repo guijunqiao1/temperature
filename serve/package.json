@@ -2,7 +2,6 @@
   "name": "serve1",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "webpack-dev-server",
     "start": "nodemon ./bin/www"
@@ -37,7 +36,8 @@
     "serialport": "^13.0.0",
     "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "webpack-dev-server": "^5.2.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/express-mysql-session": "^3.0.6"

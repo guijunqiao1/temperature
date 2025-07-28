@@ -221,6 +221,32 @@ Router.get("/recent/list_obj", function _callee4(req, res) {
       }
     }
   });
+}); //最新图片资源记录路由
+
+Router.get("/recent/img", function _callee5(req, res) {
+  var d_no, _ref11, _ref12, rows;
+
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          d_no = req.query.d_no;
+          _context5.next = 3;
+          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT *\n    FROM t_behavior_data\n    WHERE d_no = '".concat(d_no, "'\n    ORDER BY c_time DESC\n    LIMIT 1\n    ")));
+
+        case 3:
+          _ref11 = _context5.sent;
+          _ref12 = _slicedToArray(_ref11, 1);
+          rows = _ref12[0];
+          //封装查询结果
+          res.send(rows[0]);
+
+        case 7:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  });
 });
 var _default = Router;
 exports["default"] = _default;

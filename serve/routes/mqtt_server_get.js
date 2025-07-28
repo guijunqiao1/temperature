@@ -57,7 +57,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://192.168.1.102',{
+export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
 }); 
 
@@ -83,7 +83,7 @@ function getTongbu() {
   const minutes = String(now.getMinutes()).padStart(2, '0');
   const seconds = String(now.getSeconds()).padStart(2, '0');
   return `${hours}:${minutes}:${seconds}`;
-}
+} 
 
  
 // 心跳检测器
@@ -278,9 +278,9 @@ client.on('message',async (topic, message)=>{
     // 首先获取到指标变量的内容
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
-    let { d_no,temperature1,temperature2,temperature3,humidity1,humidity2,humidity3,light1,light2,light3,I,V,type} = JSON.parse(message);
+    let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type} = JSON.parse(message);
     //首先判断值是否合法后进行插入
-    if(temperature1>0&&humidity1>0&&light1>0){
+    if(temperature1>0&&smog1>0&&waterlevel1>0){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -290,10 +290,10 @@ client.on('message',async (topic, message)=>{
           obj[item.p_name] = temperature1;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = humidity1;
+          obj[item.p_name] = smog1;
         }
         else if(index===2){
-          obj[item.p_name] = light1;
+          obj[item.p_name] = waterlevel1;
         }
       })
       // 将传感器数据存入到t_data中
@@ -307,10 +307,10 @@ client.on('message',async (topic, message)=>{
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
       INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域1","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
+      VALUES ("区域1","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
       `);
     }
-    if(temperature2>0&&humidity2>0&&light2>0){
+    if(temperature2>0&&smog2>0&&waterlevel2>0){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -320,10 +320,10 @@ client.on('message',async (topic, message)=>{
           obj[item.p_name] = temperature2;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = humidity2;
+          obj[item.p_name] = smog2;
         }
         else if(index===2){
-          obj[item.p_name] = light2;
+          obj[item.p_name] = waterlevel2;
         }
       })
       // 将传感器数据存入到t_data中
@@ -337,10 +337,10 @@ client.on('message',async (topic, message)=>{
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
       INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域2","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
+      VALUES ("区域2","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
       `);
     }
-    if(temperature3>0&&humidity3>0&&light3>0){
+    if(temperature3>0&&smog3>0&&waterlevel3>0){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -350,10 +350,10 @@ client.on('message',async (topic, message)=>{
           obj[item.p_name] = temperature3;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = humidity3;
+          obj[item.p_name] = smog3;
         }
         else if(index===2){
-          obj[item.p_name] = light3;
+          obj[item.p_name] = waterlevel3;
         }
       })
       // 将传感器数据存入到t_data中
@@ -366,7 +366,7 @@ client.on('message',async (topic, message)=>{
       }
       const [rows] = await connection1.execute(`
       INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域3","${obj.T}","${obj.S}","${obj.L}","${I}","${V}","${time_base}","${type}")
+      VALUES ("区域3","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
       `);
     }
   }

@@ -25,9 +25,9 @@ Router2.get("/t_device/first", async (req, res) => {
       let query;
       // 处理 undefined 情况
       query = "SELECT * FROM t_container ORDER BY ctime DESC";
-      // ✅ 使用 `await` 进行查询
+      // ✅ 使用 `await` 进行查询 
       const [results] = await connection2.execute(query);
-      // 格式化数据
+      // 格式化数据 
       const formattedResults = results.map(row => [
           row.PID,
           row.VID,
@@ -56,16 +56,20 @@ Router2.get("/t_device/first", async (req, res) => {
 });
 
 // 不需要分页的路由--多设备表格
-Router2.get("/t_device", async (req, res) => {
+Router2.get("/t_device", async (req, res) => {  
   try {
       let query;
       // 处理 undefined 情况
       query = "SELECT * FROM t_device";
       // ✅ 使用 `await` 进行查询
-      const [results] = await connection1.execute(query);
+      const [results] = await connection2.execute(query);
       // 格式化数据
       console.log("rows:"+results);
       res.setHeader("Content-Type", "application/json");
+      const formattedResults = results.map(row => [
+          row.device_name,
+          row.number,
+      ]);
       res.send(JSON.stringify(formattedResults));
   } 
   catch (error) {

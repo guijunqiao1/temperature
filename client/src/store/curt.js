@@ -10,6 +10,12 @@ export const useUserStore = defineStore('user', {
     action_sign:true,//控制行为控件
     Device_sign:true,//控制设备总内容
     all:false,
-    device:true
-  })
+    device:true,
+    signzhi:null
+  }),
+  actions:{
+    change(value) {
+      this.signzhi = value;
+    }
+  }
 });

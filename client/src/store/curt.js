@@ -11,11 +11,17 @@ export const useUserStore = defineStore('user', {
     Device_sign:true,//控制设备总内容
     all:false,
     device:true,
-    signzhi:null
+    signzhi:null,
+    type_array:null,
+    type_len:null
   }),
   actions:{
     change(value) {
       this.signzhi = value;
+    },
+    change_jifang(value) {
+      this.type_array = value;
+      this.type_len = value.length;
     }
   }
 });

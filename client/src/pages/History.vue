@@ -1,6 +1,28 @@
 <template>
   <div class="container">
     <!-- 设备相关内容 -->
+    <el-dropdown>
+      <el-button type="primary" v-show="Pinia.type_len > 1">
+        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+              </el-dropdown-item>
+            </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
+      当前机房：{{ Pinia.signzhi }}</div>
+
+
+
+
     <div class="block1 block" v-show="Pinia.Device_sign">
       <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime1" />
@@ -17,6 +39,11 @@
           <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
           <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
           <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
+          <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
+          <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
+          <th>{{ yingshe_array[5].field6 }} ({{ unit_array[5] }})</th>
+          <th>{{ yingshe_array[6].field7 }} ({{ unit_array[6] }})</th>
+          <th>{{ yingshe_array[7].field8 }} ({{ unit_array[7] }})</th>
           <th>收集时间</th>
           <!-- <th>数据类型</th> -->
         </tr>
@@ -27,7 +54,12 @@
           <td>{{ item[1] }}</td>
           <td>{{ item[2] }}</td>
           <td>{{ item[3] }}</td>
-          <td>{{ moment(item[4]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ item[4] }}</td>
+          <td>{{ item[5] }}</td>
+          <td>{{ item[6] }}</td>
+          <td>{{ item[7] }}</td>
+          <td>{{ item[8] }}</td>
+          <td>{{ moment(item[9]).format('YYYY-MM-DD HH:mm:ss') }}</td>
         </tr>
       </tbody>
     </table>
@@ -120,6 +152,7 @@ import { LabelLayout } from 'echarts/features';
 import { UniversalTransition } from 'echarts/features';
 import { ArrowDown } from '@element-plus/icons-vue'
 import { watch } from "vue";
+import { useRouter } from 'vue-router'
 import {
   TitleComponent,
   TooltipComponent,
@@ -206,6 +239,11 @@ let end1: any = 1;
 let update = () => { };//普通数据表更新函数
 let update1 = () => { };//行为表更新函数
 
+
+
+const router = useRouter();
+
+
 const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
 const defaultTime2 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
 
@@ -222,7 +260,7 @@ async function start_block(value) {
   modal.style.display = "block";
   // 解析传递的value
   const value_Extension = value.split('.').pop();//补充：pop方法用于返回到最后一项
-  if (value_Extension === "png") {
+  if (value_Extension === "jpeg") {
     //添加img标签对象
     const img = document.createElement("img");
     //属性赋值
@@ -247,7 +285,6 @@ async function start_block(value) {
     alert("后缀名解析失败");
   }
 }
-
 //为弹出框删除按钮绑定上事件
 function XXX() {
   const modal = document.getElementById("modal") as HTMLElement;
@@ -260,6 +297,17 @@ function XXX() {
     modal.style.display = "none";
   })
 }
+
+//机房切换重置方法
+function change_jifang(value){
+  Pinia.change(value);
+  //页面重置,先跳到一个空路由，再跳回来
+  router.replace('/empty').then(() => {
+    router.replace('/History');
+  })
+  console.log("当前机房:"+Pinia.signzhi);
+}
+
 
 
 //专门用于更新的函数--赋值device_page_array和jiezhi_array
@@ -339,7 +387,7 @@ function enough() {
       if (device_array && device_array.value && device_array.value.length > 0) {
         //时间轴赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          time_array.push(moment(device_array.value[i][4]).format('YYYY-MM-DD HH:mm'));
+          time_array.push(moment(device_array.value[i][9]).format('YYYY-MM-DD HH:mm'));
         }
         chartOption.value.xAxis.data = time_array;
 
@@ -350,33 +398,43 @@ function enough() {
 
         //设备赋值
         for (let i = 0; i < device_array.value.length; i++) {
-          console.log("循环了" + device_array.value.length);
           // 和映射数组对比判断是否需要将值加入到渲染数组中
           chartOption.value.series.forEach((item, index) => {
-            console.log("执行了n此捏");
             item.data.push(device_array.value[i][index + 1]);
           })
         }
-        console.log("当前成功图像的：");
         console.dir(chartOption.value);
-
-
         chartOption1.value.series[0].data = [];
         //柱状图(设备生产总量,定义总和变量)
         let sum1 = 0;
         let sum2 = 0;
         let sum3 = 0;
+        let sum4 = 0;
+        let sum5 = 0;
+        let sum6 = 0;
+        let sum7 = 0;
+        let sum8 = 0;
         //设备信息
         for (let i = 0; i < device_array.value.length; i++) {
           console.log("当前设备为：" + device_array.value[i]);
           sum1 += Number(device_array.value[i][1]);
           sum2 += Number(device_array.value[i][2]);
           sum3 += Number(device_array.value[i][3]);
+          sum4 += Number(device_array.value[i][4]);
+          sum5 += Number(device_array.value[i][5]);
+          sum6 += Number(device_array.value[i][6]);
+          sum7 += Number(device_array.value[i][7]);
+          sum8 += Number(device_array.value[i][8]);
         }
         //设备赋值
         chartOption1.value.series[0].data.push(sum1);
         chartOption1.value.series[0].data.push(sum2);
         chartOption1.value.series[0].data.push(sum3);
+        chartOption1.value.series[0].data.push(sum4);
+        chartOption1.value.series[0].data.push(sum5);
+        chartOption1.value.series[0].data.push(sum6);
+        chartOption1.value.series[0].data.push(sum7);
+        chartOption1.value.series[0].data.push(sum8);
 
         //修改柱状图标题
         //设备判断
@@ -1070,6 +1128,9 @@ onMounted(async () => {
     }
   };
 
+  currentPage.value =0;
+  currentPage.value =1;
+
 });
 
 </script>
@@ -1543,6 +1604,11 @@ input[type="checkbox"]:hover {
 
 .X:hover {
   cursor: pointer;
+}
+
+.el-dropdown {
+  margin-left: 269px;
+  margin-top: 40px;
 }
 </style>
 <!-- flex-flow属性可用于同时控制flex-direction和flex-wrap  -->

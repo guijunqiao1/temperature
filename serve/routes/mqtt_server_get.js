@@ -3,6 +3,9 @@ import mqtt from "mqtt";
 
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 import Config1 from "../indexNode3.js";//此处获取到数据库链接配置对象
+import axios from "axios";
+import WebSocket from "ws";
+
 
 let connection1;//定义数据库连接对象--project02
 
@@ -54,12 +57,12 @@ let tem = 0;
 // 设备编号,【主题，数据({payload,qos})，该设备所属的指令的类别】
 
 
-// 方式：传感器直接支持MQTT
+// 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
 export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
-}); 
+});  
 
 //定义延时函数
 function delay(ms) {
@@ -84,6 +87,17 @@ function getTongbu() {
   const seconds = String(now.getSeconds()).padStart(2, '0');
   return `${hours}:${minutes}:${seconds}`;
 } 
+//定义获取当前时间并且为特定格式的方法
+function getFormattedDate1() {
+  const now = new Date(); 
+  const year = now.getFullYear();  
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 
  
 // 心跳检测器
@@ -182,14 +196,14 @@ client.on('connect', () => {
   console.log("接收方连接成功");
   //当客户端连接成功之后订阅对应的主题
   //用于检测传感器数据的主题
-  // client.subscribe('sensorData',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("sensorData主题订阅失败");
-  //   }
-  //   else{
-  //     console.log("sensorData主题订阅成功");
-  //   }
-  // });
+  client.subscribe('sensorData',{qos:1},(err)=>{
+    if(err){
+      console.log("sensorData主题订阅失败");
+    }
+    else{
+      console.log("sensorData主题订阅成功");
+    }
+  });
   // //用于检测告警信息发送过来的主题
   // client.subscribe('sensor/alarm',{qos:1}, (err) => {
   //   if (!err) {
@@ -217,14 +231,14 @@ client.on('connect', () => {
   //   }
   // });
   //主动订阅自动模式下修改控件的监听主题
-  // client.subscribe('veiw',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅view主题失败");
-  //   } 
-  //   else{
-  //     console.log("订阅view主题成功");
-  //   }
-  // });
+  client.subscribe('state',{qos:1},(err)=>{
+    if(err){
+      console.log("订阅state主题失败");
+    } 
+    else{
+      console.log("订阅state主题成功");
+    }
+  });
   //主动订阅入库主题
   // client.subscribe('direct1',{qos:1},(err)=>{
   //   if(err){
@@ -261,12 +275,72 @@ client.on('connect', () => {
 });
 
 client.on('disconnect', () => {
-  console.log("断开连接");
+  console.log("断开连接");  
 });
+
+//创建websocket服务器用于实时的告警内容的填充
+const wss = new WebSocket.Server({ port: 8081 });
+console.log('WebSocket 服务器启动，端口：8081');  
+
+// 存储所有WebSocket客户端
+const clients = [];
+
+// WebSocket连接处理
+wss.on('connection', (ws, req) => {
+  console.log('新客户端连接');
+  clients.push(ws);
+  
+  // 发送欢迎消息
+  ws.send(JSON.stringify({
+    type: 'welcome',
+    message: '告警系统连接成功'
+  }));
+  
+  // 监听客户端断开
+  ws.on('close', () => {
+    console.log('客户端断开连接');
+    const index = clients.indexOf(ws);
+    if (index > -1) {
+      clients.splice(index, 1);
+    }
+  });
+});
+
+
+// 向所有客户端发送消息的函数
+function sendToAllClients(data) {    
+  console.log("11111111111111111111111111111111");
+  clients.forEach(client => {
+  console.log("222222222222222222222222222222");
+    if (client.readyState === WebSocket.OPEN) { 
+      try {
+        console.log("查看一次总data:");
+        console.dir(data);
+        client.send(data);
+      } catch (error) { 
+        console.error('发送消息失败:', error);
+      }
+    }
+  });
+} 
+
 
 //监听控制台客户端对象收到的消息--接收方完成即可
 client.on('message',async (topic, message)=>{
-    console.log("成功接收到消息");
+  //阈值越界方法定义
+  function temperature_panduan(value){
+    if(value>=0&&value<=100) return true;
+    else return false;
+  }
+  function smoke_panduan(value){
+    if(value>=0&&value<=100) return true;
+    else return false;
+  }
+  function shuiwei_panduan(value){
+    if(value>=0&&value<=100) return true;
+    else return false;
+  }
+  console.log("成功接收到消息");
   //告警
   if(topic === "sensorData"){
     console.log("成功接收到消息");
@@ -279,8 +353,17 @@ client.on('message',async (topic, message)=>{
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
     let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type} = JSON.parse(message);
+    V = Math.round(V * 100) / 100;
+    I = Math.round(I * 100) / 100;
+    I = I / 1000; 
+    V = V / 1000;
+    const P = I * V;
+    const Q = I * 1;
+    const W = P * 1;
+
+
     //首先判断值是否合法后进行插入
-    if(temperature1>0&&smog1>0&&waterlevel1>0){
+    if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -306,11 +389,47 @@ client.on('message',async (topic, message)=>{
       }
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域1","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
+      VALUES ("机房1","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
       `);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(!temperature_panduan(temperature1)){//温度出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房1",'温度越界',"${getFormattedDate1()}");
+          `);
+          console.log("--------------------------");
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房1的温度越界',
+        }));
+      }
+      if(!smoke_panduan(smog1)){//烟雾出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房1",'烟雾越界',"${getFormattedDate1()}");
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房1的烟雾越界',
+        }));
+      }
+      if(!shuiwei_panduan(waterlevel1)){//水位出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房1",'水位越界',"${getFormattedDate1()}");
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房1的水位越界',
+        }));
+      }
     }
-    if(temperature2>0&&smog2>0&&waterlevel2>0){
+    if(temperature_panduan(temperature2)&&smoke_panduan(smog2)&&shuiwei_panduan(waterlevel2)){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -336,11 +455,46 @@ client.on('message',async (topic, message)=>{
       }
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域2","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
+      VALUES ("机房2","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
       `);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(!temperature_panduan(temperature2)){//温度出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房2",'温度越界',"${getFormattedDate1()}");
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房2的温度越界',
+        }));
+      }
+      if(!smoke_panduan(smog2)){//烟雾出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房2",'烟雾越界',"${getFormattedDate1()}");
+          `);
+          // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房2的烟雾越界',
+        }));
+      }
+      if(!shuiwei_panduan(waterlevel2)){//水位出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房2",'水位越界',"${getFormattedDate1()}");
+          `);
+          // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房2的水位越界',
+        }));
+      }
     }
-    if(temperature3>0&&smog3>0&&waterlevel3>0){
+    if(temperature_panduan(temperature3)&&smoke_panduan(smog3)&&shuiwei_panduan(waterlevel3)){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
@@ -365,9 +519,44 @@ client.on('message',async (topic, message)=>{
         d_no = null;
       }
       const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,c_time,type)
-      VALUES ("区域3","${obj.T}","${obj.S}","${obj.L}","${1}","${1}","${time_base}","${type}")
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
+      VALUES ("机房3","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
       `);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(!temperature_panduan(temperature3)){//温度出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房3",'温度越界',"${getFormattedDate1()}");
+          `);
+          // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房3的温度越界',
+        }));
+      }
+      if(!smoke_panduan(smog3)){//烟雾出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房3",'烟雾越界',"${getFormattedDate1()}");
+          `);
+              // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房3的烟雾越界',
+        }));
+      }
+      if(!shuiwei_panduan(waterlevel3)){//水位出错
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time)
+          VALUES("机房3",'水位越界',"${getFormattedDate1()}");
+          `);
+              // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: '机房3的水位越界',
+        }));
+      }
     }
   }
   //重发数据
@@ -421,30 +610,45 @@ client.on('message',async (topic, message)=>{
     reconnect_republish(d_no);//完成对应设备的心跳置true
   }
   // 接收到底层的自动模式下的修改控件状态的指令的情况
-  // else if(topic==="veiw"){
-  //   //解构赋值获取参数--需要设计参数名和路由名称一致完成遍历的条件设计
-  //   let obj = { fengshan,fengshanV,kongtiao,kongtiaoP,kongtiaoM,deng } = JSON.parse(message);
-  //   for (let key in obj) {
-  //     //首先将中文值进行转化
-  //     if(Number.isNaN(Number(obj.key))){//若为中文值
-  //       if(obj.key==="start"||obj.key==="stop"){
-  //         obj.key = obj.key==="start"?"开":"关";
-  //       }
-  //       else if(obj.key==="hot"||obj.key==="cold"){
-  //         obj.key = obj.key==="hot"?"制热":"制冷";
-  //       }
-  //     }
-  //     const [rows] = await connection1.execute(`
-  //     UPDATE t_direct
-  //     SET value = '${obj.key}'
-  //     WHERE config_id IN (
-  //         SELECT id
-  //         FROM t_direct_config
-  //         WHERE luyou = ${key}
-  //     );
-  //     `);
-  //   }
-  // }
+  else if(topic==="state"){
+    console.log("chenggo进入cichu");
+    //解构赋值获取参数--需要设计参数名和路由名称一致完成遍历的条件设计
+    let { current } = JSON.parse(message);
+    // for (let key in obj) {
+    //   //首先将中文值进行转化
+    //   if(Number.isNaN(Number(obj.key))){//若为中文值
+    //     if(obj.key==="start"||obj.key==="stop"){
+    //       obj.key = obj.key==="start"?"开":"关";
+    //     }
+    //     else if(obj.key==="hot"||obj.key==="cold"){
+    //       obj.key = obj.key==="hot"?"制热":"制冷";
+    //     }
+    //   }
+    //   const [rows] = await connection1.execute(`
+    //   UPDATE t_direct
+    //   SET value = '${obj.key}'
+    //   WHERE config_id IN (
+    //       SELECT id
+    //       FROM t_direct_config
+    //       WHERE luyou = ${key}
+    //   );
+    //   `);
+    // }
+    console.log("current:"+current);
+    const [rows] = await connection1.execute(`
+    UPDATE t_direct
+    SET value = '${(current.split('_')[1])==='0'?'关':'开'}'
+    WHERE d_no = '机房${current.split("n")[1][0]}';
+    `);
+
+
+    //设备修改记录添加
+    const [rows1] = await connection1.execute(`
+    INSERT INTO operate_history(place,operate,ctime,device)
+    VALUES ('机房${current.split("n")[1][0]}','修改为${(current.split('_')[1])==='0'?'关':'开'}','${getFormattedDate1()}','电磁阀开关')
+    `);
+
+  }
   // else if (topic==="alarm"){
   //   const { Vstatus } = JSON.parse(message);
   //   const [rows] = await connection1.execute(`
@@ -509,6 +713,10 @@ client.on('message',async (topic, message)=>{
   //   `);
   // } 
 });
+
+
+
+
 
 
 

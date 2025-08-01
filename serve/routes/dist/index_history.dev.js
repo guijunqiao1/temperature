@@ -9,11 +9,7 @@ var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
 var _dayjs = _interopRequireDefault(require("dayjs"));
 
-var _express = _interopRequireWildcard(require("express"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+var _express = _interopRequireDefault(require("express"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -27,6 +23,7 @@ function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) ||
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+//引入提供format使用环境的组件
 var connection2; //定义数据库连接对象
 
 var Router4 = (0, _express["default"])();
@@ -70,7 +67,7 @@ Router4.get("/History", function _callee2(req, res) {
         case 0:
           toMap = function _ref18(value) {
             return value.map(function (row) {
-              return [row.d_no, row.field1, row.field2, row.field3, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss')];
+              return [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field5, row.field6, row.field7, row.field8, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss')];
             });
           };
 
@@ -88,10 +85,12 @@ Router4.get("/History", function _callee2(req, res) {
           };
 
           toTwoArray = function _ref15(value) {
-            // 将数据转换为二维数组格式
+            console.log("当前的row:");
+            console.dir(value); // 将数据转换为二维数组格式 
+
             var formattedRows = value.map(function (row) {
               return [row.d_no, row.field1.toString(), // 确保所有字段为字符串类型
-              row.field2.toString(), row.field3.toString(), (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss') // 已经格式化为ISO 8601标准时间字符串
+              row.field2.toString(), row.field3.toString(), row.field4.toString(), row.field5.toString(), row.field6.toString(), row.field7.toString(), row.field8.toString(), (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss') // 已经格式化为ISO 8601标准时间字符串
               ];
             });
             return formattedRows;
@@ -117,14 +116,14 @@ Router4.get("/History", function _callee2(req, res) {
           } //全局sql
 
 
-          query = "SELECT d_no,".concat(sql_string, "c_time FROM t_data "); //降序sql
+          query = "SELECT d_no,".concat(sql_string, " c_time FROM t_data "); //降序sql
 
-          DESC_query = "ORDER BY c_time DESC"; //页数有效值判断布尔变量
+          DESC_query = "ORDER BY c_time DESC"; //页数有效值判断布尔变量 
 
-          page_boolean = currentPage === "undefined" || pageSize === "undefined" || currentPage === undefined || pageSize === undefined; //封装转化为数组的方法
+          page_boolean = currentPage === "undefined" || pageSize === "undefined" || currentPage === undefined || pageSize === undefined; //封装转化为数组的方法 
 
           //全局解构赋值
-          formattedStart = FORMATTIME(start !== "end" || start !== "1" ? start : '2025-06-13 15:51:16');
+          formattedStart = FORMATTIME(start !== "end" && start !== "1" ? start : '2025-06-13 15:51:16');
           formattedEnd = FORMATTIME(end !== "1" ? end : '2025-06-13 15:51:16'); //单向限制sql
 
           one_query = "WHERE c_time < \"".concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no = \"".concat(d_no, "\""));
@@ -399,7 +398,7 @@ Router4.get("/data", function _callee4(req, res) {
               var data = JSON.parse(fixedData); // 解析 JSON 数据
 
               data.forEach(function (entry) {
-                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
+                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4], entry[5], entry[6], entry[7], entry[8]]);
               });
             });
             return formattedResult;

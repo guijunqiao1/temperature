@@ -2,8 +2,9 @@ import express from 'express';
 import path from 'path';
 import logger from 'morgan';
 import cors from 'cors';
-import { fileURLToPath } from 'url';
-import "./routes/websocket_test.js";
+import { fileURLToPath } from 'url'; 
+// import "./routes/websocket_test.js";
+// import "./routes/jiankong.js";
 
 
 // 导入自定义路由模块
@@ -15,8 +16,8 @@ import Router4 from './routes/index_history.js';
 import Router5 from './routes/index_action.js';
 import Router_direct from './routes/direct.js';
 import Router_direct_control from './routes/direct_control.js';
-// 导入和YOLOV5的沟通模块 
-// import Router_http from "./routes/http_server_get.js";
+// 导入和YOLOV5的沟通模块   
+import Router_http from "./routes/http_server_get.js";
 
 const app = express();
 
@@ -42,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // 提供静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
-
+ 
 
 // 挂载子路由（假设路由模块已适配 Koa 路由）
 app.use('/', Router_direct);
@@ -53,6 +54,7 @@ app.use('/', Router2);
 app.use('/', Router1);
 app.use('/', IndexRouter);
 app.use('/', Router_direct_control);
+app.use("/",Router_http);
 // 应用和YOLO服务端的沟通http路由
 // app.use('/', Router_http);
 

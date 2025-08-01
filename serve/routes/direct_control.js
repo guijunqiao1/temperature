@@ -37,7 +37,7 @@ function getFormattedDate() {
     //       WHEN '1' THEN 1
     //       WHEN '5' THEN 2
     //       WHEN '3' THEN 3
-    //       ELSE 4
+    //       ELSE 4 
     //     END;
     // `);
     const result = await connection.execute(`
@@ -59,6 +59,9 @@ function getFormattedDate() {
       Router_direct_response.get("/zhiling/"+item.luyou,async(req,res)=>{
         console.log("成功进入32行阶段");
         let {content,d_no} = req.query;
+        console.log("当前总neriong:");
+        console.dir(item);
+        console.log("content:"+content);
         //备份内容的封装
         const obj1 = {};
         let tem1;
@@ -79,6 +82,9 @@ function getFormattedDate() {
           tem1 = content === C1 ? E1 : E2;
           tem11 = content === C1 ? N1 : N2;
           topic =item.topic;
+          if(item.id===12){
+            tem11 = 'on'+d_no.split("机房")[1]+'_'+(content==="开"?'4':'0');
+          }
           obj1[tem1] = tem11;
           //中文更新
           content = content === C1 ? C1 : C2 ;
@@ -115,9 +121,10 @@ function getFormattedDate() {
              }
            }
            topic = item.topic;
-            if(item.id===12){
-              tem11 = 'on'+d_no+'_'+content;
-            }
+           console.log("item.id:"+item.id);
+          if(item.id===12){
+            tem11 = 'on'+d_no+'_'+content;
+          }
            obj1[tem1] = tem11;
         }
         //指令发送以及是否备份的判断
@@ -127,14 +134,12 @@ function getFormattedDate() {
           console.log("tem:"+template);
           //发送指令，同时完成指令备份
           beifen(d_no,[template,obj1]);//在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
-
-
+          console.log("注册的一次路由");
           //指令历史的记录
           await connection.execute(`
           INSERT INTO operate_history(place,device,operate,ctime)
           VALUES('${d_no}','${item.t_name}','修改为${content}','${getFormattedDate()}')
-          `);
-
+          `); 
           //首先判断是否存在编号对应的内容
           const [row] = await connection.execute(`
           SELECT config_id

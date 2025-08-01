@@ -76,6 +76,7 @@
     databases_array.value = value;
     //得到type_array
     type_array.value = qu_repeate(databases_array.value);
+
     console.log("type_array:");
     console.dir(type_array.value);
     a_length.value = type_array.value.length;
@@ -108,6 +109,7 @@
     }
     //主动初始化一次第一个设备
     change(type_array.value[0][0]);
+    Pinia.change_jifang(type_array.value);
   });
 </script>
 

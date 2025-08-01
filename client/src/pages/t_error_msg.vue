@@ -1,5 +1,29 @@
 <template>
   <div class="content1" v-if="Pinia.Device_sign">
+    <!-- 设备选择 -->
+    <el-dropdown>
+      <el-button type="primary" v-show="Pinia.type_len > 1">
+        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+              </el-dropdown-item>
+            </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
+      当前机房：{{ Pinia.signzhi }}</div>
+
+
+
+
+
     <!-- 上半部分 -->
     <div class="top_part">
       <!-- 设备表的时间选择器 -->
@@ -46,6 +70,7 @@ import { watch } from "vue";
 import axios from "axios";
 //格式化时间变量(数据库中的datetime类型)的包
 import moment from "moment";
+import { useRouter } from 'vue-router'
 import { useUserStore } from "../store/curt";
 const Pinia = useUserStore();
 
@@ -72,8 +97,7 @@ let value1 = ref();//用于将时间值进行动态获取的变量
 let start: any = ref(1);
 let end: any = ref(1);
 
-
-
+const router = useRouter();
 const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
 
 
@@ -135,6 +159,18 @@ function submit() {
     update();
   }
 }
+
+function change_jifang(value){
+  //全局变量修改
+  Pinia.change(value);
+  //当前页面的重置(携带上Pinia.signzhi)
+  //页面重置,先跳到一个空路由，再跳回来
+  router.replace('/empty').then(() => {
+    router.replace('/t_error_msg');
+  })
+  console.log("当前机房:"+Pinia.signzhi);
+}
+
 
 //自当前组件创建阶段就对currentPage变量的值进行监视，若发生了修改，则结合上currentPage变量对databases_array赋值(模版为jiezhi_array)
 watch(() => currentPage.value, () => {
@@ -207,6 +243,9 @@ onMounted(async () => {
     //   }
     // }
   }
+
+
+  
 })
 </script>
 

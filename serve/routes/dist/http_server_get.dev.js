@@ -5,11 +5,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _fs = _interopRequireDefault(require("fs"));
+
+var _path = _interopRequireDefault(require("path"));
+
+var _express = _interopRequireDefault(require("express"));
+
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
 
 // const Router = require('koa-router');
 // const multer = require('@koa/multer');
@@ -57,13 +61,7 @@ function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only")
 //   };
 // });
 // export default router;
-var fs = require('fs');
-
-var path = require('path');
-
-var express = require("express");
-
-var router = express();
+var router = (0, _express["default"])();
 var connection1;
 
 (function _callee() {
@@ -96,18 +94,20 @@ var connection1;
 
 
 router.post('/insert_img', function _callee2(req, res) {
-  var _req$body, image, d_no, sum, fileName1, fileName2, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, base64Image, matches, extension, base64Data, buffer;
+  var _req$body, image, d_no, sum, fileName1, fileName2, filePath, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, base64Image, matches, extension, base64Data, buffer;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _req$body = req.body, image = _req$body.image, d_no = _req$body.d_no; // 判断场景
+          _req$body = req.body, image = _req$body.image, d_no = _req$body.d_no; //image数组第二个元素包含检测结果
+          // 判断场景
 
-          d_no = (_readOnlyError("d_no"), d_no ? d_no : null);
+          d_no = d_no ? d_no : null;
+          console.log("成功进入插入路由");
 
           if (!(!image || !Array.isArray(image) || image.length === 0)) {
-            _context2.next = 4;
+            _context2.next = 5;
             break;
           }
 
@@ -115,19 +115,19 @@ router.post('/insert_img', function _callee2(req, res) {
             error: '未上传图片资源'
           }));
 
-        case 4:
+        case 5:
           //外部计数变量
           sum = 0;
-          _context2.prev = 5;
+          _context2.prev = 6;
           _iteratorNormalCompletion = true;
           _didIteratorError = false;
           _iteratorError = undefined;
-          _context2.prev = 9;
+          _context2.prev = 10;
           _iterator = image[Symbol.iterator]();
 
-        case 11:
+        case 12:
           if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-            _context2.next = 23;
+            _context2.next = 24;
             break;
           }
 
@@ -136,7 +136,7 @@ router.post('/insert_img', function _callee2(req, res) {
           matches = base64Image.match(/^data:image\/(jpeg|png|jpg);base64,(.+)$/);
 
           if (matches) {
-            _context2.next = 16;
+            _context2.next = 17;
             break;
           }
 
@@ -144,7 +144,7 @@ router.post('/insert_img', function _callee2(req, res) {
             error: '无效的 Base64 编码'
           }));
 
-        case 16:
+        case 17:
           extension = matches[1]; // 图片格式（jpeg, png, jpg）
 
           base64Data = matches[2]; // 图片的 Base64 数据
@@ -154,80 +154,94 @@ router.post('/insert_img', function _callee2(req, res) {
 
           if (sum === 0) {
             fileName1 = "".concat(Date.now(), "-").concat(Math.random().toString(36).substr(2, 9), ".").concat(extension);
-            filePath = path.join(__dirname, 'public', fileName1);
+            filePath = _path["default"].join('D:', 'temperature', 'project01', 'serve', 'public', fileName1);
             sum++;
           } else {
             fileName2 = "".concat(Date.now(), "-").concat(Math.random().toString(36).substr(2, 9), ".").concat(extension);
-            filePath = path.join(__dirname, 'public', fileName2); // 将二进制数据保存为文件
+            filePath = _path["default"].join('D:', 'temperature', 'project01', 'serve', 'public', fileName2); // 将二进制数据保存为文件
 
-            fs.writeFileSync(filePath, buffer);
+            _fs["default"].writeFileSync(filePath, buffer);
           }
 
-        case 20:
+        case 21:
           _iteratorNormalCompletion = true;
-          _context2.next = 11;
+          _context2.next = 12;
           break;
 
-        case 23:
-          _context2.next = 29;
+        case 24:
+          _context2.next = 30;
           break;
 
-        case 25:
-          _context2.prev = 25;
-          _context2.t0 = _context2["catch"](9);
+        case 26:
+          _context2.prev = 26;
+          _context2.t0 = _context2["catch"](10);
           _didIteratorError = true;
           _iteratorError = _context2.t0;
 
-        case 29:
-          _context2.prev = 29;
+        case 30:
           _context2.prev = 30;
+          _context2.prev = 31;
 
           if (!_iteratorNormalCompletion && _iterator["return"] != null) {
             _iterator["return"]();
           }
 
-        case 32:
-          _context2.prev = 32;
+        case 33:
+          _context2.prev = 33;
 
           if (!_didIteratorError) {
-            _context2.next = 35;
+            _context2.next = 36;
             break;
           }
 
           throw _iteratorError;
 
-        case 35:
-          return _context2.finish(32);
-
         case 36:
-          return _context2.finish(29);
+          return _context2.finish(33);
 
         case 37:
-          _context2.next = 39;
+          return _context2.finish(30);
+
+        case 38:
+          _context2.next = 40;
           return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_behavior_data(d_no, field1,field2, c_time, is_saved, file_type)\n      VALUES (\"".concat(d_no, "\", \"").concat(fileName1, "\",\"").concat(fileName2, "\", \"").concat(new Date(), "\", \"\u5B9E\u65F6\u6570\u636E\", \"picture\")\n    ")));
 
-        case 39:
+        case 40:
           // 返回成功响应
           res.json({
             message: '文件上传成功'
           });
-          _context2.next = 46;
+          _context2.next = 47;
           break;
 
-        case 42:
-          _context2.prev = 42;
-          _context2.t1 = _context2["catch"](5);
+        case 43:
+          _context2.prev = 43;
+          _context2.t1 = _context2["catch"](6);
           console.error(_context2.t1);
           return _context2.abrupt("return", res.status(500).json({
             error: '保存文件信息失败'
           }));
 
-        case 46:
+        case 47:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[5, 42], [9, 25, 29, 37], [30,, 32, 36]]);
+  }, null, null, [[6, 43], [10, 26, 30, 38], [31,, 33, 37]]);
+});
+router.get('/sssss', function _callee3(req, res) {
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          res.send('1');
+
+        case 1:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  });
 });
 var _default = router;
 exports["default"] = _default;

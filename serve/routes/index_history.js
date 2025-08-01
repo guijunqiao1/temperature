@@ -3,7 +3,6 @@
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
 import Config4 from "../indexNode2.js";//此处获取到数据库链接配置对象
 import dayjs from "dayjs";//引入提供format使用环境的组件
-import { json } from "express";
 let connection2;//定义数据库连接对象
 import Router from "express";
 const Router4=  Router();
@@ -22,7 +21,7 @@ const Router4=  Router();
 
 //表格的呈现-图像的呈现路由
 Router4.get("/History", async (req,res) => {
-  let { start,end,currentPage,pageSize,d_no } = req.query;
+  let { start,end,currentPage,pageSize,d_no } = req.query; 
   // 动态获取到字段
   const [result_now] = await connection2.query(`
     SELECT * 
@@ -37,19 +36,26 @@ Router4.get("/History", async (req,res) => {
     }
   }
   //全局sql
-  const query = `SELECT d_no,${sql_string }c_time FROM t_data `;
+  const query = `SELECT d_no,${sql_string} c_time FROM t_data `;
   //降序sql
   const DESC_query = `ORDER BY c_time DESC`;
-  //页数有效值判断布尔变量
+  //页数有效值判断布尔变量 
   const page_boolean = currentPage==="undefined" || pageSize==="undefined"||currentPage===undefined||pageSize===undefined;
-  //封装转化为数组的方法
+  //封装转化为数组的方法 
   function toTwoArray(value){
-    // 将数据转换为二维数组格式
+    console.log("当前的row:");
+    console.dir(value);
+    // 将数据转换为二维数组格式 
     const formattedRows = value.map(row => [
       row.d_no,
       row.field1.toString(),  // 确保所有字段为字符串类型
       row.field2.toString(),
       row.field3.toString(),
+      row.field4.toString(),
+      row.field5.toString(),
+      row.field6.toString(),
+      row.field7.toString(),
+      row.field8.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),  // 已经格式化为ISO 8601标准时间字符串
     ]);
     return formattedRows;
@@ -63,7 +69,7 @@ Router4.get("/History", async (req,res) => {
     return formatTime(value);
   }
   //全局解构赋值
-  const formattedStart = FORMATTIME((start!=="end"||start!=="1")?start:'2025-06-13 15:51:16');
+  const formattedStart = FORMATTIME((start!=="end"&&start!=="1")?start:'2025-06-13 15:51:16');
   const formattedEnd = FORMATTIME((end!=="1")?end:'2025-06-13 15:51:16');
   //单向限制sql
   const one_query = `WHERE c_time < "${formattedEnd}"`+(d_no==="null"?"":` AND d_no = "${d_no}"`);
@@ -74,7 +80,7 @@ Router4.get("/History", async (req,res) => {
   }
   //封装响应结果格式化的方法
   function toMap(value){
-    return value.map(row => [row.d_no, row.field1, row.field2, row.field3,dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss')])
+    return value.map(row => [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field5, row.field6, row.field7, row.field8 , dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss')])
   }
   //直接将总的历史记录进行获取--类似data路由内容，但是返回的数组的格式不同
   if(start==="1" && end==="1"){//初始的时候的总数据的请求,进行特定的d_no的分页查询数组的返回
@@ -281,7 +287,7 @@ Router4.get("/data", async (req,res) => {//对data路由进行修改并且接纳
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData); // 解析 JSON 数据
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3],entry[4],entry[5],entry[6],entry[7],entry[8]]);
       });
     });
     return formattedResult;

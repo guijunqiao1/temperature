@@ -39,10 +39,10 @@ const router = createRouter({
       path: "/t_Control",
       component: Mqtt
     },
-    {
-      path: "/ex",
-      component: ex
-    }
+    // {
+    //   path: "/ex",
+    //   component: ex
+    // }
     // {
     //   path: "/t_Container",
     //   component: container

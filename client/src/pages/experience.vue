@@ -1,12 +1,14 @@
   <template> 
     <div class="containerxxx">
       <h1 class="h1_one">实时监控</h1>
-      <canvas id="videoCanvas"></canvas>
-      <button class="function">检测</button>
+      <img id="videoCanvas" :src="src0" alt="实时视频"></img> 
+      <button class="function" @click="jiance">检测</button>
 
       <h1 class="h1_two">检测结果：</h1>
       <div class="result">
         检测时间:{{ moment(time).format('YYYY-MM-DD HH:mm:ss') }}
+        <div class="result_person">实际检测结果:{{ REF==='1'?'有人':'没人' }}</div>
+        <div class="confidence_person">可信度:{{ REF_confidence }}</div>
         <div class="container_child">
           <div class="img1">
             原图片：
@@ -14,7 +16,7 @@
           </div>
           <div class="img2">
             检测结果图片:
-            <img :src="src2" alt="图片2">
+             <img :src="src2" alt="图片2">
           </div>
         </div>
       </div>
@@ -33,62 +35,43 @@
     const Pinia = useUserStore();
 
     //定义响应式资源变量
+    const src0 = ref();
     const src1 = ref();
     const src2 = ref();
+    const REF = ref();
+    const REF_confidence = ref();
     const time = ref();
+    const result_person = ref();
 
     //定义检测方法
     async function jiance(value){
-      const canvas = document.getElementById('videoCanvas') as HTMLCanvasElement;
-      const ctx = canvas.getContext('2d');
-      // 从 Canvas 获取图像数据，转为 base64 编码的图片数据
-      const imageData = canvas.toDataURL('image/jpeg');
-
+      console.log("触发检测事件");
+      let waibu;
+      if(Pinia.signzhi==='机房1'){
+        waibu = "0";
+      }
+      else if(Pinia.signzhi==='机房2'){
+        waibu = "1";
+      }
+      else{
+        waibu = "2";
+      }
+      //截图
+      const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+waibu);
+      console.log('最终jieguo:'+result1.data['screenshot']);
+      const imageData = result1.data['screenshot'];
       //发出检测请求
-      const result = await axios.post('http://localhost:3000/api/upload', {
+      const result = await axios.post('http://192.168.1.102:5000/infer', {
         image: imageData,  // 发送 Base64 编码的图像
       });
+      console.log("confidence:"+result.data['inference_results']['confidence']);
       //存到数据库中--原图和结果图
       const result_insert = await axios.post('/api/insert_img',{
-        image: [ImageData,result.data],
-        d_no: Pinia.signzhi
-      })
-      //获取库中最新记录
-      const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
-      //实时更新图片内容--在当前机房的情况下
-      src1.value = "../../public/" + result_newest.data.field1;
-      src2.value = "../../public/" + result_newest.data.field2;
-      //实时更新最新检测时间
-      time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
-    }
-
-    onMounted(async()=>{
-      // 画布初始化监控内容
-      const canvas = document.getElementById('videoCanvas');
-      const ctx = canvas.getContext('2d');
-      const socket = new WebSocket('ws://localhost:3000');  // 连接到 WebSocket 服务器
-      socket.onmessage = (event) => {
-        const img = new Image();
-        img.src = URL.createObjectURL(event.data);
-        img.onload = () => {
-          const canvasWidth = canvas.width;
-          const canvasHeight = canvas.height;
-
-          // 启用高质量的图像缩放
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-
-          const scale = Math.min(canvasWidth / img.width, canvasHeight / img.height);
-          const width = img.width * scale;
-          const height = img.height * scale;
-
-          ctx.clearRect(0, 0, canvasWidth, canvasHeight);  // 清空画布
-          ctx.drawImage(img, 0, 0, width, height);  // 绘制图像
-        };
-      };
-
-      //初始化对照资源src1、src2、time
+        image: [imageData,result.data['processed_image']],
+        d_no: Pinia.signzhi,
+        person: result.data['inference_results']['class'],
+        confidence: result.data['inference_results']['confidence']
+      }) 
       //获取库中最新记录
       const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
       //实时更新图片内容--在当前机房的情况下
@@ -98,11 +81,14 @@
       console.log("src2:"+src2.value);
       //实时更新最新检测时间
       time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
+      REF.value = result_newest.data.result;
+      REF_confidence.value = result_newest.data.confidence;
+    }
+
+    onMounted(async()=>{
+
     })
-
-
   </script>
-
 
 <style scoped>
 #videoCanvas{
@@ -146,5 +132,9 @@
   height: 150px;
   max-width: 200px;
   max-height: 150px;
+}
+
+
+.result_person {
 }
 </style>

@@ -3,7 +3,9 @@
 import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
 
 let connection;//定义数据库连接对象
+import fs from "fs";
 import Router from "express";
+import path from "path";
 import dayjs from "dayjs";//引入提供format使用环境的组件
 const Router5 = Router();
 (async ()=>{
@@ -12,12 +14,12 @@ const Router5 = Router();
     connection = await Config();
     console.log("数据库5连接成功");
   }
-  catch(error){
+  catch(error){ 
     console.log("数据库5连接失败");
   }
 })();
 
-//表格的呈现-图像的呈现路由
+//表格的呈现-图像的呈现路由 
 Router5.get("/action", async (req,res) => {
   let { start,end,currentPage,pageSize,d_no } = req.query;
   // 动态获取到字段
@@ -302,5 +304,5 @@ Router5.get("/data/action", async (req,res) => {//对data路由进行修改并�
   // res.send([]);
 });
 
-
 export default Router5;
+ 

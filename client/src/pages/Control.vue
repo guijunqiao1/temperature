@@ -1,5 +1,25 @@
 <template>
   <div class="control">
+    <el-dropdown>
+      <el-button type="primary" v-show="Pinia.type_len > 1">
+        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+              </el-dropdown-item>
+            </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
+      当前机房：{{ Pinia.signzhi }}</div>
+
+
     <div v-if="Pinia.all" class="all">
       <h1>全局指令</h1>
       <!-- 同步时间    -->
@@ -60,7 +80,7 @@
           {{ item.t_name }}：
           <el-switch @change="submit(item)" v-model="item.value" :active-text="xuanran1(item.f_value)"
             :inactive-text="xuanran2(item.f_value)" :active-value="xuanran1(item.f_value)"
-            :inactive-value="xuanran2(item.f_value)" :disabled="!Boolean(item.label_boolean)" />
+            :inactive-value="xuanran2(item.f_value)" />
         </div>
 
         <!-- 类型2： -->
@@ -133,6 +153,8 @@ import axios from "axios";
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from "../store/curt";
 import moment from "moment";
+import { useRouter } from 'vue-router'
+
 
 const Pinia = useUserStore();
 //获取到渲染数组
@@ -145,10 +167,11 @@ let changjing_array = ref();
 let change1;
 let signzhi = ref(Pinia.signzhi);
 
+const router = useRouter();
+
+
 //机房设备记录数组
 let operate_history_array = ref();
-
-
 
 //定时器变量
 let x;
@@ -182,17 +205,26 @@ function setInter() {
 function handleInputFocus(item: any) {
   currentFocusedInput.value = item;
 }
-
 function handleInputBlur() {
   currentFocusedInput.value = null;
 }
-
 //封装渲染方法
 function xuanran1(value) {
   return value.split("|")[0].split(":")[0];
 }
 function xuanran2(value) {
   return value.split("|")[1].split(":")[0];
+}
+
+//机房切换以及重置方法
+function change_jifang(value){
+  Pinia.change(value);
+
+  //重置页面,先跳到一个空路由，再跳回来
+  router.replace('/empty').then(() => {
+    router.replace('/t_Control');
+  })
+  console.log("当前机房:"+Pinia.signzhi);
 }
 
 (async () => {
@@ -207,8 +239,6 @@ function xuanran2(value) {
   console.log("定时器正常运转");
   const resultx = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
   // 更新control_array时保留正在编辑的输入框的值
-
-
   if (currentFocusedInput.value) {
     const focusedInputId = currentFocusedInput.value.id;
     const currentValue = currentFocusedInput.value.value;

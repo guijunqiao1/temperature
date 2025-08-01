@@ -5,6 +5,8 @@
     <div class="aler" @click="aler" style="cursor:pointer">#</div>
     <div class="getnew" @click="getnew" style="cursor:pointer">@</div>
     <span ref="add" class="add">主页</span>
+     <!-- 全局告警盒子 -->
+    <div class="alarm_all"></div>
     <!-- 下方标签专门用于向后端发送请求，并且后端的router文件夹中的route.js文件提前设置好对应的路由，主页面为当前App.vue文件所搭载的内容，
     而路由发生跳转的文件为后端的view中的.ejs文件临时渲染的内容 -->
     <a href="#" class="register_outer"><img src="../public/ok2.png" alt="" class="register_inner"></a>
@@ -41,9 +43,6 @@
             <el-menu-item index="1-5">
               <RouterLink to="/t_Control"> 指令控制台</RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-6">
-              <RouterLink to="/ex"> 监控室</RouterLink>
-            </el-menu-item>
           </el-menu>
         </el-col>
       </el-row>
@@ -66,6 +65,7 @@
 import { RouterView, RouterLink } from "vue-router";
 import { ref } from "vue";
 import { onMounted } from 'vue';
+
 //使用vue中的路由进行类似a标签功能的RouteLink标签以及RouteView标签的使用(需要对to属性进行理解性的设置以及对路由器进行动态的引入并在
 //main.ts文件中配置上盖路由器并且挂载到当前App文件对象(应用对象)身上)
 
@@ -85,7 +85,7 @@ const add = ref();
 let add1 = (value) => { };
 let change = (value) => { };
 
-//方法
+// 方法
 // 重置页面方法
 function aler() {
   location.assign("/");
@@ -129,6 +129,48 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
   //的函数体内容中如果有console.log(title.value)则可以正常将值进行输出(因为本质上该内容对象(title = ref())在获取的时候所处
   //的环境是onMounted()方法中)
 
+
+  //对告警标签进行获取
+  const alarm_html = document.querySelector(".alarm_all") as HTMLElement;
+
+  //定义告警的队列数组
+  let alarm_quene=[];
+  setInterval(async ()=>{
+    //每5秒检测一次队列是否存在其它值
+    if(alarm_quene.length>0){
+      console.log("检测成功应当显示");
+      console.log("输出一次总队列:");
+      console.dir(alarm_quene);
+      //恢复标签
+      alarm_html.style.display = 'block';
+      //添加上文本
+      alarm_html.innerText = `${alarm_quene[0]} !!!`;
+      //当前元素位置创建临时定时器
+      const x = setTimeout(async ()=>{
+        //去除元素同时完成隐藏
+        alarm_quene = alarm_quene.slice(1);
+        alarm_html.style.display = 'none';
+      },4000);
+    }
+  },5000);
+
+  //全局建立websocket连接，使得告警内容被实时推送到页面的全局
+  const socket = new WebSocket('ws://localhost:8081');
+  // 连接成功
+  socket.onopen = function() {
+      console.log('WebSocket连接成功');
+      console.log('WebSocket连接成功');
+      console.log('WebSocket连接成功');
+      console.log('WebSocket连接成功');
+      console.log('WebSocket连接成功');
+  }; 
+  // 接收消息
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log(data.message);
+    alarm_quene.push(data['message']);
+    console.log("成功那个廷加告警元素");
+  };
 
 
 });
@@ -306,6 +348,19 @@ div.nothing {
 /* 配置上高度 */
 .container.fit-view {
   height: 1734px;
+}
+
+/* 为全局告警标签进行样式设计 */
+.alarm_all {
+  width:200px;
+  height:30px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 30px;
+  background-color: red;
+  position: relative;
+  left:350px;
+  display: none;
 }
 </style>
 

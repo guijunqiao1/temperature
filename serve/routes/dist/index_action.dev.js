@@ -7,7 +7,11 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
+var _fs = _interopRequireDefault(require("fs"));
+
 var _express = _interopRequireDefault(require("express"));
+
+var _path = _interopRequireDefault(require("path"));
 
 var _dayjs = _interopRequireDefault(require("dayjs"));
 
@@ -53,7 +57,7 @@ var Router5 = (0, _express["default"])();
       }
     }
   }, null, null, [[0, 7]]);
-})(); //表格的呈现-图像的呈现路由
+})(); //表格的呈现-图像的呈现路由 
 
 
 Router5.get("/action", function _callee2(req, res) {

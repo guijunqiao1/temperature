@@ -7,7 +7,7 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _express = _interopRequireDefault(require("express"));
+var _koaRouter = _interopRequireDefault(require("koa-router"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -19,15 +19,11 @@ function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) ||
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-//此处获取到数据库链接配置对象
-// import Config2 from "../indexNode2.js";
-var connection2; //首先定义一个用于存储连接数据库的实例对象,在下方首次进行数据库的实例赋值之后则可完成值的保存，后续在路由中进行
-//数据库操作的时候直接执行connection.execute()方法即可--因为connection指向保持不变
-// 同时需要注意的是connection就算初始化未被赋值的情况下如果使用的是const关键字进行定义的话则在后续赋值则会被视作为错误，则提前进行全局变量的定义不能使用const关键字
-// let connection2;
+// 替换 express 为 koa-router
+var connection2; // 数据库连接对象
 
-var Router = (0, _express["default"])(); //引入数据库链接函数
-//下方语句用于实现数据库1的连接
+var Router = new _koaRouter["default"](); // 创建 Koa 路由实例
+// 数据库连接（立即执行异步函数）
 
 (function _callee() {
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -55,12 +51,10 @@ var Router = (0, _express["default"])(); //引入数据库链接函数
       }
     }
   }, null, null, [[0, 7]]);
-})(); //注意此为立即执行函数的写法，并且通过使用匿名函数的方式，则需要立即执行函数本身自带的第一个()进行包裹，并且在前者中的同时因为需要使用异步对Config方法进行处理
-//故需要进行async的同理包裹
-//设备最新数据
+})(); // 设备最新数据
 
 
-Router.get("/recent", function _callee2(req, res) {
+Router.get("/recent", function _callee2(ctx) {
   var _ref, _ref2, result_now, sql_string, item, x, _ref3, _ref4, results, formattedResult;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
@@ -79,7 +73,6 @@ Router.get("/recent", function _callee2(req, res) {
           _ref = _context2.sent;
           _ref2 = _slicedToArray(_ref, 1);
           result_now = _ref2[0];
-          //动态拼接sql依据字符串
           sql_string = '';
 
           for (item in result_now[0]) {
@@ -90,7 +83,7 @@ Router.get("/recent", function _callee2(req, res) {
           }
 
           _context2.next = 12;
-          return regeneratorRuntime.awrap(connection2.query("\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT(\n                  '[', " + sql_string + "'\"', t.c_time, '\"', \n                  ']'\n              ) ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      WHERE t.c_time BETWEEN \n          (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no) - INTERVAL 5 MINUTE \n          AND (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no)\n      GROUP BY t.d_no;\n    "));
+          return regeneratorRuntime.awrap(connection2.query("\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT(\n                  '[', ".concat(sql_string, " '\"', t.c_time, '\"', \n                  ']'\n              ) ORDER BY t.c_time\n          ) AS data\n      FROM t_data t\n      WHERE t.c_time BETWEEN \n          (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no) - INTERVAL 5 MINUTE \n          AND (SELECT MAX(c_time) FROM t_data WHERE d_no = t.d_no)\n      GROUP BY t.d_no;\n    ")));
 
         case 12:
           _ref3 = _context2.sent;
@@ -100,8 +93,7 @@ Router.get("/recent", function _callee2(req, res) {
             try {
               if (!row.data) return [row.d_no, []];
               var fixedData = "[".concat(row.data, "]");
-              var data = JSON.parse(fixedData); // 遍历 data 数组，修改 c_time 格式（去掉秒数）
-
+              var data = JSON.parse(fixedData);
               data = data.map(function (entry) {
                 return entry;
               });
@@ -110,11 +102,9 @@ Router.get("/recent", function _callee2(req, res) {
               console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
               return [row.d_no, []];
             }
-          }); //允许所有的来源
-
-          res.setHeader('Access-Control-Allow-Origin', '*'); // 允许所有来源
-
-          res.send(formattedResult);
+          });
+          ctx.set('Access-Control-Allow-Origin', '*');
+          ctx.body = formattedResult;
           _context2.next = 23;
           break;
 
@@ -129,9 +119,9 @@ Router.get("/recent", function _callee2(req, res) {
       }
     }
   }, null, null, [[0, 20]]);
-}); //行为最新数据
+}); // 行为最新数据
 
-Router.get("/recent/action", function _callee3(req, res) {
+Router.get("/recent/action", function _callee3(ctx) {
   var _ref5, _ref6, result_now, sql_string, item, x, _ref7, _ref8, results, formattedResult;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
@@ -150,7 +140,6 @@ Router.get("/recent/action", function _callee3(req, res) {
           _ref5 = _context3.sent;
           _ref6 = _slicedToArray(_ref5, 1);
           result_now = _ref6[0];
-          //动态拼接sql依据字符串
           sql_string = '';
 
           for (item in result_now[0]) {
@@ -161,7 +150,7 @@ Router.get("/recent/action", function _callee3(req, res) {
           }
 
           _context3.next = 12;
-          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n        SELECT d_no, MAX(c_time) AS max_time \n        FROM t_behavior_data\n        GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', \n              " + sql_string + "\n              '\"', t.c_time, '\",',\n              '\"', t.file_type, '\"',\n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_behavior_data t\n      JOIN latest_time_per_dno l\n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    "));
+          return regeneratorRuntime.awrap(connection2.query("\n      WITH latest_time_per_dno AS (\n        SELECT d_no, MAX(c_time) AS max_time \n        FROM t_behavior_data\n        GROUP BY d_no\n      )\n      SELECT \n          t.d_no, \n          GROUP_CONCAT(\n              CONCAT('[', \n              ".concat(sql_string, "\n              '\"', t.c_time, '\",',\n              '\"', t.file_type, '\"',\n              ']') ORDER BY t.c_time\n          ) AS data\n      FROM t_behavior_data t\n      JOIN latest_time_per_dno l\n        ON t.d_no = l.d_no\n        WHERE t.c_time BETWEEN (l.max_time - INTERVAL 5 MINUTE) AND l.max_time\n      GROUP BY t.d_no;\n    ")));
 
         case 12:
           _ref7 = _context3.sent;
@@ -171,18 +160,14 @@ Router.get("/recent/action", function _callee3(req, res) {
             try {
               if (!row.data) return [row.d_no, []];
               var fixedData = "[".concat(row.data, "]");
-              var data = JSON.parse(fixedData); // 遍历 data 数组，修改 c_time 格式（去掉秒数）
-              // data = data.map(entry => {
-              //   return entry;
-              // });
-
+              var data = JSON.parse(fixedData);
               return [row.d_no, data];
             } catch (error) {
               console.error("JSON \u89E3\u6790\u5931\u8D25: ".concat(row.data), error);
               return [row.d_no, []];
             }
           });
-          res.send(formattedResult);
+          ctx.body = formattedResult;
           _context3.next = 22;
           break;
 
@@ -197,9 +182,9 @@ Router.get("/recent/action", function _callee3(req, res) {
       }
     }
   }, null, null, [[0, 19]]);
-}); //设备ID最新记录--映射列表对象路由
+}); // 设备ID最新记录
 
-Router.get("/recent/list_obj", function _callee4(req, res) {
+Router.get("/recent/list_obj", function _callee4(ctx) {
   var _ref9, _ref10, rows;
 
   return regeneratorRuntime.async(function _callee4$(_context4) {
@@ -207,13 +192,13 @@ Router.get("/recent/list_obj", function _callee4(req, res) {
       switch (_context4.prev = _context4.next) {
         case 0:
           _context4.next = 2;
-          return regeneratorRuntime.awrap(connection2.query("\n  SELECT *\n  FROM t_container\n  ORDER BY ctime DESC\n  "));
+          return regeneratorRuntime.awrap(connection2.query("\n    SELECT *\n    FROM t_container\n    ORDER BY ctime DESC\n  "));
 
         case 2:
           _ref9 = _context4.sent;
           _ref10 = _slicedToArray(_ref9, 1);
           rows = _ref10[0];
-          res.send(rows[0]);
+          ctx.body = rows[0];
 
         case 6:
         case "end":
@@ -221,25 +206,24 @@ Router.get("/recent/list_obj", function _callee4(req, res) {
       }
     }
   });
-}); //最新图片资源记录路由
+}); // 最新图片资源记录
 
-Router.get("/recent/img", function _callee5(req, res) {
+Router.get("/recent/img", function _callee5(ctx) {
   var d_no, _ref11, _ref12, rows;
 
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
         case 0:
-          d_no = req.query.d_no;
+          d_no = ctx.query.d_no;
           _context5.next = 3;
-          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT *\n    FROM t_behavior_data\n    WHERE d_no = '".concat(d_no, "'\n    ORDER BY c_time DESC\n    LIMIT 1\n    ")));
+          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT *\n    FROM t_behavior_data\n    WHERE d_no = '".concat(d_no, "'\n    ORDER BY c_time DESC\n    LIMIT 1\n  ")));
 
         case 3:
           _ref11 = _context5.sent;
           _ref12 = _slicedToArray(_ref11, 1);
           rows = _ref12[0];
-          //封装查询结果
-          res.send(rows[0]);
+          ctx.body = rows[0];
 
         case 7:
         case "end":

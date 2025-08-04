@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _express = _interopRequireDefault(require("express"));
+var _koaRouter = _interopRequireDefault(require("koa-router"));
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
@@ -21,10 +21,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-var Router_direct = (0, _express["default"])(); //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
-
-//此处获取到数据库链接配置对象
-var connection; //定义数据库连接对象
+var Router_direct = new _koaRouter["default"]();
+var connection;
 
 (function _callee() {
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -52,61 +50,53 @@ var connection; //定义数据库连接对象
       }
     }
   }, null, null, [[0, 7]]);
-})(); //额外绑定获取所有数据的路由
+})(); // 获取所有数据的路由
 
 
-Router_direct.get("/zhiling", function _callee2(req, res) {
-  var _req$query, mode, d_no, result, rowx;
+Router_direct.get("/zhiling", function _callee2(ctx) {
+  var _ctx$request$query, mode, d_no, result, rowx;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _req$query = req.query, mode = _req$query.mode, d_no = _req$query.d_no;
+          _ctx$request$query = ctx.request.query, mode = _ctx$request$query.mode, d_no = _ctx$request$query.d_no;
           _context2.next = 3;
-          return regeneratorRuntime.awrap(connection.execute("\n  SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou,t.value,c.label_boolean,c.label,t.d_no\n  FROM t_direct t,t_direct_config c\n  WHERE c.id = t.config_id\n  AND ok in (\"yes\",\"yes1\")\n  AND c.mode = \"".concat(mode, "\"\n  AND t.d_no = \"").concat(d_no ? d_no : 'null', "\"\n  ORDER BY CASE f_type\n      WHEN '1' THEN 1\n      WHEN '5' THEN 2\n      WHEN '3' THEN 3\n      ELSE 4\n    END;\n  ")));
+          return regeneratorRuntime.awrap(connection.execute("\n    SELECT c.id, c.f_type, c.mode, c.f_value, c.t_name, c.max, c.min, c.topic, c.header, c.luyou, t.value, c.label_boolean, c.label, t.d_no\n    FROM t_direct t, t_direct_config c\n    WHERE c.id = t.config_id\n    AND ok in (\"yes\", \"yes1\")\n    AND c.mode = \"".concat(mode, "\"\n    AND t.d_no = \"").concat(d_no ? d_no : 'null', "\"\n    ORDER BY CASE f_type\n        WHEN '1' THEN 1\n        WHEN '5' THEN 2\n        WHEN '3' THEN 3\n        ELSE 4\n      END;\n  ")));
 
         case 3:
           result = _context2.sent;
-          rowx = result[0]; //时间格式化方法
-          // const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-
+          rowx = result[0];
           rowx.forEach(function (item, index) {
-            if (item.value.split(" ")[1]) {//若为时间值
-              // item.value = formatTime(item.value);
-              // console.log("成功转化时间值" + item.value);
-            } else if (Number.isNaN(Number(item.value))) {//若为中文值
-              // console.log("item.value:"+item.value);
-              // console.log(new Date(item.value));
+            if (item.value.split(" ")[1]) {// 若为时间值
+            } else if (Number.isNaN(Number(item.value))) {// 若为中文值
             } else {
-              // console.log("进入成功");
               item.value = Number(item.value);
             }
           });
-          res.send(rowx);
-          return _context2.abrupt("return");
+          ctx.body = rowx;
 
-        case 8:
+        case 7:
         case "end":
           return _context2.stop();
       }
     }
   });
-}); //修改关联boolean的路由
+}); // 修改关联 boolean 的路由
 
-Router_direct.get("/label_boolean", function _callee3(req, res) {
-  var _req$query2, content, id, _ref, _ref2, result0, _ref3, _ref4, result, _ref5, _ref6, _result;
+Router_direct.get("/label_boolean", function _callee3(ctx) {
+  var _ctx$request$query2, content, id, _ref, _ref2, result0;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
           console.log("成功进入路由");
-          _req$query2 = req.query, content = _req$query2.content, id = _req$query2.id;
+          _ctx$request$query2 = ctx.request.query, content = _ctx$request$query2.content, id = _ctx$request$query2.id;
           id = Number(id);
           console.log("TYPE:id" + _typeof(id));
           _context3.next = 6;
-          return regeneratorRuntime.awrap(connection.execute("\n  SELECT label\n  FROM t_direct_config\n  WHERE id = ".concat(id, "\n  ")));
+          return regeneratorRuntime.awrap(connection.execute("\n    SELECT label\n    FROM t_direct_config\n    WHERE id = ".concat(id, "\n  ")));
 
         case 6:
           _ref = _context3.sent;
@@ -117,41 +107,33 @@ Router_direct.get("/label_boolean", function _callee3(req, res) {
           console.log(result0[0].label + "_label");
 
           if (!(content === "开" || content === "关")) {
-            _context3.next = 20;
+            _context3.next = 17;
             break;
           }
 
           _context3.next = 15;
-          return regeneratorRuntime.awrap(connection.execute("\n    UPDATE t_direct_config\n    SET label_boolean = ".concat(content === "开" ? "1" : null, "\n    WHERE label = \"").concat(result0[0].label + "_label", "\";\n  ")));
+          return regeneratorRuntime.awrap(connection.execute("\n      UPDATE t_direct_config\n      SET label_boolean = ".concat(content === "开" ? "1" : null, "\n      WHERE label = \"").concat(result0[0].label + "_label", "\";\n    ")));
 
         case 15:
-          _ref3 = _context3.sent;
-          _ref4 = _slicedToArray(_ref3, 1);
-          result = _ref4[0];
-          _context3.next = 25;
+          _context3.next = 19;
           break;
 
+        case 17:
+          _context3.next = 19;
+          return regeneratorRuntime.awrap(connection.execute("\n      UPDATE t_direct_config\n      SET label_boolean = ".concat(content === "手动" ? "1" : null, "\n      WHERE ok = \"yes\"; \n    ")));
+
+        case 19:
+          ctx.body = "ok";
+
         case 20:
-          _context3.next = 22;
-          return regeneratorRuntime.awrap(connection.execute("\n    UPDATE t_direct_config\n    SET label_boolean = ".concat(content === "手动" ? "1" : null, "\n    WHERE ok = \"yes\"; \n  ")));
-
-        case 22:
-          _ref5 = _context3.sent;
-          _ref6 = _slicedToArray(_ref5, 1);
-          _result = _ref6[0];
-
-        case 25:
-          res.send("ok");
-
-        case 26:
         case "end":
           return _context3.stop();
       }
     }
   });
-}); //获取控件中机房总类型数量的路由
+}); // 获取控件中机房总类型数量的路由
 
-Router_direct.get("/type_device", function _callee4(req, res) {
+Router_direct.get("/type_device", function _callee4(ctx) {
   var result;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
@@ -162,33 +144,32 @@ Router_direct.get("/type_device", function _callee4(req, res) {
 
         case 2:
           result = _context4.sent;
-          res.send(result[0]);
-          return _context4.abrupt("return");
+          ctx.body = result[0];
 
-        case 5:
+        case 4:
         case "end":
           return _context4.stop();
       }
     }
   });
-}); //机房历史记录查询路由
+}); // 机房历史记录查询路由
 
-Router_direct.get("/operate_history", function _callee5(req, res) {
-  var d_no, _ref7, _ref8, row;
+Router_direct.get("/operate_history", function _callee5(ctx) {
+  var d_no, _ref3, _ref4, row;
 
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
         case 0:
-          d_no = req.query.d_no;
+          d_no = ctx.request.query.d_no;
           _context5.next = 3;
-          return regeneratorRuntime.awrap(connection.execute("\n  SELECT *\n  FROM operate_history\n  WHERE place = '".concat(d_no, "'\n  ")));
+          return regeneratorRuntime.awrap(connection.execute("\n    SELECT *\n    FROM operate_history\n    WHERE place = '".concat(d_no, "'\n  ")));
 
         case 3:
-          _ref7 = _context5.sent;
-          _ref8 = _slicedToArray(_ref7, 1);
-          row = _ref8[0];
-          res.send(row);
+          _ref3 = _context5.sent;
+          _ref4 = _slicedToArray(_ref3, 1);
+          row = _ref4[0];
+          ctx.body = row;
 
         case 7:
         case "end":

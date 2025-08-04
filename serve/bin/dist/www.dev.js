@@ -14,17 +14,16 @@ var log = (0, _debug["default"])('serve1:server');
 /**
  * Get port from environment and store in Express.
  */
-var port = normalizePort(process.env.PORT || '9000');
+var port = normalizePort(process.env.PORT || '9000'); // app.set('port', port); // Express 写法
 
-_app_koa["default"].set('port', port); // Express 写法
+_app_koa["default"].port = port; // ✅ 自定义属性存储端口号（可选）
 
 /**
  * Create HTTP server.
  */
+// var server = http.createServer(app); // Express 写法
 
-
-var server = _http["default"].createServer(_app_koa["default"]); // Express 写法
-
+var server = _http["default"].createServer(_app_koa["default"].callback());
 /**
  * Listen on provided port, on all network interfaces.
  */

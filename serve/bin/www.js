@@ -9,13 +9,17 @@ import http from "http";
  */
 
 const port = normalizePort(process.env.PORT || '9000');
-app.set('port', port); // Express 写法
+// app.set('port', port); // Express 写法
+app.port = port; // ✅ 自定义属性存储端口号（可选）
+
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app); // Express 写法
+// var server = http.createServer(app); // Express 写法
+var server = http.createServer(app.callback());
+
 
 /**
  * Listen on provided port, on all network interfaces.

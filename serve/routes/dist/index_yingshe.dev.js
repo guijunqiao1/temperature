@@ -7,16 +7,17 @@ exports["default"] = void 0;
 
 var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
-var _express = _interopRequireDefault(require("express"));
+var _koaRouter = _interopRequireDefault(require("koa-router"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-//此处获取到数据库链接配置对象
-var connection2; //定义数据库连接对象
+// 获取数据库链接配置对象
+var connection2; // 定义数据库连接对象
 
-var Router1 = (0, _express["default"])();
+// 使用 Koa 的路由组件
+var Router1 = new _koaRouter["default"](); // 创建新的 Koa 路由对象
 
 (function _callee() {
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -29,6 +30,7 @@ var Router1 = (0, _express["default"])();
 
         case 3:
           connection2 = _context.sent;
+          // 连接数据库
           console.log("数据库1连接成功");
           _context.next = 10;
           break;
@@ -44,9 +46,10 @@ var Router1 = (0, _express["default"])();
       }
     }
   }, null, null, [[0, 7]]);
-})();
+})(); // 字段映射表
 
-Router1.get("/yingshe", function _callee2(req, res) {
+
+Router1.get("/yingshe", function _callee2(ctx) {
   var dbResult, objectArray;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -54,7 +57,7 @@ Router1.get("/yingshe", function _callee2(req, res) {
         case 0:
           console.log("123");
           _context2.next = 3;
-          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name  FROM t_field_mapper;\n  "));
+          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name FROM t_field_mapper;\n  "));
 
         case 3:
           dbResult = _context2.sent;
@@ -64,7 +67,7 @@ Router1.get("/yingshe", function _callee2(req, res) {
           });
           console.log("yingshe");
           console.dir(objectArray);
-          res.send(objectArray);
+          ctx.body = objectArray;
 
         case 9:
         case "end":
@@ -72,9 +75,9 @@ Router1.get("/yingshe", function _callee2(req, res) {
       }
     }
   });
-}); //行为映射表
+}); // 行为映射表
 
-Router1.get("/yingshe/action", function _callee3(req, res) {
+Router1.get("/yingshe/action", function _callee3(ctx) {
   var dbResult, objectArray;
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
@@ -82,7 +85,7 @@ Router1.get("/yingshe/action", function _callee3(req, res) {
         case 0:
           console.log("123");
           _context3.next = 3;
-          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name ,type,is_show FROM t_behavior_field_mapper;\n  "));
+          return regeneratorRuntime.awrap(connection2.execute("\n    SELECT db_name, f_name, type, is_show FROM t_behavior_field_mapper;\n  "));
 
         case 3:
           dbResult = _context3.sent;
@@ -93,7 +96,7 @@ Router1.get("/yingshe/action", function _callee3(req, res) {
             return _ref2 = {}, _defineProperty(_ref2, row.db_name, row.f_name), _defineProperty(_ref2, "type", row.type), _defineProperty(_ref2, "is_show", row.is_show), _ref2;
           });
           console.log("yingshe/action" + objectArray);
-          res.send(objectArray);
+          ctx.body = objectArray;
 
         case 8:
         case "end":

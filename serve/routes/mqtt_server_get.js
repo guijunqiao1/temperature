@@ -2,7 +2,7 @@
 import mqtt from "mqtt";
 
 //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
-import Config1 from "../indexNode3.js";//此处获取到数据库链接配置对象
+import Config1 from "../indexNode2.js";//此处获取到数据库链接配置对象
 import axios from "axios";
 import WebSocket from "ws";
 
@@ -79,14 +79,6 @@ function getFormattedDate() {
   const seconds = String(now.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
 }
-//同步时间格式的方法
-function getTongbu() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
-} 
 //定义获取当前时间并且为特定格式的方法
 function getFormattedDate1() {
   const now = new Date(); 
@@ -191,87 +183,23 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
 } 
 
 
+//主题订阅数组(硬转软)
+const topic_array = ['sensorData','state'];
+
 //控制台客户端对象连接设置
 client.on('connect', () => {
   console.log("接收方连接成功");
   //当客户端连接成功之后订阅对应的主题
   //用于检测传感器数据的主题
-  client.subscribe('sensorData',{qos:1},(err)=>{
-    if(err){
-      console.log("sensorData主题订阅失败");
-    }
-    else{
-      console.log("sensorData主题订阅成功");
-    }
-  });
-  // //用于检测告警信息发送过来的主题
-  // client.subscribe('sensor/alarm',{qos:1}, (err) => {
-  //   if (!err) {
-  //     console.log('成功订阅 sensor/alarm');
-  //   } else {
-  //     console.log('失败订阅 sensor/alarm');
-  //   }
-  // });
-  // //主动订阅保存状态下的传感器数据主题
-  // client.subscribe('miss_data',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("miss_data主题订阅失败");
-  //   }
-  //   else{
-  //     console.log("miss_data主题订阅成功")
-  //   }
-  // });
-  // //主动订阅心跳主题
-  // client.subscribe('heartbeat',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅sensor/heartTest_device主题失败");
-  //   }
-  //   else{
-  //     console.log("订阅sensor/heartTest_device主题成功");
-  //   }
-  // });
-  //主动订阅自动模式下修改控件的监听主题
-  client.subscribe('state',{qos:1},(err)=>{
-    if(err){
-      console.log("订阅state主题失败");
-    } 
-    else{
-      console.log("订阅state主题成功");
-    }
-  });
-  //主动订阅入库主题
-  // client.subscribe('direct1',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅direct1主题失败");
-  //   }
-  //   else{
-  //     console.log("订阅direct1主题成功");
-  //   }
-  // });
-  // client.subscribe('alarm',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅alarm主题失败");
-  //   }
-  //   else{
-  //     console.log("订阅alarm主题成功");
-  //   }
-  // });
-  // client.subscribe('alarm1',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅alarm1主题失败");
-  //   }
-  //   else{
-  //     console.log("订阅alarm1主题成功");
-  //   }
-  // });
-  // client.subscribe('chonglian',{qos:1},(err)=>{
-  //   if(err){
-  //     console.log("订阅chonglian主题失败");
-  //   }
-  //   else{
-  //     console.log("订阅chonglian主题成功");
-  //   }
-  // });
+  topic_array.forEach((item,index)=>{
+    client.subscribe(item,{qos:1},(err)=>{
+      if(err){
+        console.log(item+"主题订阅失败");
+      }else{
+        console.log(item+"主题订阅成功");
+      }
+    })
+  })
 });
 
 client.on('disconnect', () => {
@@ -353,6 +281,21 @@ client.on('message',async (topic, message)=>{
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
     let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type} = JSON.parse(message);
+
+    //定义对象名称映射变量
+    const reflect = { };
+    reflect['temperature1'] = temperature1;
+    reflect['temperature2'] = temperature2;
+    reflect['temperature3'] = temperature3;
+    reflect['smog1'] = smog1;
+    reflect['smog2'] = smog2;
+    reflect['smog3'] = smog3;
+    reflect['waterlevel1'] = waterlevel1;
+    reflect['waterlevel2'] = waterlevel2;
+    reflect['waterlevel3'] = waterlevel3;
+
+
+
     V = Math.round(V * 100) / 100;
     I = Math.round(I * 100) / 100;
     I = I / 1000; 
@@ -362,21 +305,21 @@ client.on('message',async (topic, message)=>{
     const W = P * 1;
 
 
-    //首先判断值是否合法后进行插入
-    if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
+    //公共块封装
+    async function gong_right(value){
       //基础时间值获取
       const time_base = getFormattedDate();
       //数据库中映射字段的使用
       const obj = {};
       rows1.forEach((item,index)=>{
         if(index===0){
-          obj[item.p_name] = temperature1;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
+          obj[item.p_name] = reflect['temperature'+value];//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = smog1;
+          obj[item.p_name] = reflect['smog'+value];
         }
         else if(index===2){
-          obj[item.p_name] = waterlevel1;
+          obj[item.p_name] = reflect['waterlevel'+value];
         }
       })
       // 将传感器数据存入到t_data中
@@ -392,170 +335,83 @@ client.on('message',async (topic, message)=>{
       INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
       VALUES ("机房1","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
       `);
+    }
+    async function gong_tem(value){
+      await connection1.execute(`
+        INSERT INTO t_error_msg(d_no,e_msg,c_time)
+        VALUES("机房${value}",'温度越界',"${getFormattedDate1()}");
+        `);
+        console.log("--------------------------");
+      // 发送消息
+      sendToAllClients(JSON.stringify({
+          type: 'welcome',
+          message: `机房${value}的温度越界`,
+      }));
+    }
+    async function gong_smo(value){
+      await connection1.execute(`
+        INSERT INTO t_error_msg(d_no,e_msg,c_time)
+        VALUES("机房${value}",'烟雾越界',"${getFormattedDate1()}");
+        `);
+      // 发送消息
+      sendToAllClients(JSON.stringify({
+          type: 'welcome',
+          message: `机房${value}的烟雾越界`,
+      }));
+    }
+    async function gong_wat(value){
+      await connection1.execute(`
+        INSERT INTO t_error_msg(d_no,e_msg,c_time)
+        VALUES("机房${value}",'水位越界',"${getFormattedDate1()}");
+        `);
+      // 发送消息
+      sendToAllClients(JSON.stringify({
+          type: 'welcome',
+          message: `机房${value}的水位越界`,
+      }));
+    }
+
+    //首先判断值是否合法后进行插入
+    if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
+      gong_right(1);
     }else{
       //插入告警表，最后发送错误消息到前端监听的路由中
       if(!temperature_panduan(temperature1)){//温度出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房1",'温度越界',"${getFormattedDate1()}");
-          `);
-          console.log("--------------------------");
-        // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房1的温度越界',
-        }));
+        gong_tem(1);
       }
       if(!smoke_panduan(smog1)){//烟雾出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房1",'烟雾越界',"${getFormattedDate1()}");
-          `);
-        // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房1的烟雾越界',
-        }));
+        gong_smo(1);
       }
       if(!shuiwei_panduan(waterlevel1)){//水位出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房1",'水位越界',"${getFormattedDate1()}");
-          `);
-        // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房1的水位越界',
-        }));
+        gong_wat(1);
       }
     }
     if(temperature_panduan(temperature2)&&smoke_panduan(smog2)&&shuiwei_panduan(waterlevel2)){
-      //基础时间值获取
-      const time_base = getFormattedDate();
-      //数据库中映射字段的使用
-      const obj = {};
-      rows1.forEach((item,index)=>{
-        if(index===0){
-          obj[item.p_name] = temperature2;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
-        }
-        else if(index===1){
-          obj[item.p_name] = smog2;
-        }
-        else if(index===2){
-          obj[item.p_name] = waterlevel2;
-        }
-      })
-      // 将传感器数据存入到t_data中
-      if(!type){
-        type="实时数据";
-      }
-      // 当d_no不存在时：
-      if(!d_no){
-        d_no = null;
-      }
-      // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
-      const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
-      VALUES ("机房2","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
-      `);
+      gong_right(2);
     }else{
       //插入告警表，最后发送错误消息到前端监听的路由中
       if(!temperature_panduan(temperature2)){//温度出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房2",'温度越界',"${getFormattedDate1()}");
-          `);
-        // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房2的温度越界',
-        }));
+        gong_tem(2);
       }
       if(!smoke_panduan(smog2)){//烟雾出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房2",'烟雾越界',"${getFormattedDate1()}");
-          `);
-          // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房2的烟雾越界',
-        }));
+        gong_smo(2);
       }
       if(!shuiwei_panduan(waterlevel2)){//水位出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房2",'水位越界',"${getFormattedDate1()}");
-          `);
-          // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房2的水位越界',
-        }));
+        gong_wat(2);
       }
     }
     if(temperature_panduan(temperature3)&&smoke_panduan(smog3)&&shuiwei_panduan(waterlevel3)){
-      //基础时间值获取
-      const time_base = getFormattedDate();
-      //数据库中映射字段的使用
-      const obj = {};
-      rows1.forEach((item,index)=>{
-        if(index===0){
-          obj[item.p_name] = temperature3;//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
-        }
-        else if(index===1){
-          obj[item.p_name] = smog3;
-        }
-        else if(index===2){
-          obj[item.p_name] = waterlevel3;
-        }
-      })
-      // 将传感器数据存入到t_data中
-      if(!type){
-        type="实时数据";
-      }
-      // 当d_no不存在时：
-      if(!d_no){
-        d_no = null;
-      }
-      const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
-      VALUES ("机房3","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
-      `);
+      gong_right(3);
     }else{
       //插入告警表，最后发送错误消息到前端监听的路由中
       if(!temperature_panduan(temperature3)){//温度出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房3",'温度越界',"${getFormattedDate1()}");
-          `);
-          // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房3的温度越界',
-        }));
+        gong_tem(3);
       }
       if(!smoke_panduan(smog3)){//烟雾出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房3",'烟雾越界',"${getFormattedDate1()}");
-          `);
-              // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房3的烟雾越界',
-        }));
+        gong_smo(3);
       }
       if(!shuiwei_panduan(waterlevel3)){//水位出错
-        await connection1.execute(`
-          INSERT INTO t_error_msg(d_no,e_msg,c_time)
-          VALUES("机房3",'水位越界',"${getFormattedDate1()}");
-          `);
-              // 发送消息
-        sendToAllClients(JSON.stringify({
-            type: 'welcome',
-            message: '机房3的水位越界',
-        }));
+        gong_wat(3);
       }
     }
   }
@@ -729,3 +585,5 @@ client.on('message',async (topic, message)=>{
 //   const randomDecimal3 = Math.random()>0.5? 1:0 ;
 //   client.publish("sensor/data",JSON.stringify({yanwu1:randomDecimal1.toFixed(2),yanwu2:randomDecimal2.toFixed(2),warning_flag:randomDecimal3}),{qos:1});
 // },2000);
+
+

@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.t_direct_control = t_direct_control;
 
-var _express = _interopRequireDefault(require("express"));
+var _koaRouter = _interopRequireDefault(require("koa-router"));
 
-var _indexNode = _interopRequireDefault(require("../indexNode3.js"));
+var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
 var _mqtt_server_get = require("./mqtt_server_get.js");
 
@@ -21,19 +21,14 @@ function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) ||
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-var Router_direct_response = (0, _express["default"])(); //在当前需要对Mysql数据库进行操作的文件中提前引入Mysql数据库的配置文件--需要注意的是indexNode文件中的其他引入的组件文件只是对indexNode本身编写的时候进行约束的文件
-// import Config from "../indexNode2.js";//此处获取到数据库链接配置对象
+var Router_direct_response = new _koaRouter["default"]();
+var connection;
 
-//此处获取到数据库链接配置对象
-var connection; //定义数据库连接对象
-//导入mqtt模块--用于指令的正确发送响应 
-
-//定义获取当前时间并且为特定格式的方法
+// 获取格式化时间字符串
 function getFormattedDate() {
   var now = new Date();
   var year = now.getFullYear();
-  var month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
-
+  var month = String(now.getMonth() + 1).padStart(2, '0');
   var day = String(now.getDate()).padStart(2, '0');
   var hours = String(now.getHours()).padStart(2, '0');
   var minutes = String(now.getMinutes()).padStart(2, '0');
@@ -41,242 +36,184 @@ function getFormattedDate() {
   return "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
 }
 
-(function _callee3() {
+function t_direct_control() {
   var result, rowx;
-  return regeneratorRuntime.async(function _callee3$(_context3) {
+  return regeneratorRuntime.async(function t_direct_control$(_context2) {
     while (1) {
-      switch (_context3.prev = _context3.next) {
+      switch (_context2.prev = _context2.next) {
         case 0:
-          _context3.prev = 0;
-          _context3.next = 3;
+          _context2.prev = 0;
+          _context2.next = 3;
           return regeneratorRuntime.awrap((0, _indexNode["default"])());
 
         case 3:
-          connection = _context3.sent;
-          console.log("数据库连接成功"); // const result = await connection.execute(`
-          //   SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou,t.value
-          //   FROM t_direct t,t_direct_config c
-          //   WHERE c.id = t.config_id
-          //   AND ok in ("yes","yes1") 
-          //   ORDER BY CASE f_type
-          //       WHEN '1' THEN 1
-          //       WHEN '5' THEN 2
-          //       WHEN '3' THEN 3
-          //       ELSE 4 
-          //     END;
-          // `);
-
-          _context3.next = 7;
+          connection = _context2.sent;
+          console.log("数据库连接成功");
+          _context2.next = 7;
           return regeneratorRuntime.awrap(connection.execute("\n      SELECT c.id,c.f_type,c.mode,c.f_value,c.t_name,c.max,c.min,c.topic,c.header,c.luyou\n      FROM t_direct_config c\n      WHERE ok in (\"yes\",\"yes1\") \n      ORDER BY CASE f_type\n          WHEN '1' THEN 1\n          ELSE 2\n        END;\n    "));
 
         case 7:
-          result = _context3.sent;
+          result = _context2.sent;
           rowx = result[0];
           console.log("成功进入外层");
-          console.dir(rowx); //遍历完成全局路由绑定 
+          console.dir(rowx);
+          rowx.forEach(function (item, index) {
+            console.log("item:" + item.luyou);
+            Router_direct_response.get("/zhiling/" + item.luyou, function _callee(ctx) {
+              var _ctx$query, content, d_no, obj1, tem1, tem11, topic, C1, C2, E1, E2, N1, N2, formatTime, _ref, _ref2, rowsx, template, _ref3, _ref4, row;
 
-          rowx.forEach(function _callee2(item, index) {
-            return regeneratorRuntime.async(function _callee2$(_context2) {
-              while (1) {
-                switch (_context2.prev = _context2.next) {
-                  case 0:
-                    console.log("item:" + item.luyou); //需要注意content控制存入库中的值，tem11为指令值
+              return regeneratorRuntime.async(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      _ctx$query = ctx.query, content = _ctx$query.content, d_no = _ctx$query.d_no;
+                      console.log("当前总neriong:");
+                      console.dir(item);
+                      console.log("content:" + content);
+                      obj1 = {};
 
-                    Router_direct_response.get("/zhiling/" + item.luyou, function _callee(req, res) {
-                      var _req$query, content, d_no, obj1, tem1, tem11, topic, C1, C2, E1, E2, N1, N2, formatTime, _ref, _ref2, rowsx, template, _ref3, _ref4, row, _ref5, _ref6, rows;
+                      if (!(item.f_type !== '2' && item.f_type !== '3' && item.f_type !== '4')) {
+                        _context.next = 20;
+                        break;
+                      }
 
-                      return regeneratorRuntime.async(function _callee$(_context) {
-                        while (1) {
-                          switch (_context.prev = _context.next) {
-                            case 0:
-                              console.log("成功进入32行阶段");
-                              _req$query = req.query, content = _req$query.content, d_no = _req$query.d_no;
-                              console.log("当前总neriong:");
-                              console.dir(item);
-                              console.log("content:" + content); //备份内容的封装
+                      C1 = item.f_value.split("|")[0].split(":")[0];
+                      C2 = item.f_value.split("|")[1].split(":")[0];
+                      E1 = item.f_value.split("|")[0].split(":")[1];
+                      E2 = item.f_value.split("|")[1].split(":")[1];
+                      N1 = item.header.split("|")[0];
+                      N2 = item.header.split("|")[1];
+                      tem1 = content === C1 ? E1 : E2;
+                      tem11 = content === C1 ? N1 : N2;
+                      topic = item.topic;
 
-                              obj1 = {};
+                      if (item.id === 12) {
+                        tem11 = 'on' + d_no.split("机房")[1] + '_' + (content === "开" ? '4' : '0');
+                      }
 
-                              if (!(item.f_type !== '2' && item.f_type !== '3' && item.f_type !== '4')) {
-                                _context.next = 21;
-                                break;
-                              }
+                      obj1[tem1] = tem11;
+                      content = content === C1 ? C1 : C2;
+                      _context.next = 37;
+                      break;
 
-                              //定义区块变量--用于替代切割后的各个维度的内容
-                              C1 = item.f_value.split("|")[0].split(":")[0]; //中文第一个维度
+                    case 20:
+                      formatTime = function formatTime(timeStr) {
+                        return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+                      };
 
-                              C2 = item.f_value.split("|")[1].split(":")[0]; //中文第二个维度
+                      console.log("成功进入时间判断");
+                      tem1 = item.f_value.split("|")[0];
 
-                              E1 = item.f_value.split("|")[0].split(":")[1]; //英文第一个维度
+                      if (!content) {
+                        _context.next = 27;
+                        break;
+                      }
 
-                              E2 = item.f_value.split("|")[1].split(":")[1]; //英文第二个维度
-                              //定义指令收尾变量--用于存储切割后的各个维度的内容
+                      if (item.f_type === "4") {
+                        content = formatTime(content);
+                        console.log("时间值格式:" + content);
+                        tem11 = content.split(" ")[1];
+                        console.log("time:" + tem11);
+                      } else {
+                        tem11 = content;
+                      }
 
-                              N1 = item.header.split("|")[0]; //结尾第一个维度
+                      _context.next = 33;
+                      break;
 
-                              N2 = item.header.split("|")[1]; //结尾第二个维度
+                    case 27:
+                      _context.next = 29;
+                      return regeneratorRuntime.awrap(connection.execute("\n              SELECT t_direct.value\n              FROM t_direct,t_direct_config\n              WHERE t_direct_config.id = t_direct.config_id\n              AND t_direct_config.id = ".concat(item.id, "\n              AND d_no = \"").concat(d_no === "null" ? "null" : "".concat(d_no), "\"\n            ")));
 
-                              tem1 = content === C1 ? E1 : E2;
-                              tem11 = content === C1 ? N1 : N2;
-                              topic = item.topic;
+                    case 29:
+                      _ref = _context.sent;
+                      _ref2 = _slicedToArray(_ref, 1);
+                      rowsx = _ref2[0];
 
-                              if (item.id === 12) {
-                                tem11 = 'on' + d_no.split("机房")[1] + '_' + (content === "开" ? '4' : '0');
-                              }
+                      if (item.f_type === "4") {
+                        tem11 = rowsx[0].value.split(" ")[1];
+                        console.log("time:" + tem11);
+                      } else {
+                        tem11 = content;
+                      }
 
-                              obj1[tem1] = tem11; //中文更新
+                    case 33:
+                      topic = item.topic;
+                      console.log("item.id:" + item.id);
 
-                              content = content === C1 ? C1 : C2;
-                              _context.next = 38;
-                              break;
+                      if (item.id === 12) {
+                        tem11 = 'on' + d_no + '_' + content;
+                      }
 
-                            case 21:
-                              //输入框情况
-                              //定义时间格式化方法
-                              formatTime = function formatTime(timeStr) {
-                                return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
-                              };
+                      obj1[tem1] = tem11;
 
-                              console.log("成功进入时间判断");
-                              tem1 = item.f_value.split("|")[0];
+                    case 37:
+                      if (!d_no) {
+                        _context.next = 57;
+                        break;
+                      }
 
-                              if (!content) {
-                                _context.next = 28;
-                                break;
-                              }
+                      console.log("即将更新:" + d_no);
+                      template = topic;
+                      console.log("tem:" + template);
+                      (0, _mqtt_server_get.beifen)(d_no, [template, obj1]);
+                      console.log("注册的一次路由");
+                      _context.next = 45;
+                      return regeneratorRuntime.awrap(connection.execute("\n            INSERT INTO operate_history(place,device,operate,ctime)\n            VALUES('".concat(d_no, "','").concat(item.t_name, "','\u4FEE\u6539\u4E3A").concat(content, "','").concat(getFormattedDate(), "')\n          ")));
 
-                              //当不为单独值查询路由的情况
-                              if (item.f_type === "4") {
-                                //为时间值的情况下将content、tem11进行转化
-                                content = formatTime(content);
-                                console.log("时间值格式:" + content);
-                                tem11 = content.split(" ")[1];
-                                console.log("time:" + tem11);
-                              } else {
-                                tem11 = content;
-                              }
+                    case 45:
+                      _context.next = 47;
+                      return regeneratorRuntime.awrap(connection.execute("\n            SELECT config_id\n            FROM t_direct,t_direct_config\n            WHERE t_direct_config.id = t_direct.config_id\n            AND t_direct_config.id = ".concat(item.id, "\n            AND d_no = \"").concat(d_no, "\"\n          ")));
 
-                              _context.next = 34;
-                              break;
+                    case 47:
+                      _ref3 = _context.sent;
+                      _ref4 = _slicedToArray(_ref3, 1);
+                      row = _ref4[0];
 
-                            case 28:
-                              _context.next = 30;
-                              return regeneratorRuntime.awrap(connection.execute("\n              SELECT t_direct.value\n              FROM t_direct,t_direct_config\n              WHERE t_direct_config.id = t_direct.config_id\n              AND t_direct_config.id = ".concat(item.id, "\n              AND d_no = \"").concat(d_no === "null" ? "null" : "".concat(d_no), "\"\n              ")));
+                      if (row[0]) {
+                        _context.next = 55;
+                        break;
+                      }
 
-                            case 30:
-                              _ref = _context.sent;
-                              _ref2 = _slicedToArray(_ref, 1);
-                              rowsx = _ref2[0];
+                      _context.next = 53;
+                      return regeneratorRuntime.awrap(connection.execute("\n              INSERT INTO t_direct(config_id,value,d_no)\n              VALUE(".concat(item.id, ",\"").concat(content, "\",\"").concat(d_no, "\")\n            ")));
 
-                              if (item.f_type === "4") {
-                                //为时间值的情况下将
-                                tem11 = rowsx[0].value.split(" ")[1];
-                                console.log("time:" + tem11);
-                              } else {
-                                tem11 = content;
-                              }
+                    case 53:
+                      _context.next = 57;
+                      break;
 
-                            case 34:
-                              topic = item.topic;
-                              console.log("item.id:" + item.id);
+                    case 55:
+                      _context.next = 57;
+                      return regeneratorRuntime.awrap(connection.execute("\n              UPDATE t_direct\n              SET value = \"".concat(content, "\"\n              WHERE config_id = ").concat(item.id, "\n            ")));
 
-                              if (item.id === 12) {
-                                tem11 = 'on' + d_no + '_' + content;
-                              }
+                    case 57:
+                      ctx.body = "ok";
 
-                              obj1[tem1] = tem11;
-
-                            case 38:
-                              if (!d_no) {
-                                _context.next = 63;
-                                break;
-                              }
-
-                              console.log("即将更新:" + d_no);
-                              template = topic;
-                              console.log("tem:" + template); //发送指令，同时完成指令备份
-
-                              (0, _mqtt_server_get.beifen)(d_no, [template, obj1]); //在实际场景像需要将payload包装成value进行直接的传递--后续则直接在publish方法中使用...展开运算符传值即可
-
-                              console.log("注册的一次路由"); //指令历史的记录
-
-                              _context.next = 46;
-                              return regeneratorRuntime.awrap(connection.execute("\n          INSERT INTO operate_history(place,device,operate,ctime)\n          VALUES('".concat(d_no, "','").concat(item.t_name, "','\u4FEE\u6539\u4E3A").concat(content, "','").concat(getFormattedDate(), "')\n          ")));
-
-                            case 46:
-                              _context.next = 48;
-                              return regeneratorRuntime.awrap(connection.execute("\n          SELECT config_id\n          FROM t_direct,t_direct_config\n          WHERE t_direct_config.id = t_direct.config_id\n          AND t_direct_config.id = ".concat(item.id, "\n          AND d_no = \"").concat(d_no, "\"\n          ")));
-
-                            case 48:
-                              _ref3 = _context.sent;
-                              _ref4 = _slicedToArray(_ref3, 1);
-                              row = _ref4[0];
-
-                              if (row[0]) {
-                                _context.next = 57;
-                                break;
-                              }
-
-                              _context.next = 54;
-                              return regeneratorRuntime.awrap(connection.execute("\n          INSERT INTO t_direct(config_id,value,d_no)\n          VALUE(".concat(item.id, ",\"").concat(content, "\",\"").concat(d_no, "\")\n          ")));
-
-                            case 54:
-                              _context.t0 = _context.sent;
-                              _context.next = 60;
-                              break;
-
-                            case 57:
-                              _context.next = 59;
-                              return regeneratorRuntime.awrap(connection.execute("\n          UPDATE t_direct\n          SET value = \"".concat(content, "\"\n          WHERE config_id = ").concat(item.id, "\n          ")));
-
-                            case 59:
-                              _context.t0 = _context.sent;
-
-                            case 60:
-                              _ref5 = _context.t0;
-                              _ref6 = _slicedToArray(_ref5, 1);
-                              rows = _ref6[0];
-
-                            case 63:
-                              // res.send(!d_no ? item : "ok");
-                              res.send("ok");
-                              return _context.abrupt("return");
-
-                            case 65:
-                            case "end":
-                              return _context.stop();
-                          }
-                        }
-                      });
-                    });
-                    Router_direct_response.get('/test111', function (req, res) {
-                      res.send('ok');
-                    });
-
-                  case 3:
-                  case "end":
-                    return _context2.stop();
+                    case 58:
+                    case "end":
+                      return _context.stop();
+                  }
                 }
-              }
+              });
+            });
+            Router_direct_response.get('/test111', function (ctx) {
+              ctx.body = 'ok';
             });
           });
-          _context3.next = 18;
-          break;
+          return _context2.abrupt("return", Router_direct_response);
 
-        case 14:
-          _context3.prev = 14;
-          _context3.t0 = _context3["catch"](0);
-          console.log(_context3.t0);
+        case 15:
+          _context2.prev = 15;
+          _context2.t0 = _context2["catch"](0);
+          console.log(_context2.t0);
           console.log("数据库连接失败");
 
-        case 18:
+        case 19:
         case "end":
-          return _context3.stop();
+          return _context2.stop();
       }
     }
-  }, null, null, [[0, 14]]);
-})(); //添加和对应的数据库操作的修改以及指令发送过程中为d_no不为null的情况的topic的修改,考虑为输入框进行提交而不是单纯的sign值的修改导致当前的请求的发送
+  }, null, null, [[0, 15]]);
+}
 
-
-var _default = Router_direct_response;
-exports["default"] = _default;
+;

@@ -109,38 +109,38 @@ let update = () => { };
 //专门用于更新的函数
 update = async () => {//最好别在挂载阶段使用function否则容易提升到最高级导致变量未定义的隐藏错误
   if (start.value === end.value && end.value !== 1) {//单向查询
-    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=end&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=end&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
-    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=end&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${Pinia.signzhi}&start=end&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
   else if (start.value === 1 && end.value === 1) {
-    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
 
-    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=${start.value}&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
   else {
-    const result = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
-    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${d_no1.value}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
+    const result2 = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
 
-    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${d_no1.value}&start=${start.value}&end=${end.value}`);//获取总数据
+    const result1 = await axios.get(`/api/t_error_msg/count?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
 

@@ -20,8 +20,6 @@
     <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
       当前机房：{{ Pinia.signzhi }}</div>
 
-
-
     <!-- 监控相关内容 -->
     <h2>监控相关内容</h2>
     <div class="containerxxx">
@@ -46,8 +44,6 @@
         </div>
       </div>
     </div>
-
-
 
     <!-- 设备信息  -->
     <div id="latestData" v-show="Pinia.Device_sign">
@@ -216,8 +212,6 @@ let time_array: any = [];//设备图像和行为图像通用
 let tem_array: any = ref([]);//用于临时存储不同时间格式的nowArray
 let tem_array1: any = ref([]);//用于临时存储不同时间格式的nowArray1
 
-
-
 //监控相关变量
 const src0 = ref();
 const src1 = ref();
@@ -228,8 +222,6 @@ const time = ref();
 const result_person = ref();
 
 const router = useRouter();
-
-
 
 
 //定义额外的维度变量用于内容的扩展

@@ -16,6 +16,7 @@ import Router from '@koa/router';
 // 导入子路由（假设这些模块都使用 koa-router 创建）
 import { t_direct_control } from "./routes/direct_control.js";
 import IndexRouter from './routes/index.js';
+import Test from "./routes/test.js";
 import Router1 from './routes/index_yingshe.js';
 import Router2 from './routes/index_device.js';
 import Router3 from './routes/index_error_msg.js';
@@ -61,6 +62,7 @@ async function startServer() {
     router.use( Router3.routes(), Router3.allowedMethods());
     router.use( Router2.routes(), Router2.allowedMethods());
     router.use( Router1.routes(), Router1.allowedMethods());
+    router.use( Test.routes(), Test.allowedMethods());
     router.use( IndexRouter.routes(), IndexRouter.allowedMethods());
     router.use( Router_direct_control.routes(), Router_direct_control.allowedMethods());
     router.use( Router_http.routes(), Router_http.allowedMethods());

@@ -1,5 +1,9 @@
 <template>
   <div class="container">
+
+    <h1>当前选中的测试次数：{{ Pinia.times }}</h1>
+
+
     <!-- 设备相关内容 -->
     <el-dropdown>
       <el-button type="primary" v-show="Pinia.type_len > 1">
@@ -19,6 +23,27 @@
     </el-dropdown>
     <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
       当前机房：{{ Pinia.signzhi }}</div>
+
+
+      <!-- 测试次数 -->
+    <el-dropdown>
+      <el-button type="primary" v-if="Pinia.test_type_len > 1">
+        测试次数<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.test_array" :key="item[0]">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_cishu(item[0])">{{ item[0] }}</div>
+              </el-dropdown-item>
+            </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only1" style="border-radius: 5px;background-color: #409eff;" v-if="Pinia.test_type_len <= 1">
+      当前选中的测试次数：{{ Pinia.times }}</div>
 
 
 
@@ -308,17 +333,27 @@ function change_jifang(value){
   console.log("当前机房:"+Pinia.signzhi);
 }
 
+//修改测试次数的方法
+function change_cishu(value){
+  Pinia.change_times(value);
+  //页面重置,先跳到一个空路由，再跳回来
+  router.replace('/empty').then(() => {
+    router.replace('/History');
+  })
+  console.log("当前次数:"+Pinia.times);
+}
 
 
 //专门用于更新的函数--赋值device_page_array和jiezhi_array
 update = async () => {//用于自动触发分页路由
   const boolean_x = start !== 1 && end !== 1 && start.getTime() === end.getTime();
   //直接进行赋值(由于本身databases_array就随着ok的变化而变化所以不需要进行条件判断)
-  const result = await axios.get(`/api/History?currentPage=${currentPage.value}&pageSize=${pageSize}&start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);
+  console.log("发送之前的times为："+Pinia.times);
+  const result = await axios.get(`/api/test_history?currentPage=${currentPage.value}&pageSize=${pageSize}&start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
   device_page_array.value = result.data;//进行设备分页数组的赋值
-  const result1 = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
+  const result1 = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
   device_array.value = result1.data;
-  const result_count = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//用于获取总数
+  const result_count = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//用于获取总数
   total1.value = result_count.data;
   const result2 = await axios.get(`/api/device_unit`);
   unit_array.value = result2.data;
@@ -579,11 +614,11 @@ onMounted(async () => {
   if (a_length.value > 0 && Pinia.Device_sign) {//当且仅当date_Array中存在值且Device_sign为true时才进行处理
     //在监视阶段进行currentPage的赋值用于进行初次切割的验证
     currentPage.value = 1;
-    const result2 = await axios.get(`/api/History?start=${start}&end=${end}&d_no=${signzhi.value}`);//此处同理将指定d_No的起始位置以及最终位置进行定位
+    const result2 = await axios.get(`/api/test_history?start=${start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//此处同理将指定d_No的起始位置以及最终位置进行定位
     //故不需要再使用filter函数进行d_no的筛选
     now_databasesArray.value = result2.data;
     device_array.value = now_databasesArray.value;
-    const result11 = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);
+    const result11 = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
     total1.value = result11.data;//某设备总量的获取
     //设备数据
     // 定义图表配置--折线图
@@ -794,9 +829,6 @@ onMounted(async () => {
       //柱状赋值
       chartOption11.value.xAxis.data.push(item[`field${index + 1}`]);
     })
-
-
-
   }
 
   // 根据当前的Pinia状态决定是否调用enough函数
@@ -882,15 +914,15 @@ onMounted(async () => {
       a_length.value = jiezhi.data.length;//进行总设备数量的赋值
       currentPage.value = 1;
       //当点击ok的时候则对date_array进行获取
-      const resultk = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}`);
+      const resultk = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&times=${Pinia.times}`);
       date_Array.value = resultk.data;//分页内容的呈现数组赋值
       type_array.value = qu_repeate(date_Array.value);//去重数组的获取
-      const resultx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
+      const resultx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
       now_databasesArray.value = resultx.data;//进行总ok内容的赋值
       device_page_array.value = resultx.data;
-      const resultxx = await axios.get(`/api/History?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
+      const resultxx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
       device_array.value = resultxx.data;//赋值完毕
-      const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}`);//将数组的总内容数进行获取用于total1的赋值
+      const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//将数组的总内容数进行获取用于total1的赋值
       total1.value = resultxxx.data;//进行某设备总值的赋值
 
       console.log("点击了Ok但是还没有进入到enough中的device_array:" + device_array.value);
@@ -943,17 +975,17 @@ onMounted(async () => {
       //首先判断signzhi是否发生改变
       if (signzhi.value !== value[0]) {//改变则进行device_array的从新请求赋值
         if (start !== 1 && end !== 1 && start.getTime() === end.getTime()) {
-          const result = await axios.get(`/api/History?&start=end&end=${end}&d_no=${signzhi.value}`);
+          const result = await axios.get(`/api/test_history?&start=end&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
           device_array.value = result.data;
-          const result11 = await axios.get(`/api/History_count?start=end&end=${end}&d_no=${signzhi.value}`);
+          const result11 = await axios.get(`/api/History_count?start=end&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
           total1.value = result11.data;//进行某设备总数的获取
           const result2 = await axios.get(`/api/data?start=end&end=${end}`);
           a_length.value = result2.data.length;//进行设备总数的获取
         }
         else {
-          const result = await axios.get(`/api/History?&start=${start}&end=${end}&d_no=${signzhi.value}`);
+          const result = await axios.get(`/api/test_history?&start=${start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
           device_array.value = result.data;
-          const result11 = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}`);
+          const result11 = await axios.get(`/api/History_count?start=${start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);
           total1.value = result11.data;//进行某设备总数的获取
           const result2 = await axios.get(`/api/data?start=${start}&end=${end}`);
           a_length.value = result2.data.length;//进行设备总数的获取
@@ -1610,6 +1642,19 @@ input[type="checkbox"]:hover {
   margin-left: 269px;
   margin-top: 40px;
 }
+
+/* 为次数选择器进行样式设计 */
+.container.fit-view>.el-dropdown:nth-child(3) {
+  position: relative;
+  top: 35px;
+  left:100px;
+}
+.container.fit-view .only1 {
+  position: relative;
+  left:700px;
+}
+
+
 </style>
 <!-- flex-flow属性可用于同时控制flex-direction和flex-wrap  -->
 <!-- 实时数据用于在前端进行对应的表格的内容设计的时候如果该变量发生了变化则导致template表格的内容发生动态的变化方便响应式布局的设计 -->

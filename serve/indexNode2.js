@@ -8,12 +8,12 @@ async function Config2(){
     const connection = await mysql.createConnection({
       host:"127.0.0.1",
       password:"123456",
-      database:"project02",
+      database:"bingxiang",
       port:3306,
       user:"root"
     });
     //进行数据连接事件的绑定
-    console.log("连接成功");
+    console.log("连接成功~~~~~~~~~~~~~~~~~~~~~~");
     //返回连接实例
     return connection;
   }catch(error){

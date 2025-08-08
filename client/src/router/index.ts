@@ -9,7 +9,8 @@ import New from "../pages/Now.vue";
 import Mqtt from "../pages/Control.vue";
 import ex from "../pages/experience.vue";
 import container from "../pages/t_container.vue";
-
+import test from '../pages/test.vue';
+import DEVICE from "../pages/DEVICE.vue";
 
 //2、创建路由器
 const router = createRouter({
@@ -39,14 +40,14 @@ const router = createRouter({
       path: "/t_Control",
       component: Mqtt
     },
-    // {
-    //   path: "/ex",
-    //   component: ex
-    // }
-    // {
-    //   path: "/t_Container",
-    //   component: container
-    // }
+    {
+      path: "/test",
+      component: test
+    },
+    {
+      path: "/DEVICE",
+      component: DEVICE
+    }
   ]
 });
 

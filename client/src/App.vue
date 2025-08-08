@@ -29,8 +29,8 @@
             这么做的好处是原先针对这个el-menu-item组件标签而言无法直接对标签进行事件的绑定后的$event进行准确的获取，但是通过这种嵌套的
             方式则能在传递参数的时候的$event进行明确的事件对象进行获取--补充：对于原生事件而言$event一般获取到的是事件对象(针对普通标签，而非组件标签) -->
             <el-menu-item index="1-2">
-              <RouterLink to="/New">
-                实时数据
+              <RouterLink to="/test">
+                测试模块
               </RouterLink>
             </el-menu-item>
             <el-menu-item index="1-3">
@@ -42,6 +42,9 @@
             </el-menu-item>
             <el-menu-item index="1-5">
               <RouterLink to="/t_Control"> 指令控制台</RouterLink>
+            </el-menu-item>
+            <el-menu-item index="1-6">
+              <RouterLink to="/DEVICE"> 铭牌信息</RouterLink>
             </el-menu-item>
           </el-menu>
         </el-col>
@@ -167,9 +170,11 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
   // 接收消息
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    console.log(data.message);
-    alarm_quene.push(data['message']);
-    console.log("成功那个廷加告警元素");
+    if(data.message){
+      console.log(data.message);
+      alarm_quene.push(data['message']);
+      console.log("成功那个廷加告警元素");
+    }
   };
 
 

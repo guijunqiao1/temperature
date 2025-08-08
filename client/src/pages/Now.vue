@@ -137,7 +137,6 @@
         </tbody>
       </table>
     </div>
-
     <!-- 图像切换按钮--使用事件委托完成change事件的执行 -->
     <div class="change" @click="change0($event)"
       v-if="b_length > 0 && yingshe_action_array && yingshe_action_array[0].is_show === '1' && Pinia.Action_sign">
@@ -148,7 +147,6 @@
       v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
     <ECharts :option="chartOption11" style="width: 600px; height:400px;" class="zhuzhuang1"
       v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
-
   </div>
 </template>
 

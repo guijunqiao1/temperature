@@ -2,8 +2,8 @@
   <div class="content1" v-show="Pinia.Device_sign">
     <div class="device_container">
       <div class="device_item" v-for="item in type_array" >
-        <div>机房编号为：{{ item[1] }}的机房</div>
-        <RouterLink to="/New" @click="change(item[0])"><img src="../../public/jifang.webp" /></RouterLink>
+        <div>工位编号为：{{ item[1] }}的工位</div>
+        <RouterLink to="/test" @click="change(item[0])"><img src="../../public/jifang.webp" /></RouterLink>
         <!-- <a @click="change(item[1])" href="http://localhost:5173/New"></a> -->
       </div>
     </div>
@@ -110,6 +110,23 @@
     //主动初始化一次第一个设备
     change(type_array.value[0][0]);
     Pinia.change_jifang(type_array.value);
+    //初始化相应的次数（Pinia.times）
+    if(Pinia.signzhi==='机房1'){
+    Pinia.change_times();
+      const result = await axios.get(`/api/times?id=1`);
+      Pinia.change_times(result.data);
+    }
+    else if(Pinia.signzhi==='机房2'){
+      const result = await axios.get(`/api/times?id=2`);
+      Pinia.change_times(result.data);
+    }
+    else{
+      const result = await axios.get(`/api/times?id=3`);
+      Pinia.change_times(result.data);
+    }
+    //完成数组的内容重置获取
+    const result = await axios.get(`/api/Test_array_get`);
+    Pinia.change_Test_array = result.data;
   });
 </script>
 

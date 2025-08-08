@@ -13,7 +13,10 @@ export const useUserStore = defineStore('user', {
     device:true,
     signzhi:null,
     type_array:null,
-    type_len:null
+    type_len:null,
+    test_array:[],//当此的测试的总数组记录
+    test_type_len:null,//测试总次数
+    times:null,//次数变量
   }),
   actions:{
     change(value) {
@@ -22,6 +25,13 @@ export const useUserStore = defineStore('user', {
     change_jifang(value) {
       this.type_array = value;
       this.type_len = value.length;
+    },
+    change_times(value) {
+      this.times = value;
+    },
+    change_Test_array(value) {
+      this.test_array = value;
+      this.test_type_len = value.length;
     }
   }
 });

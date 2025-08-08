@@ -6,14 +6,42 @@ import Config1 from "../indexNode2.js";//此处获取到数据库链接配置对
 import axios from "axios";
 import WebSocket from "ws";
 
-
+//定义全局测试启动变量以及工位启动变量、测试次数变量
+export let test;
+export let gongwei;
+export let test_times = [];
 let connection1;//定义数据库连接对象--project02
-
 (async ()=>{
   try{
     //异步执行Config，用于连接数据库,后续可对connection数据库链接对象进行数据库语法操作用于对数据库本身进行操作
     connection1 = await Config1();
-    console.log("数据库3连接成功");
+    console.log("数据库333333连接成功");
+    const [rows] = await connection1.execute(`
+      SELECT times 
+      FROM t_data
+      WHERE d_no = "工位1"
+      ORDER BY times DESC
+      LIMIT 1;
+    `);
+    console.log("成功了一次");
+    test_times.push(rows[0]['times']);
+    const [rows1] = await connection1.execute(`
+      SELECT times 
+      FROM t_data
+      WHERE d_no = "工位2"
+      ORDER BY times DESC
+      LIMIT 1;
+    `);
+    test_times.push(rows1[0]['times']);
+    const [rows2] = await connection1.execute(`
+      SELECT times 
+      FROM t_data
+      WHERE d_no = "工位3"
+      ORDER BY times DESC
+      LIMIT 1;
+    `);
+    test_times.push(rows2[0]['times']);
+    console.log("此时完成了test_times的赋值~~~~~~~~:"+test_times);
   }
   catch(error){
     console.log("数据库3连接失败");
@@ -186,6 +214,9 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
 //主题订阅数组(硬转软)
 const topic_array = ['sensorData','state'];
 
+
+
+
 //控制台客户端对象连接设置
 client.on('connect', () => {
   console.log("接收方连接成功");
@@ -213,6 +244,9 @@ console.log('WebSocket 服务器启动，端口：8081');
 // 存储所有WebSocket客户端
 const clients = [];
 
+
+
+
 // WebSocket连接处理
 wss.on('connection', (ws, req) => {
   console.log('新客户端连接');
@@ -223,7 +257,27 @@ wss.on('connection', (ws, req) => {
     type: 'welcome',
     message: '告警系统连接成功'
   }));
-  
+
+  // 监听客户端发送的消息
+  ws.on('message', (message) => {
+    // 这里的 message 是客户端发送的数据
+    console.log('接收到客户端消息:', message);
+    // 你可以在这里对消息进行处理，比如解析 JSON 或其他逻辑
+    const data = JSON.parse(message);
+    console.log("message:"+message);
+    if(data['gongwei']){
+      gongwei = data['gongwei'];
+    }else if(data['test']||data['test']===false){
+      test = data['test'];
+    }else if(data['test_times']){
+      if(data['test_times']===0) test_times[0]++;
+      else if(data['test_times']===1) test_times[1]++;
+      else if(data['test_times']===2) test_times[2]++;
+    }else {
+      console.log("没有v匹配上/");
+    }
+  });
+
   // 监听客户端断开
   ws.on('close', () => {
     console.log('客户端断开连接');
@@ -232,7 +286,7 @@ wss.on('connection', (ws, req) => {
       clients.splice(index, 1);
     }
   });
-});
+}); 
 
 
 // 向所有客户端发送消息的函数
@@ -280,7 +334,7 @@ client.on('message',async (topic, message)=>{
     // 首先获取到指标变量的内容
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
-    let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type} = JSON.parse(message);
+    let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type } = JSON.parse(message);
 
     //定义对象名称映射变量
     const reflect = { };
@@ -308,7 +362,7 @@ client.on('message',async (topic, message)=>{
     //公共块封装
     async function gong_right(value){
       //基础时间值获取
-      const time_base = getFormattedDate();
+      const time_base = getFormattedDate1();
       //数据库中映射字段的使用
       const obj = {};
       rows1.forEach((item,index)=>{
@@ -332,86 +386,103 @@ client.on('message',async (topic, message)=>{
       }
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
-      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type)
-      VALUES ("机房1","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}")
+      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type,times)
+      VALUES ("工位${value}","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}","${test_times[value-1]}")
       `);
+      //插入成功则发送动态数据
+      // 发送消息
+      sendToAllClients(JSON.stringify({
+        type: 'data',
+        data: ['工位'+value,obj.T,obj.S,obj.L,V,I,P,Q,W,time_base,type,test_times[value-1]]
+      }));
     }
     async function gong_tem(value){
       await connection1.execute(`
         INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("机房${value}",'温度越界',"${getFormattedDate1()}");
+        VALUES("工位${value}",'温度越界',"${getFormattedDate1()}");
         `);
         console.log("--------------------------");
       // 发送消息
       sendToAllClients(JSON.stringify({
           type: 'welcome',
-          message: `机房${value}的温度越界`,
+          message: `工位${value}的温度越界`,
       }));
     }
     async function gong_smo(value){
       await connection1.execute(`
         INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("机房${value}",'烟雾越界',"${getFormattedDate1()}");
+        VALUES("工位${value}",'烟雾越界',"${getFormattedDate1()}");
         `);
       // 发送消息
       sendToAllClients(JSON.stringify({
           type: 'welcome',
-          message: `机房${value}的烟雾越界`,
+          message: `工位${value}的烟雾越界`,
       }));
     }
     async function gong_wat(value){
       await connection1.execute(`
         INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("机房${value}",'水位越界',"${getFormattedDate1()}");
+        VALUES("工位${value}",'水位越界',"${getFormattedDate1()}");
         `);
       // 发送消息
       sendToAllClients(JSON.stringify({
           type: 'welcome',
-          message: `机房${value}的水位越界`,
+          message: `工位${value}的水位越界`,
       }));
     }
 
+    console.log("条件就差一点点:");
+    console.log("gongwei:"+gongwei);
+    console.log("test:"+test);
     //首先判断值是否合法后进行插入
-    if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
-      gong_right(1);
-    }else{
-      //插入告警表，最后发送错误消息到前端监听的路由中
-      if(!temperature_panduan(temperature1)){//温度出错
-        gong_tem(1);
-      }
-      if(!smoke_panduan(smog1)){//烟雾出错
-        gong_smo(1);
-      }
-      if(!shuiwei_panduan(waterlevel1)){//水位出错
-        gong_wat(1);
-      }
-    }
-    if(temperature_panduan(temperature2)&&smoke_panduan(smog2)&&shuiwei_panduan(waterlevel2)){
-      gong_right(2);
-    }else{
-      //插入告警表，最后发送错误消息到前端监听的路由中
-      if(!temperature_panduan(temperature2)){//温度出错
-        gong_tem(2);
-      }
-      if(!smoke_panduan(smog2)){//烟雾出错
-        gong_smo(2);
-      }
-      if(!shuiwei_panduan(waterlevel2)){//水位出错
-        gong_wat(2);
+    if(test&&gongwei==='工位1'){
+      console.log("进入啦啦啦啦");
+      //当处于test的过程的情况下
+      if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
+        gong_right(1);
+      }else{
+        //插入告警表，最后发送错误消息到前端监听的路由中
+        if(!temperature_panduan(temperature1)){//温度出错
+          gong_tem(1);
+        }
+        if(!smoke_panduan(smog1)){//烟雾出错
+          gong_smo(1);
+        }
+        if(!shuiwei_panduan(waterlevel1)){//水位出错
+          gong_wat(1);
+        }
       }
     }
-    if(temperature_panduan(temperature3)&&smoke_panduan(smog3)&&shuiwei_panduan(waterlevel3)){
-      gong_right(3);
-    }else{
-      //插入告警表，最后发送错误消息到前端监听的路由中
-      if(!temperature_panduan(temperature3)){//温度出错
-        gong_tem(3);
+    if(test&&gongwei==='工位2'){
+      if(temperature_panduan(temperature2)&&smoke_panduan(smog2)&&shuiwei_panduan(waterlevel2)){
+        gong_right(2);
+      }else{
+        //插入告警表，最后发送错误消息到前端监听的路由中
+        if(!temperature_panduan(temperature2)){//温度出错
+          gong_tem(2);
+        }
+        if(!smoke_panduan(smog2)){//烟雾出错
+          gong_smo(2);
+        }
+        if(!shuiwei_panduan(waterlevel2)){//水位出错
+          gong_wat(2);
+        }
       }
-      if(!smoke_panduan(smog3)){//烟雾出错
-        gong_smo(3);
-      }
-      if(!shuiwei_panduan(waterlevel3)){//水位出错
-        gong_wat(3);
+    }
+    if(test&&gongwei==='工位3'){
+      if(temperature_panduan(temperature3)&&smoke_panduan(smog3)&&shuiwei_panduan(waterlevel3)){
+        gong_right(3);
+      }else{
+        //插入告警表，最后发送错误消息到前端监听的路由中
+        if(!temperature_panduan(temperature3)){//温度出错
+          gong_tem(3);
+        }
+        if(!smoke_panduan(smog3)){//烟雾出错
+          gong_smo(3);
+        }
+        if(!shuiwei_panduan(waterlevel3)){//水位出错
+          gong_wat(3);
+        }
       }
     }
   }
@@ -494,14 +565,14 @@ client.on('message',async (topic, message)=>{
     const [rows] = await connection1.execute(`
     UPDATE t_direct
     SET value = '${(current.split('_')[1])==='0'?'关':'开'}'
-    WHERE d_no = '机房${current.split("n")[1][0]}';
+    WHERE d_no = '工位${current.split("n")[1][0]}';
     `);
 
 
     //设备修改记录添加
     const [rows1] = await connection1.execute(`
     INSERT INTO operate_history(place,operate,ctime,device)
-    VALUES ('机房${current.split("n")[1][0]}','修改为${(current.split('_')[1])==='0'?'关':'开'}','${getFormattedDate1()}','电磁阀开关')
+    VALUES ('工位${current.split("n")[1][0]}','修改为${(current.split('_')[1])==='0'?'关':'开'}','${getFormattedDate1()}','电磁阀开关')
     `);
 
   }
@@ -572,18 +643,7 @@ client.on('message',async (topic, message)=>{
 
 
 
-
-
-
-
 // //模拟发送传感器数据的客户端
-// setInterval(async()=>{
-//   const min = 10;
-//   const max = 30
-//   const randomDecimal1 = Math.random() * (max - min) + min;
-//   const randomDecimal2 = Math.random() * (max - min) + min;
-//   const randomDecimal3 = Math.random()>0.5? 1:0 ;
-//   client.publish("sensor/data",JSON.stringify({yanwu1:randomDecimal1.toFixed(2),yanwu2:randomDecimal2.toFixed(2),warning_flag:randomDecimal3}),{qos:1});
-// },2000);
-
-
+setInterval(async()=>{
+  client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
+},1000);

@@ -62,12 +62,19 @@
       <!-- 此处需要注意的是对.fit-view进行样式设计的本质为对RouterView子组件标签中的最靠近template标签的那个标签进行样式设计的 -->
     </div>
   </div>
+
+  <div class="calculator">
+    <button @click="calculator">计算器</button>
+  </div>
+
+  
 </template>
 
 <script lang="ts" setup>
 import { RouterView, RouterLink } from "vue-router";
 import { ref } from "vue";
 import { onMounted } from 'vue';
+import axios from "axios";
 
 //使用vue中的路由进行类似a标签功能的RouteLink标签以及RouteView标签的使用(需要对to属性进行理解性的设置以及对路由器进行动态的引入并在
 //main.ts文件中配置上盖路由器并且挂载到当前App文件对象(应用对象)身上)
@@ -114,6 +121,13 @@ function new_string(string) {
   }
   return New;//注意js中支持将整个字符串(数组进行直接的返回)
 }
+
+  //唤起计算器的方法
+  async function calculator(){
+    await axios.get('/api/open-calculator');
+  }
+
+
 
 //首先对生命周期钩子之间的关系以及一些注意事项进行归纳：
 //首先要知道，整个生命周期(针对vue3而言)钩子，在实际执行的时候本质上都是在setup创建组件这个生命周期钩子中作为回调执行的，
@@ -176,6 +190,8 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
       console.log("成功那个廷加告警元素");
     }
   };
+
+
 
 
 });
@@ -366,6 +382,12 @@ div.nothing {
   position: relative;
   left:350px;
   display: none;
+}
+.calculator>button {
+  z-index:100;
+  width:100px;
+  height:100px;
+  cursor: pointer;
 }
 </style>
 

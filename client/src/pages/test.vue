@@ -12,23 +12,30 @@
               <el-dropdown-item>
                 <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
               </el-dropdown-item>
-            </div>
+            </div> 
           </div>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
     <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-      当前机房：{{ Pinia.signzhi }}</div>
+      当前机房：{{ Pinia.signzhi }}</div>  
 
 
-    <!-- 设备信息  -->
+    <!-- 设备信息  --> 
     <div id="latestData" v-show="Pinia.Device_sign">
-      <!-- 弹出框设计 -->
+      <!-- 弹出框设计 -->   
       <div id="modal">
         <span class="X" @click="XXX">X</span>
         <div class="modal_child">
         </div>
       </div>
+    </div>
+
+    <!-- 目标值设定 -->
+    <div class="target_set">
+      <input type="text">目标温度
+      <input type="text">目标湿度
+      <button  @click="submit">提交目标值</button>
     </div>
 
 
@@ -38,7 +45,7 @@
 
     <button class="print" @click="print">打印</button>
 
-    <ECharts :option="chartOption" style="width:600px; height: 400px;" class="zhexian" />
+    <ECharts ref="chartRef" :option="chartOption" style="width:600px; height: 400px;" class="zhexian" />
   </div>
 </template>
 
@@ -79,6 +86,11 @@ use([
   UniversalTransition
 ]);
 import { useUserStore } from "../store/curt"; 
+import * as echarts from 'echarts/core';
+
+
+// 在组件中添加一个 ref 引用
+const chartRef = ref(null);
 const Pinia = useUserStore();
 
 // 响应式变量定义
@@ -100,6 +112,19 @@ let x: any = 0;
 
 //定义存储图像数据的数组注意和time_array进行区分
 const nowArray = ref([]);
+
+//目标温湿度变量
+const target_wen = ref();
+const target_shi = ref();
+
+//温湿度总量变量
+let sum_wen = 0;
+let sum_shi = 0;
+let sum_hao = 0;
+
+
+// 计时秒变量
+let jishi_second = 0;
 
 
 
@@ -182,6 +207,10 @@ function y_zhi(value1, value2) {
   }
   console.log("完成所有内容的赋值");
   console.dir(object_chart);
+  if (chartRef.value && chartRef.value.chart) {
+    // 直接调用底层 echarts 实例的方法
+    chartRef.value.chart.setOption(chartOption.value);
+  }
 }
 
 //机房修改函数
@@ -204,7 +233,12 @@ function change_jifang(value){
 
 //测试方法
 async function test(value) {
+  //获取到输入框对象
+  const wendu_input = document.querySelector(".target_set>input:nth-child(1)");
+  const shidu_input = document.querySelector(".target_set>input:nth-child(2)");
   if(value===0){//停止测试
+    //清除计时器
+    clearInterval(x);
     if(test_qidong!==1){
       alert("请先启动测试");
     }
@@ -213,29 +247,100 @@ async function test(value) {
       test_qidong = 0;
     }
   }else {//开启测试
-    //清除上次的定时器以及时间数组内容、图像数组
-    clearInterval(x);
-    //清空折线图
-    chartOption.value.series.forEach((item, index) => {
-      item = [];
-    })
-    //清空时间数组
-    time_array = [];
-    //清空图像当前维度下的数组
-    nowArray.value = [];
-    // x = setInterval(async () => {
-    //   //定期渲染图像
-      
-    // },1000);
-    test_qidong = 1;
-    const result = await axios.get(`/api/test?d_no=${Pinia.signzhi}&qidong=yes`);
+    if((wendu_input.value<-10)&&(wendu_input.value>30) || (shidu_input.value<-50)&&(shidu_input.value>50)){
+      alert("目标值设定必须为数值");
+    }else{
+      target_wen.value = wendu_input.value;
+      target_shi.value = shidu_input.value;
+      //清除时间数组内容、图像数组
+      clearInterval(x);
+      //清空折线图
+      chartOption.value.series.forEach((item, index) => {
+        item = [];
+      })
+      //清空时间数组
+      time_array = [];
+      //清空图像当前维度下的数组
+      nowArray.value = [];
+      //清空计时器(s)
+      jishi_second = 0;
+      //清空总量变量
+      sum_wen = 0;
+      sum_shi = 0;
+      sum_hao = 0;
+
+      x = setInterval(async () => {
+        //定期渲染图像
+        jishi_second++;
+      },1000);
+      test_qidong = 1;
+      const result = await axios.get(`/api/test?d_no=${Pinia.signzhi}&qidong=yes`);
+    }
   }
 }
 
 // 打印方法
-async function print() { 
+async function print() {
+  try {
+    // 使用 html2canvas 库，需要先安装: npm install html2canvas
+    const html2canvas = await import('html2canvas').then(module => module.default);
+    // 获取图表元素
+    const chartElement = document.querySelector('.zhexian');
+    if (!chartElement) {
+      alert("没有找到可打印的图表");
+      return;
+    }
+    // 使用 html2canvas 直接截取 DOM 元素
+    const canvas = await html2canvas(chartElement, {
+      useCORS: true,
+      scale: 2, // 提高分辨率
+      backgroundColor: '#ffffff'
+    });
+    // 获取 canvas 上下文
+    const ctx = canvas.getContext('2d');
+    
+    // 添加标题文本
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    // 设置文本内容
+    let titleText = `${Pinia.signzhi} - 实时测试数据`;
+    
+    // 在顶部添加标题
+    ctx.fillText(titleText, canvas.width / 2, 30);
+    
+    // 在底部添加时间戳和其他信息
+    ctx.font = '12px Arial';
+    ctx.fillText(`生成时间: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, canvas.width / 2, canvas.height - 20);
+    
+    // 在底部添加测试状态
+    const testStatus = test_qidong === 1 ? "测试中" : "测试已停止";
+    ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height - 40);
 
+    // 底部添加工位信息
+    ctx.fillText(`测试工位: ${Pinia.signzhi}`, canvas.width / 2, canvas.height - 60);
+
+    //计算当前温湿平均值
+    const wen_average = sum_wen/jishu_second;
+    const shi_average = sum_shi/jishu_second;
+    ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height - 80);
+
+    
+    // 创建下载链接
+    const link = document.createElement('a');
+    link.download = `测试数据_${Pinia.signzhi}_${moment().format('YYYYMMDD_HHmmss')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    
+    // 触发下载
+    link.click();
+    
+  } catch (error) {
+    console.error('打印图表时出错:', error);
+    alert('打印失败: ' + error.message);
+  }
 }
+
+
 
 //建立websocket连接，完成实时的图像内容填充
 //全局建立websocket连接，使得告警内容被实时推送到页面的全局
@@ -270,19 +375,23 @@ socket.onmessage = function(event) {
         nowArray.value[1].push(data.data);
       }
       console.log("当前的nowArray:"+nowArray.value);
+      //统计总量
+      sum_wen += data.data[1];
+      sum_shi += data.data[2];
+      sum_hao += data.data[8];
+
+
       //立即完成x轴赋值
       chartOption.value.xAxis.data = OneMinute(time_array, "1");
       //重新渲染图像
       y_zhi(OneMinute(time_array, "0"), "device");
     }
   }
-  
 };
 
-
-
-//立即执行函数
-(async () => {
+// 挂载时加载数据
+onMounted(async () => {
+  
   const result = await axios.get("/api/yingshe");//设备映射数组
   yingshe_array.value = result.data;
   // 定义图表配置--设备信息--折线图
@@ -294,8 +403,7 @@ socket.onmessage = function(event) {
       trigger: 'axis'
     },
     legend: {
-      data: []
-      //yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3
+      data: [1]
     },
     grid: {
       left: '3%',
@@ -317,33 +425,17 @@ socket.onmessage = function(event) {
     yAxis: {
       type: 'value'
     },
-    series: [
-      // {
-      //   name: yingshe_array.value[0].field1,
-      //   type: 'line',
-      //   data: [],
-      //   smooth: true,
-
-      // },
-      // {
-      //   name: yingshe_array.value[1].field2,
-      //   type: 'line',
-      //   data: [],
-      //   smooth: true,
-
-
-      // },
-      // {
-      //   name: yingshe_array.value[2].field3,
-      //   type: 'line',
-      //   data: [],
-      //   smooth: true,
-
-      // },
-    ]
+    series: [{
+      name: '1',
+      type: 'line',
+      smooth: true,
+      data: [1]
+    }]
   });
   //需要注意的是初始化体表进行渲染的时候的赋值应该发生在异步处理中，否则报错且不生效
   time_array = [];
+  chartOption.value.series = [];
+  chartOption.value.legend.data = [];
   // 设备配置赋值
   yingshe_array.value.forEach((item, index) => {
     // 折线赋值
@@ -356,13 +448,6 @@ socket.onmessage = function(event) {
       data: []
     })
   })
-})()
-
-
-// 挂载时加载数据
-onMounted(async () => {
-
-  
 });
 // 上述代码需要注意的是：这个语句（setup语法糖的部分中包含了onMounted()和onUpdated()的情况）中，在多次的标签元素的动态修改的时候
 //(由外部互动产生的标签元素),在onUpdated这个钩子会因每次的标签元素发生动态的改变而多次执行而setup()本身的内容(例如let i=0)和onMOounted仅执行一次,并且需要注意的是每次onUpdated执行的位置发生在原先的位置的地方进行叠加
@@ -457,8 +542,6 @@ onUnmounted(() => {
   .container222>.el-dropdown{
     top:0px !important;  
   }
-
-
 
   /* 对最新数据表格进行渲染 */
   /* 对表格进行样式设计 */

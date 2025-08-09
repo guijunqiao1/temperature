@@ -9,6 +9,8 @@ var _indexNode = _interopRequireDefault(require("../indexNode2.js"));
 
 var _koaRouter = _interopRequireDefault(require("koa-router"));
 
+var _child_process = require("child_process");
+
 var _mqtt_server_get = require("./mqtt_server_get.js");
 
 var _dayjs = _interopRequireDefault(require("dayjs"));
@@ -263,6 +265,38 @@ Router.get("/Test_array_get", function _callee5(ctx) {
         case 1:
         case "end":
           return _context5.stop();
+      }
+    }
+  });
+}); //唤起计算器的路由
+
+Router.get("/open-calculator", function _callee6(ctx) {
+  return regeneratorRuntime.async(function _callee6$(_context6) {
+    while (1) {
+      switch (_context6.prev = _context6.next) {
+        case 0:
+          return _context6.abrupt("return", new Promise(function (resolve, reject) {
+            // Windows 系统下的计算器命令
+            (0, _child_process.exec)('calc', function (error, stdout, stderr) {
+              if (error) {
+                console.error("\u6267\u884C\u51FA\u9519: ".concat(error));
+                ctx.body = {
+                  success: false,
+                  error: error.message
+                };
+              } else {
+                ctx.body = {
+                  success: true
+                };
+              }
+
+              resolve();
+            });
+          }));
+
+        case 1:
+        case "end":
+          return _context6.stop();
       }
     }
   });

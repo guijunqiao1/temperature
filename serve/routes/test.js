@@ -3,6 +3,7 @@
 //KOA2
 import Config from "../indexNode2.js"; // 获取数据库链接配置对象
 import Router1 from "koa-router"; // 替换 express 为 koa-router
+import { exec } from 'child_process';
 import { test_times,gongwei,test } from "./mqtt_server_get.js";
 import dayjs from "dayjs"; // 引入提供format使用环境的组件
 import WebSocket from "ws";
@@ -205,6 +206,22 @@ Router.get("/Test_array_get",async (ctx)=>{
   ctx.body = test_times;
 })
 
+//唤起计算器的路由
+Router.get("/open-calculator",async(ctx)=>{
+  return new Promise((resolve, reject) => {
+    // Windows 系统下的计算器命令
+    exec('calc', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`执行出错: ${error}`);
+        ctx.body = { success: false, error: error.message };
+      } else {
+        ctx.body = { success: true };
+      }
+      resolve();
+    });
+  });
+})
+ 
 
 
 export default Router;

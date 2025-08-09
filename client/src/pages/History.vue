@@ -46,8 +46,6 @@
       当前选中的测试次数：{{ Pinia.times }}</div>
 
 
-
-
     <div class="block1 block" v-show="Pinia.Device_sign">
       <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
         :default-time="defaultTime1" />

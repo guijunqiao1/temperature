@@ -43,13 +43,6 @@ Router.get("/test", async (ctx) => {
       type: 'data',
       test: true
     }));
-  }
-  else{
-    console.log("这里接收到了test:false");
-    socket.send(JSON.stringify({
-      type: 'data',
-      test: false
-    }));
     //进行相应的次数变量的递增
     if(d_no==='工位1') {
       socket.send(JSON.stringify({
@@ -69,6 +62,13 @@ Router.get("/test", async (ctx) => {
         test_times: 2
       }));
     }
+  }
+  else{
+    console.log("这里接收到了test:false");
+    socket.send(JSON.stringify({
+      type: 'data',
+      test: false
+    }));
   }
   ctx.body = 'ok';
 });
@@ -152,53 +152,65 @@ Router.get("/test_history", async (ctx) => {
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),
     ]);
   }
-
   // 直接将总的历史记录进行获取
-  if (page_boolean) {
-    const [rows] = await connection2.execute(query + (d_no === "null" ? "" : ` WHERE d_no="${d_no} "`)+` AND times="${times}" `+DESC_query);
-    const formattedRows = toTwoArray(rows);
-    ctx.body = JSON.stringify(formattedRows);
-  } else {
-    const [rows] = await connection2.execute(query + (d_no === "null" ? "" : ` WHERE d_no="${d_no} "`)+` AND times="${times}" `+DESC_query + `
-      LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
-    const formattedRows = toTwoArray(rows);
-    ctx.body = JSON.stringify(formattedRows);
+  if (start === "1" && end === "1") {
+    if (page_boolean) {
+      const [rows] = await connection2.execute(query + (d_no === "null" ? "" : ` WHERE d_no="${d_no} "`)+` AND times="${times}" `+DESC_query);
+      const formattedRows = toTwoArray(rows);
+      ctx.body = JSON.stringify(formattedRows);
+    } else {
+      const [rows] = await connection2.execute(query + (d_no === "null" ? "" : ` WHERE d_no="${d_no} "`)+` AND times="${times}" `+DESC_query + `
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
+      const formattedRows = toTwoArray(rows);
+      ctx.body = JSON.stringify(formattedRows);
+    }
   }
-  // else if (start === "end" && end !== "1") {
-  //   if (page_boolean) {
-  //     const [rows] = await connection2.execute(query + one_query + DESC_query);
-  //     const formattedRows = toTwoArray(rows);
-  //     ctx.body = JSON.stringify(formattedRows);
-  //   } else {
-  //     const [rows] = await connection2.execute(query + one_query + DESC_query + `
-  //       LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
-  //     ctx.body = toMap(rows);
-  //   }
-  // } else {
-  //   if (page_boolean) {
-  //     const [rows] = await connection2.execute(query + `
-  //       WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : ` AND d_no="${d_no}" `) + DESC_query);
-  //     const formattedRows = toTwoArray(rows);
-  //     ctx.body = JSON.stringify(formattedRows);
-  //   } else {
-  //     const [rows] = await connection2.execute(query + `WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : ` AND d_no="${d_no}" `) + DESC_query + ` LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
-  //     ctx.body = toMap(rows);
-  //   }
-  // }
+  else if (start === "end" && end !== "1") {
+    if (page_boolean) {
+      const [rows] = await connection2.execute(query + one_query+` AND times="${times}" ` + DESC_query);
+      const formattedRows = toTwoArray(rows);
+      ctx.body = JSON.stringify(formattedRows);
+    } else {
+      const [rows] = await connection2.execute(query + one_query+` AND times="${times}" ` + DESC_query + `
+        LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
+      ctx.body = toMap(rows);
+    }
+  } else {
+    if (page_boolean) {
+      const [rows] = await connection2.execute(query + `
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : ` AND d_no="${d_no}" `)+` AND times="${times}" ` + DESC_query);
+      const formattedRows = toTwoArray(rows);
+      ctx.body = JSON.stringify(formattedRows);
+    } else {
+      const [rows] = await connection2.execute(query + `WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : ` AND d_no="${d_no}" `)+` AND times="${times}" ` + DESC_query + ` LIMIT ${parseInt(pageSize)} OFFSET ${offset}`);
+      ctx.body = toMap(rows);
+    }
+  }
 
 
 });
 
 Router.get("/times",async (ctx)=>{
   const { id } = ctx.query;
+  // 动态获取到相应长度的数组的方法
   console.log("111111");
+  const result_array = [];
   if(id===1||id=='1'){
-    ctx.body = test_times[0];
+    for(let j=0;j<=test_times[0];j++){
+      result_array.push(j);
+    }
+    ctx.body = result_array;
   }
   else if(id===2||id==='2'){
-    ctx.body = test_times[1];
+    for(let j=0;j<=test_times[1];j++){
+      result_array.push(j);
+    }
+    ctx.body = result_array;
   }else{
-    ctx.body = test_times[2];
+    for(let j=0;j<=test_times[2];j++){
+      result_array.push(j);
+    }
+    ctx.body = result_array;
   }
 });
 

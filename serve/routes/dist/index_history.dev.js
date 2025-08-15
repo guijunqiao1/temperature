@@ -241,78 +241,103 @@ Router4.get("/History", function _callee2(ctx) {
 }); // 表格的呈现路由
 
 Router4.get("/History_count", function _callee3(ctx) {
-  var _ctx$query2, start, end, d_no, _ref19, _ref20, rows, formattedEnd, _ref21, _ref22, _rows6, formattedStart, _formattedEnd, _ref23, _ref24, _rows7;
+  var _ctx$query2, start, end, d_no, times, FORMATTIME, _ref19, _ref20, rows, formattedEnd, _ref21, _ref22, _rows6, formattedStart, _formattedEnd, _ref23, _ref24, _rows7;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
-          _ctx$query2 = ctx.query, start = _ctx$query2.start, end = _ctx$query2.end, d_no = _ctx$query2.d_no;
+          _ctx$query2 = ctx.query, start = _ctx$query2.start, end = _ctx$query2.end, d_no = _ctx$query2.d_no, times = _ctx$query2.times;
           _context3.prev = 1;
 
+          FORMATTIME = function FORMATTIME(value) {
+            var formatTime = function formatTime(timeStr) {
+              return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+            };
+
+            return formatTime(value);
+          };
+
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+          console.log("哈鲁1");
+
           if (!(start === "1" && end === "1")) {
-            _context3.next = 11;
+            _context3.next = 20;
             break;
           }
 
-          _context3.next = 5;
-          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total \n        FROM t_data\n      " + (d_no === "null" ? "" : "WHERE d_no = \"".concat(d_no, "\""))));
+          _context3.next = 14;
+          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total \n        FROM t_data\n      " + (d_no === "null" ? "" : "WHERE d_no = \"".concat(d_no, "\"")) + "AND times = ".concat(times)));
 
-        case 5:
+        case 14:
           _ref19 = _context3.sent;
           _ref20 = _slicedToArray(_ref19, 1);
           rows = _ref20[0];
           ctx.body = "" + rows[0].total.toString();
-          _context3.next = 29;
+          _context3.next = 46;
           break;
 
-        case 11:
+        case 20:
           if (!(start === "end" && end !== "1")) {
-            _context3.next = 21;
+            _context3.next = 30;
             break;
           }
 
           formattedEnd = FORMATTIME(end);
-          _context3.next = 15;
-          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total \n        FROM t_data \n        WHERE c_time < \"".concat(formattedEnd, "\"\n      ") + (d_no === "null" ? "" : "AND d_no = \"".concat(d_no, "\""))));
+          _context3.next = 24;
+          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total \n        FROM t_data \n        WHERE c_time < \"".concat(formattedEnd, "\"\n      ") + (d_no === "null" ? "" : " AND d_no = \"".concat(d_no, "\"")) + " AND times = ".concat(times)));
 
-        case 15:
+        case 24:
           _ref21 = _context3.sent;
           _ref22 = _slicedToArray(_ref21, 1);
           _rows6 = _ref22[0];
           ctx.body = "" + _rows6[0].total.toString();
-          _context3.next = 29;
+          _context3.next = 46;
           break;
 
-        case 21:
+        case 30:
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
+          console.log("哈鲁");
           formattedStart = FORMATTIME(start);
           _formattedEnd = FORMATTIME(end);
-          _context3.next = 25;
-          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total  \n        FROM t_data \n        WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(_formattedEnd, "\"") + (d_no === "null" ? "" : "AND d_no=\"".concat(d_no, "\" "))));
+          _context3.next = 42;
+          return regeneratorRuntime.awrap(connection2.execute("\n        SELECT COUNT(*) as total  \n        FROM t_data \n        WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(_formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no=\"".concat(d_no, "\" ")) + " AND times = ".concat(times)));
 
-        case 25:
+        case 42:
           _ref23 = _context3.sent;
           _ref24 = _slicedToArray(_ref23, 1);
           _rows7 = _ref24[0];
           ctx.body = "" + _rows7[0].total.toString();
 
-        case 29:
-          _context3.next = 36;
+        case 46:
+          _context3.next = 53;
           break;
 
-        case 31:
-          _context3.prev = 31;
+        case 48:
+          _context3.prev = 48;
           _context3.t0 = _context3["catch"](1);
           console.log("History：" + start);
           console.log("History：" + end);
           console.log("History：" + d_no);
 
-        case 36:
+        case 53:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[1, 31]]);
+  }, null, null, [[1, 48]]);
 }); //设备选项列表相关路由
 
 Router4.get("/data", function _callee4(ctx) {
@@ -514,6 +539,30 @@ Router4.get("/action_unit", function _callee6(ctx) {
       }
     }
   });
-});
+}); //行为维度绑定上删除库记录的事件--依据为仅时间值
+
+Router4.get('/delete', function _callee7(ctx) {
+  var sign;
+  return regeneratorRuntime.async(function _callee7$(_context8) {
+    while (1) {
+      switch (_context8.prev = _context8.next) {
+        case 0:
+          sign = ctx.query.sign; // const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+
+          console.log("时间值格式检查：" + sign);
+          _context8.next = 4;
+          return regeneratorRuntime.awrap(connection2.execute("\n    DELETE FROM t_behavior_data\n    WHERE c_time = '".concat(sign, "'\n    ")));
+
+        case 4:
+          ctx.body = 'ok';
+
+        case 5:
+        case "end":
+          return _context8.stop();
+      }
+    }
+  });
+}); //行为维度绑定上查询库记录的事件
+
 var _default = Router4;
 exports["default"] = _default;

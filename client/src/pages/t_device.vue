@@ -111,19 +111,15 @@
     change(type_array.value[0][0]);
     Pinia.change_jifang(type_array.value);
     //初始化相应的次数（Pinia.times）
-    if(Pinia.signzhi==='机房1'){
-    Pinia.change_times();
-      const result = await axios.get(`/api/times?id=1`);
-      Pinia.change_times(result.data);
-    }
-    else if(Pinia.signzhi==='机房2'){
-      const result = await axios.get(`/api/times?id=2`);
-      Pinia.change_times(result.data);
-    }
-    else{
-      const result = await axios.get(`/api/times?id=3`);
-      Pinia.change_times(result.data);
-    }
+    // if(Pinia.signzhi==='工位1'){
+    //   const result = await axios.get(`/api/times?id=1`);
+    // }
+    // else if(Pinia.signzhi==='工位2'){
+    //   const result = await axios.get(`/api/times?id=2`);
+    // }
+    // else{
+    //   const result = await axios.get(`/api/times?id=3`);
+    // }
     //完成数组的内容重置获取
     const result = await axios.get(`/api/Test_array_get`);
     Pinia.change_Test_array = result.data;

@@ -9,7 +9,7 @@ import cors from '@koa/cors';
 import logger from 'koa-morgan';
 import serve from 'koa-static';
 import bodyParser from 'koa-bodyparser';
-import views from 'koa-views';
+import views from 'koa-views'; 
 import { fileURLToPath } from 'url';
 import Router from '@koa/router';
 
@@ -25,6 +25,7 @@ import Router5 from './routes/index_action.js';
 import Router_direct from './routes/direct.js';
 // import Router_direct_control from './routes/direct_control.js';
 import Router_http from "./routes/http_server_get.js";
+import SENSOR from './routes/sensor.js';
 
 
 const app = new Koa();
@@ -66,6 +67,7 @@ async function startServer() {
     router.use( IndexRouter.routes(), IndexRouter.allowedMethods());
     router.use( Router_direct_control.routes(), Router_direct_control.allowedMethods());
     router.use( Router_http.routes(), Router_http.allowedMethods());
+    router.use( SENSOR.routes(), SENSOR.allowedMethods());
 
     // 应用路由
     app.use(router.routes()).use(router.allowedMethods());

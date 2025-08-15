@@ -88,7 +88,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://127.0.0.1',{
+export const client = mqtt.connect('mqtt://192.168.1.101',{
   clientId:"client_control",//唯一标识符
 });  
 
@@ -265,11 +265,13 @@ wss.on('connection', (ws, req) => {
     // 你可以在这里对消息进行处理，比如解析 JSON 或其他逻辑
     const data = JSON.parse(message);
     console.log("message:"+message);
+    console.log("data:"+data);
     if(data['gongwei']){
       gongwei = data['gongwei'];
     }else if(data['test']||data['test']===false){
       test = data['test'];
-    }else if(data['test_times']){
+    }else if(data['test_times']||data['test_times']===0){
+      console.log("应当完成自增");
       if(data['test_times']===0) test_times[0]++;
       else if(data['test_times']===1) test_times[1]++;
       else if(data['test_times']===2) test_times[2]++;
@@ -643,7 +645,7 @@ client.on('message',async (topic, message)=>{
 
 
 
-// //模拟发送传感器数据的客户端
-setInterval(async()=>{
-  client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
-},1000);
+//模拟发送传感器数据的客户端
+// setInterval(async()=>{
+//   client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
+// },5000);

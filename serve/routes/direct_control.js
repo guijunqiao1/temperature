@@ -46,7 +46,7 @@ export async function t_direct_control() {
         let tem1;
         let tem11;
         let topic;
-        if (item.f_type !== '2' && item.f_type !== '3' && item.f_type !== '4') {
+        if (item.f_type !== '2' && item.f_type !== '3' && item.f_type !== '4') {//开关或单选框的情况
           const C1 = item.f_value.split("|")[0].split(":")[0];
           const C2 = item.f_value.split("|")[1].split(":")[0];
           const E1 = item.f_value.split("|")[0].split(":")[1];
@@ -57,7 +57,7 @@ export async function t_direct_control() {
           tem11 = content === C1 ? N1 : N2;
           topic = item.topic;
           if (item.id === 12) {
-            tem11 = 'on' + d_no.split("机房")[1] + '_' + (content === "开" ? '4' : '0');
+            tem11 = 'on' + d_no.split("工位")[1] + '_' + (content === "开" ? '4' : '0');
           }
           obj1[tem1] = tem11;
           content = content === C1 ? C1 : C2;
@@ -91,8 +91,13 @@ export async function t_direct_control() {
           }
           topic = item.topic;
           console.log("item.id:" + item.id);
-          if (item.id === 12) {
-            tem11 = 'on' + d_no + '_' + content;
+          if (item.id === 12) { //  "开:deng": "on工位1_2"
+            console.log("最终进入的是此处");
+            console.log("最终进入的是此处");
+            console.log("最终进入的是此处");
+            console.log("最终进入的是此处");
+            tem1 = item.f_value.split("|")[0].split(":")[1];
+            tem11 = 'on' + d_no.split("工位")[1] + '_' + content;
           }
           obj1[tem1] = tem11;
         }

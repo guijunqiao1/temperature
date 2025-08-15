@@ -306,7 +306,7 @@ Router.get("/recent/action", async (ctx) => {
   } catch (err) {
     console.error("数据库查询失败", err);
   }
-});
+}); 
 
 // 设备ID最新记录
 Router.get("/recent/list_obj", async (ctx) => {

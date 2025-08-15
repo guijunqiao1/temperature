@@ -87,12 +87,6 @@ Router.get("/test", function _callee2(ctx) {
             socket.send(JSON.stringify({
               type: 'data',
               test: true
-            }));
-          } else {
-            console.log("这里接收到了test:false");
-            socket.send(JSON.stringify({
-              type: 'data',
-              test: false
             })); //进行相应的次数变量的递增
 
             if (d_no === '工位1') {
@@ -111,6 +105,12 @@ Router.get("/test", function _callee2(ctx) {
                 test_times: 2
               }));
             }
+          } else {
+            console.log("这里接收到了test:false");
+            socket.send(JSON.stringify({
+              type: 'data',
+              test: false
+            }));
           }
 
           ctx.body = 'ok';
@@ -124,19 +124,19 @@ Router.get("/test", function _callee2(ctx) {
 }); // 获取到当次的历史数组记录的路由
 
 Router.get("/test_history", function _callee3(ctx) {
-  var _ctx$query2, start, end, currentPage, pageSize, d_no, times, _ref, _ref2, result_now, sql_string, item, x, query, DESC_query, page_boolean, toTwoArray, OFFSET, FORMATTIME, formattedStart, formattedEnd, one_query, offset, toMap, _ref3, _ref4, rows, formattedRows, _ref5, _ref6, _rows, _formattedRows;
+  var _ctx$query2, start, end, currentPage, pageSize, d_no, times, _ref, _ref2, result_now, sql_string, item, x, query, DESC_query, page_boolean, toTwoArray, OFFSET, FORMATTIME, formattedStart, formattedEnd, one_query, offset, toMap, _ref3, _ref4, rows, formattedRows, _ref5, _ref6, _rows, _formattedRows, _ref7, _ref8, _rows2, _formattedRows2, _ref9, _ref10, _rows3, _ref11, _ref12, _rows4, _formattedRows3, _ref13, _ref14, _rows5;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
-          toMap = function _ref10(value) {
+          toMap = function _ref18(value) {
             return value.map(function (row) {
               return [row.d_no, row.field1, row.field2, row.field3, row.field4, row.field5, row.field6, row.field7, row.field8, (0, _dayjs["default"])(row.c_time).format('YYYY-MM-DD HH:mm:ss')];
             });
           };
 
-          FORMATTIME = function _ref9(value) {
+          FORMATTIME = function _ref17(value) {
             var formatTime = function formatTime(timeStr) {
               return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
             };
@@ -144,12 +144,12 @@ Router.get("/test_history", function _callee3(ctx) {
             return formatTime(value);
           };
 
-          OFFSET = function _ref8(value1, value2) {
+          OFFSET = function _ref16(value1, value2) {
             // value1:currentPage,value2:pageSize
             return (parseInt(value1) - 1) * parseInt(value2);
           };
 
-          toTwoArray = function _ref7(value) {
+          toTwoArray = function _ref15(value) {
             console.log("当前的row:");
             console.dir(value); // 将数据转换为二维数组格式 
 
@@ -196,35 +196,109 @@ Router.get("/test_history", function _callee3(ctx) {
           } // 封装响应结果格式化的方法
 
 
-          if (!page_boolean) {
-            _context3.next = 29;
+          if (!(start === "1" && end === "1")) {
+            _context3.next = 39;
             break;
           }
 
-          _context3.next = 22;
+          if (!page_boolean) {
+            _context3.next = 30;
+            break;
+          }
+
+          _context3.next = 23;
           return regeneratorRuntime.awrap(connection2.execute(query + (d_no === "null" ? "" : " WHERE d_no=\"".concat(d_no, " \"")) + " AND times=\"".concat(times, "\" ") + DESC_query));
 
-        case 22:
+        case 23:
           _ref3 = _context3.sent;
           _ref4 = _slicedToArray(_ref3, 1);
           rows = _ref4[0];
           formattedRows = toTwoArray(rows);
           ctx.body = JSON.stringify(formattedRows);
-          _context3.next = 36;
+          _context3.next = 37;
           break;
 
-        case 29:
-          _context3.next = 31;
-          return regeneratorRuntime.awrap(connection2.execute(query + (d_no === "null" ? "" : " WHERE d_no=\"".concat(d_no, " \"")) + " AND times=\"".concat(times, "\" ") + DESC_query + "\n      LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset)));
+        case 30:
+          _context3.next = 32;
+          return regeneratorRuntime.awrap(connection2.execute(query + (d_no === "null" ? "" : " WHERE d_no=\"".concat(d_no, " \"")) + " AND times=\"".concat(times, "\" ") + DESC_query + "\n        LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset)));
 
-        case 31:
+        case 32:
           _ref5 = _context3.sent;
           _ref6 = _slicedToArray(_ref5, 1);
           _rows = _ref6[0];
           _formattedRows = toTwoArray(_rows);
           ctx.body = JSON.stringify(_formattedRows);
 
-        case 36:
+        case 37:
+          _context3.next = 74;
+          break;
+
+        case 39:
+          if (!(start === "end" && end !== "1")) {
+            _context3.next = 58;
+            break;
+          }
+
+          if (!page_boolean) {
+            _context3.next = 50;
+            break;
+          }
+
+          _context3.next = 43;
+          return regeneratorRuntime.awrap(connection2.execute(query + one_query + " AND times=\"".concat(times, "\" ") + DESC_query));
+
+        case 43:
+          _ref7 = _context3.sent;
+          _ref8 = _slicedToArray(_ref7, 1);
+          _rows2 = _ref8[0];
+          _formattedRows2 = toTwoArray(_rows2);
+          ctx.body = JSON.stringify(_formattedRows2);
+          _context3.next = 56;
+          break;
+
+        case 50:
+          _context3.next = 52;
+          return regeneratorRuntime.awrap(connection2.execute(query + one_query + " AND times=\"".concat(times, "\" ") + DESC_query + "\n        LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset)));
+
+        case 52:
+          _ref9 = _context3.sent;
+          _ref10 = _slicedToArray(_ref9, 1);
+          _rows3 = _ref10[0];
+          ctx.body = toMap(_rows3);
+
+        case 56:
+          _context3.next = 74;
+          break;
+
+        case 58:
+          if (!page_boolean) {
+            _context3.next = 68;
+            break;
+          }
+
+          _context3.next = 61;
+          return regeneratorRuntime.awrap(connection2.execute(query + "\n        WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no=\"".concat(d_no, "\" ")) + " AND times=\"".concat(times, "\" ") + DESC_query));
+
+        case 61:
+          _ref11 = _context3.sent;
+          _ref12 = _slicedToArray(_ref11, 1);
+          _rows4 = _ref12[0];
+          _formattedRows3 = toTwoArray(_rows4);
+          ctx.body = JSON.stringify(_formattedRows3);
+          _context3.next = 74;
+          break;
+
+        case 68:
+          _context3.next = 70;
+          return regeneratorRuntime.awrap(connection2.execute(query + "WHERE c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"") + (d_no === "null" ? "" : " AND d_no=\"".concat(d_no, "\" ")) + " AND times=\"".concat(times, "\" ") + DESC_query + " LIMIT ".concat(parseInt(pageSize), " OFFSET ").concat(offset)));
+
+        case 70:
+          _ref13 = _context3.sent;
+          _ref14 = _slicedToArray(_ref13, 1);
+          _rows5 = _ref14[0];
+          ctx.body = toMap(_rows5);
+
+        case 74:
         case "end":
           return _context3.stop();
       }
@@ -232,23 +306,38 @@ Router.get("/test_history", function _callee3(ctx) {
   });
 });
 Router.get("/times", function _callee4(ctx) {
-  var id;
+  var id, result_array, j, _j, _j2;
+
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
-          id = ctx.query.id;
+          id = ctx.query.id; // 动态获取到相应长度的数组的方法
+
           console.log("111111");
+          result_array = [];
 
           if (id === 1 || id == '1') {
-            ctx.body = _mqtt_server_get.test_times[0];
+            for (j = 0; j <= _mqtt_server_get.test_times[0]; j++) {
+              result_array.push(j);
+            }
+
+            ctx.body = result_array;
           } else if (id === 2 || id === '2') {
-            ctx.body = _mqtt_server_get.test_times[1];
+            for (_j = 0; _j <= _mqtt_server_get.test_times[1]; _j++) {
+              result_array.push(_j);
+            }
+
+            ctx.body = result_array;
           } else {
-            ctx.body = _mqtt_server_get.test_times[2];
+            for (_j2 = 0; _j2 <= _mqtt_server_get.test_times[2]; _j2++) {
+              result_array.push(_j2);
+            }
+
+            ctx.body = result_array;
           }
 
-        case 3:
+        case 4:
         case "end":
           return _context4.stop();
       }

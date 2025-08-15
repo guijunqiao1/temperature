@@ -119,7 +119,7 @@ var tem = 0; //设备存储
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-var client = _mqtt["default"].connect('mqtt://127.0.0.1', {
+var client = _mqtt["default"].connect('mqtt://192.168.1.101', {
   clientId: "client_control" //唯一标识符
 
 }); //定义延时函数
@@ -335,12 +335,14 @@ wss.on('connection', function (ws, req) {
 
     var data = JSON.parse(message);
     console.log("message:" + message);
+    console.log("data:" + data);
 
     if (data['gongwei']) {
       exports.gongwei = gongwei = data['gongwei'];
     } else if (data['test'] || data['test'] === false) {
       exports.test = test = data['test'];
-    } else if (data['test_times']) {
+    } else if (data['test_times'] || data['test_times'] === 0) {
+      console.log("应当完成自增");
       if (data['test_times'] === 0) test_times[0]++;else if (data['test_times'] === 1) test_times[1]++;else if (data['test_times'] === 2) test_times[2]++;
     } else {
       console.log("没有v匹配上/");
@@ -701,34 +703,7 @@ client.on('message', function _callee2(topic, message) {
       }
     }
   });
-}); // //模拟发送传感器数据的客户端
-
-setInterval(function _callee3() {
-  return regeneratorRuntime.async(function _callee3$(_context9) {
-    while (1) {
-      switch (_context9.prev = _context9.next) {
-        case 0:
-          client.publish("sensorData", JSON.stringify({
-            temperature1: 1,
-            temperature2: 2,
-            temperature3: 3,
-            smog1: 1,
-            smog2: 2,
-            smog3: 3,
-            waterlevel1: 1,
-            waterlevel2: 2,
-            waterlevel3: 3,
-            I: 1,
-            V: 2,
-            type: "实时数据"
-          }), {
-            qos: 1
-          });
-
-        case 1:
-        case "end":
-          return _context9.stop();
-      }
-    }
-  });
-}, 1000);
+}); //模拟发送传感器数据的客户端
+// setInterval(async()=>{
+//   client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
+// },5000);

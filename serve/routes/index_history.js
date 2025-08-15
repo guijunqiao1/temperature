@@ -135,13 +135,25 @@ Router4.get("/History", async (ctx) => {
 
 // 表格的呈现路由
 Router4.get("/History_count", async (ctx) => {
-  const { start, end, d_no } = ctx.query;
+  const { start, end, d_no,times } = ctx.query;
   try {
+    function FORMATTIME(value) {
+      const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+      return formatTime(value);
+    }
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
+    console.log("哈鲁1")
     if (start === "1" && end === "1") {
       const [rows] = await connection2.execute(`
         SELECT COUNT(*) as total 
         FROM t_data
-      ` + (d_no === "null" ? "" : `WHERE d_no = "${d_no}"`));
+      ` + (d_no === "null" ? "" : `WHERE d_no = "${d_no}"`)+`AND times = ${times}`);
       ctx.body = "" + rows[0].total.toString();
     } else if (start === "end" && end !== "1") {
       const formattedEnd = FORMATTIME(end);
@@ -149,15 +161,23 @@ Router4.get("/History_count", async (ctx) => {
         SELECT COUNT(*) as total 
         FROM t_data 
         WHERE c_time < "${formattedEnd}"
-      ` + (d_no === "null" ? "" : `AND d_no = "${d_no}"`));
+      ` + (d_no === "null" ? "" : ` AND d_no = "${d_no}"`)+` AND times = ${times}`);
       ctx.body = "" + rows[0].total.toString();
     } else {
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
+      console.log("哈鲁")
       const formattedStart = FORMATTIME(start);
       const formattedEnd = FORMATTIME(end);
       const [rows] = await connection2.execute(`
         SELECT COUNT(*) as total  
         FROM t_data 
-        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : `AND d_no="${d_no}" `));
+        WHERE c_time BETWEEN "${formattedStart}" AND "${formattedEnd}"` + (d_no === "null" ? "" : ` AND d_no="${d_no}" `)+` AND times = ${times}`);
       ctx.body = "" + rows[0].total.toString();
     }
   } catch (error) {
@@ -282,5 +302,23 @@ Router4.get("/action_unit", async (ctx) => {
   const unitArray = rows.map((row) => row.unit);
   ctx.body = unitArray;
 });
+
+
+//行为维度绑定上删除库记录的事件--依据为仅时间值
+Router4.get('/delete',async (ctx)=>{
+  const { sign } = ctx.query;
+  // const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
+  console.log("时间值格式检查："+sign);
+  await connection2.execute(`
+    DELETE FROM t_behavior_data
+    WHERE c_time = '${sign}'
+    `);
+  ctx.body = 'ok';
+})
+
+
+
+
+//行为维度绑定上查询库记录的事件
 
 export default Router4;

@@ -327,7 +327,6 @@ const Router5 = new Router();
 
 Router5.get("/action", async (ctx) => {
   let { start, end, currentPage, pageSize, d_no } = ctx.query;
-
   const [result_now] = await connection.query(`
     SELECT * 
     FROM t_behavior_data 
@@ -339,7 +338,6 @@ Router5.get("/action", async (ctx) => {
       sql_string += x;
     }
   }
-
   const query = `SELECT d_no , ${sql_string} c_time,is_saved,file_type FROM t_behavior_data `;
   const DESC_query = `ORDER BY c_time DESC`;
   const page_boolean = (!pageSize || !currentPage || currentPage === "undefined" || pageSize === "undefined" || currentPage === undefined || pageSize === undefined);

@@ -35,7 +35,6 @@
     <div class="target_set">
       <input type="text">目标温度
       <input type="text">目标湿度
-      <button  @click="submit">提交目标值</button>
     </div>
 
 
@@ -124,7 +123,7 @@ let sum_hao = 0;
 
 
 // 计时秒变量
-let jishi_second = 0;
+let jishu_second = 0;
 
 
 
@@ -167,7 +166,6 @@ function OneMinute(value1, value2) {//value2为'1'时去秒
   }
   return time_now;
 }
-
 //定义获取分钟间隔的时候的平均值数组的函数--折线图值的配置函数
 function y_zhi(value1, value2) {
   let average: any = [[],[],[],[],[],[],[],[]] ; // 用于存储 5 个字段的平均值--设备信息
@@ -212,7 +210,6 @@ function y_zhi(value1, value2) {
     chartRef.value.chart.setOption(chartOption.value);
   }
 }
-
 //机房修改函数
 function change_jifang(value){
   if(test_qidong===1) {
@@ -221,7 +218,6 @@ function change_jifang(value){
   else{
     //全局变量修改
     Pinia.change(value);
-    test(0);//叠加上次数同时清空内容
     //当前页面的重置(携带上Pinia.signzhi)
     //页面重置,先跳到一个空路由，再跳回来
     router.replace('/empty').then(() => {
@@ -230,7 +226,6 @@ function change_jifang(value){
     console.log("当前机房:"+Pinia.signzhi);
   }
 }
-
 //测试方法
 async function test(value) {
   //获取到输入框对象
@@ -247,9 +242,10 @@ async function test(value) {
       test_qidong = 0;
     }
   }else {//开启测试
-    if((wendu_input.value<-10)&&(wendu_input.value>30) || (shidu_input.value<-50)&&(shidu_input.value>50)){
+    if( !(wendu_input.value&&shidu_input.value) || (wendu_input.value<-10)&&(wendu_input.value>30) || (shidu_input.value<-50)&&(shidu_input.value>50)){
       alert("目标值设定必须为数值");
     }else{
+      console.log("当前布尔值："+Boolean(wendu_input.value&&shidu_input.value));
       target_wen.value = wendu_input.value;
       target_shi.value = shidu_input.value;
       //清除时间数组内容、图像数组
@@ -263,7 +259,7 @@ async function test(value) {
       //清空图像当前维度下的数组
       nowArray.value = [];
       //清空计时器(s)
-      jishi_second = 0;
+      jishu_second = 0;
       //清空总量变量
       sum_wen = 0;
       sum_shi = 0;
@@ -271,14 +267,13 @@ async function test(value) {
 
       x = setInterval(async () => {
         //定期渲染图像
-        jishi_second++;
+        jishu_second++;
       },1000);
       test_qidong = 1;
       const result = await axios.get(`/api/test?d_no=${Pinia.signzhi}&qidong=yes`);
     }
   }
 }
-
 // 打印方法
 async function print() {
   try {
@@ -315,15 +310,15 @@ async function print() {
     
     // 在底部添加测试状态
     const testStatus = test_qidong === 1 ? "测试中" : "测试已停止";
-    ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height - 40);
+    ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height);
 
     // 底部添加工位信息
-    ctx.fillText(`测试工位: ${Pinia.signzhi}`, canvas.width / 2, canvas.height - 60);
+    ctx.fillText(`测试工位: ${Pinia.signzhi}`, canvas.width / 2, canvas.height+20);
 
     //计算当前温湿平均值
     const wen_average = sum_wen/jishu_second;
     const shi_average = sum_shi/jishu_second;
-    ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height - 80);
+    ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height+40);
 
     
     // 创建下载链接
@@ -807,6 +802,49 @@ onUnmounted(() => {
   .el-dropdown {
     margin-left: 435px;
     margin-top: 40px;
+  }
+  /* 目标值设置输入框 */
+  .target_set {
+    position: absolute;
+    top: 104px;
+    left: 327px;
+  }
+  .target_set>input:nth-child(2) {
+    margin-left:52px;
+  }
+  /* 测试相关按钮 */
+  .start_test {
+    margin-left: 335px;
+    width: 90px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #409eff;
+  }
+  .end_test {
+    margin-left: 126px;
+    width: 90px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #409eff;
+  }
+  .print {
+    margin-left: 254px;
+    width: 90px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #409eff;
+  }
+  button:hover {
+    cursor: pointer;
   }
 </style>
 

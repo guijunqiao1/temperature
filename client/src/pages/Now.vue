@@ -811,6 +811,29 @@ let y: any = 0;
 
 // 挂载时加载数据
 onMounted(async () => {
+  //监控相关内容
+
+  const cameras = [
+    {
+      id: 'camera_1',           // 摄像头的唯一标识符
+      name: '工位1',            // 摄像头名称
+      url: 'http://192.168.1.101:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
+    },  
+    {
+      id: 'camera_2',           // 摄像头的唯一标识符
+      name: '工位2',            // 摄像头名称
+      url: 'http://192.168.1.101:5000/stream/1',  // 1表示第二个摄像头
+    },
+    {
+      id: 'camera_3',           // 摄像头的唯一标识符
+      name: '工位3',            // 摄像头名称
+      url: 'http://192.168.1.101:5000/stream/2',  // 2表示第三个摄像头
+    }
+  ];
+  cameras.forEach((item)=>{
+    if(item.name===Pinia.signzhi) src0.value = item.url;
+  });
+  
   x = setInterval(async () => {
     const result_alarm = await axios.get("/api/alarm");
     // alarm.value = result_alarm.data;
@@ -1240,31 +1263,6 @@ onMounted(async () => {
   }
 
 
-
-
-
-  //监控相关内容
-
-  const cameras = [
-    {
-      id: 'camera_1',           // 摄像头的唯一标识符
-      name: '机房1',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
-    },
-    {
-      id: 'camera_2',           // 摄像头的唯一标识符
-      name: '机房2',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/1',  // 1表示第二个摄像头
-    },
-    {
-      id: 'camera_3',           // 摄像头的唯一标识符
-      name: '机房3',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/2',  // 2表示第三个摄像头
-    }
-  ];
-  cameras.forEach((item)=>{
-    if(item.name===Pinia.signzhi) src0.value = item.url;
-  })
   //初始化对照资源src1、src2、time
   //获取库中最新记录
   const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);

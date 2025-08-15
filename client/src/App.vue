@@ -46,6 +46,12 @@
             <el-menu-item index="1-6">
               <RouterLink to="/DEVICE"> 铭牌信息</RouterLink>
             </el-menu-item>
+            <el-menu-item index="1-7">
+              <RouterLink to="/sensor_set"> 传感设置</RouterLink>
+            </el-menu-item>
+            <el-menu-item index="1-8">
+              <RouterLink to="/New"> 实时页面</RouterLink>
+            </el-menu-item>
           </el-menu>
         </el-col>
       </el-row>
@@ -75,6 +81,10 @@ import { RouterView, RouterLink } from "vue-router";
 import { ref } from "vue";
 import { onMounted } from 'vue';
 import axios from "axios";
+import { useUserStore } from "./store/curt"; 
+
+const Pinia = useUserStore();
+
 
 //使用vue中的路由进行类似a标签功能的RouteLink标签以及RouteView标签的使用(需要对to属性进行理解性的设置以及对路由器进行动态的引入并在
 //main.ts文件中配置上盖路由器并且挂载到当前App文件对象(应用对象)身上)
@@ -190,6 +200,15 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
       console.log("成功那个廷加告警元素");
     }
   };
+
+ 
+  //进行全局选中测试次数以及全局总测试次数的变量的赋值
+  const result = await axios.get(`/api/times?id=1`);
+  Pinia.change_Test_array(result.data);
+  //取默认times的值
+  console.log("响应内容："+result.data);
+  Pinia.change_times(0);
+  console.log("全局次数:"+Pinia.times);
 
 
 
@@ -385,9 +404,13 @@ div.nothing {
 }
 .calculator>button {
   z-index:100;
-  width:100px;
-  height:100px;
+  width: 50px;
+  height: 23px;
   cursor: pointer;
+  font-size: 10px;
+  position: fixed;
+  top: 10px;
+  right: 200px;
 }
 </style>
 

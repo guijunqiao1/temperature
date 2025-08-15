@@ -7,7 +7,7 @@
     <!-- 设备相关内容 -->
     <el-dropdown>
       <el-button type="primary" v-show="Pinia.type_len > 1">
-        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+        工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
       </el-button>
       <template #dropdown>
         <el-dropdown-menu>
@@ -22,7 +22,7 @@
       </template>
     </el-dropdown>
     <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-      当前机房：{{ Pinia.signzhi }}</div>
+      当前工位：{{ Pinia.signzhi }}</div>
 
 
       <!-- 测试次数 -->
@@ -33,16 +33,16 @@
       <template #dropdown>
         <el-dropdown-menu>
           <div>
-            <div class="device_list" v-for="item in Pinia.test_array" :key="item[0]">
+            <div class="device_list" v-for="item in Pinia.test_array">
               <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change_cishu(item[0])">{{ item[0] }}</div>
+                <div style="border-radius: 5px;" @click="change_cishu(item)">{{ item }}</div>
               </el-dropdown-item>
             </div>
           </div>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <div class="only1" style="border-radius: 5px;background-color: #409eff;" v-if="Pinia.test_type_len <= 1">
+    <div class="only1" style="border-radius: 5px;background-color: #409eff;" v-if="Pinia.test_type_len < 1">
       当前选中的测试次数：{{ Pinia.times }}</div>
 
 
@@ -114,6 +114,7 @@
           <th>具体资源(后)</th>
           <th>收集时间</th>
           <th>文件类型</th>
+          <th>操作</th>
         </tr>
       </thead>
       <tbody>
@@ -125,6 +126,7 @@
           @click="start_block(item[2])">查看</button> </td>
           <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
           <td>{{ item[4] }}</td>
+          <td><button class="delete_button" @click="delete1(item)">删除</button></td>
         </tr>
       </tbody>
     </table>
@@ -263,6 +265,10 @@ let update = () => { };//普通数据表更新函数
 let update1 = () => { };//行为表更新函数
 
 
+//声明删除函数
+let delete1 = (value) => {  };
+
+
 
 const router = useRouter();
 
@@ -324,6 +330,7 @@ function XXX() {
 //机房切换重置方法
 function change_jifang(value){
   Pinia.change(value);
+  Pinia.change_times(0);
   //页面重置,先跳到一个空路由，再跳回来
   router.replace('/empty').then(() => {
     router.replace('/History');
@@ -915,12 +922,12 @@ onMounted(async () => {
       const resultk = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&times=${Pinia.times}`);
       date_Array.value = resultk.data;//分页内容的呈现数组赋值
       type_array.value = qu_repeate(date_Array.value);//去重数组的获取
-      const resultx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
+      const resultx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${Pinia.signzhi}&times=${Pinia.times}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//将数组指定分页的内容进行指定内容的获取用于device_array_page数组的赋值
       now_databasesArray.value = resultx.data;//进行总ok内容的赋值
       device_page_array.value = resultx.data;
-      const resultxx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
+      const resultxx = await axios.get(`/api/test_history?start=${boolean_x ? "end" : start}&end=${end}&d_no=${Pinia.signzhi}&times=${Pinia.times}`);//将数组总内容进行获取，并且指明id,用于device_array数组的赋值
       device_array.value = resultxx.data;//赋值完毕
-      const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${signzhi.value}&times=${Pinia.times}`);//将数组的总内容数进行获取用于total1的赋值
+      const resultxxx = await axios.get(`/api/History_count?start=${boolean_x ? "end" : start}&end=${end}&d_no=${Pinia.signzhi}&times=${Pinia.times}`);//将数组的总内容数进行获取用于total1的赋值
       total1.value = resultxxx.data;//进行某设备总值的赋值
 
       console.log("点击了Ok但是还没有进入到enough中的device_array:" + device_array.value);
@@ -1160,6 +1167,15 @@ onMounted(async () => {
 
   currentPage.value =0;
   currentPage.value =1;
+
+
+  //绑定上删除方法(将当前行中的新旧图片记录库内容删除以及前端更新(即重新请求))
+  delete1 = async(value)=>{
+    console.log("选中对象内容：");
+    console.dir(value);
+    await axios.get(`/api/delete?sign=${value[3]}`);
+    update1();
+  }
 
 });
 
@@ -1652,6 +1668,12 @@ input[type="checkbox"]:hover {
   left:700px;
 }
 
+/* 为删除按钮进行样式设计  */
+.delete_button {
+}
+.delete_button:hover {
+  cursor: pointer;
+}
 
 </style>
 <!-- flex-flow属性可用于同时控制flex-direction和flex-wrap  -->

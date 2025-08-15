@@ -11,6 +11,7 @@ import ex from "../pages/experience.vue";
 import container from "../pages/t_container.vue";
 import test from '../pages/test.vue';
 import DEVICE from "../pages/DEVICE.vue";
+import sensor_set from "../pages/sensor_set.vue";
 
 //2、创建路由器
 const router = createRouter({
@@ -47,6 +48,10 @@ const router = createRouter({
     {
       path: "/DEVICE",
       component: DEVICE
+    },
+    {
+      path: "/sensor_set",
+      component: sensor_set
     }
   ]
 });

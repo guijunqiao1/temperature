@@ -1184,7 +1184,6 @@ onMounted(async () => {
 <style scoped>
 .container {
   width: 100%;
-  border: 2px solid gray;
   position: absolute;
   top: 0px;
 }
@@ -1242,8 +1241,6 @@ h2 {
 .container.fit-view {
   position: absolute;
   top: 0;
-  border-left: 26px solid gray;
-  border-right: 10px solid gray;
 }
 
 .echarts {
@@ -1300,7 +1297,6 @@ h2 {
 table {
   margin-top: 18px;
   border-top: 5px solid gray;
-  width: 100%;
   height: 66px;
   /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
   border-spacing: 0;
@@ -1426,7 +1422,7 @@ table tbody>tr>td {
 
 /* 设计提示标签的样式 */
 .h1 {
-  width: 1103.8px;
+  width: 100%;
   position: relative;
   top: 22px;
   background-color: #9da79f;
@@ -1546,11 +1542,11 @@ input[type="checkbox"]:hover {
 /* 控制表格宽度铺满全屏  */
 /* .device_table {
   width: 100% !important;
-}
+} */
 
 .action_table {
-  width: 100% !important;
-} */
+  width: 100%;
+}
 
 .pagination-container1>.el-pagination {
   margin-left: 800px;
@@ -1658,11 +1654,7 @@ input[type="checkbox"]:hover {
 }
 
 /* 为次数选择器进行样式设计 */
-.container.fit-view>.el-dropdown:nth-child(3) {
-  position: relative;
-  top: 35px;
-  left:100px;
-}
+
 .container.fit-view .only1 {
   position: relative;
   left:700px;
@@ -1670,6 +1662,8 @@ input[type="checkbox"]:hover {
 
 /* 为删除按钮进行样式设计  */
 .delete_button {
+  font-size: 12px;
+  width: 70px;
 }
 .delete_button:hover {
   cursor: pointer;

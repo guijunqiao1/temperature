@@ -1,10 +1,22 @@
 <template>
-  <div class="content1" v-show="Pinia.Device_sign">
-    <div class="device_container">
-      <div class="device_item" v-for="item in type_array" >
-        <div>工位编号为：{{ item[1] }}的工位</div>
-        <RouterLink to="/test" @click="change(item[0])"><img src="../../public/jifang.webp" /></RouterLink>
-        <!-- <a @click="change(item[1])" href="http://localhost:5173/New"></a> -->
+  <div class="device-overview-container" v-show="Pinia.Device_sign">
+    <div class="device-overview-header">
+      <h1 class="page-title">设备概览</h1>
+      <p class="page-description">查看和管理所有工位设备状态</p>
+    </div>
+    
+    <div class="device-grid">
+      <div class="device-card" v-for="item in type_array" :key="item[0]">
+        <div class="device-info">
+          <h3 class="device-title">工位编号：{{ item[1] }}</h3>
+          <p class="device-description">点击进入工位详情</p>
+        </div>
+        <RouterLink to="/test" @click="change(item[0])" class="device-link">
+          <img src="../../public/jifang.webp" alt="工位图片" class="device-image" />
+          <div class="device-overlay">
+            <span class="overlay-text">进入工位</span>
+          </div>
+        </RouterLink>
       </div>
     </div>
   </div>
@@ -127,34 +139,187 @@
 </script>
 
 <style scoped>
-/* 设置了scoped则当前组件固定按照当前的style规则进行样式呈现,否则可能出现全局样式的一系列问题导致当前组件的样式无法正常呈现 */
-* {
-  text-decoration: none;
-  color: black;
+.device-overview-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* 控制机房盒子样式 */
-.device_container{
-  width: 1200px;
-  height:100%;
-  display: flex;
-  flex-direction: row;  
-  overflow: hidden;
-  justify-content: space-evenly;
-}
-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* ✅ 等比例缩放，不裁剪 */
-  display: block;
-}
-.device_container>.device_item {
-  height:200px;
-}
-.device_container>.device_item>div {
-  font-size: 21px;
+.device-overview-header {
   text-align: center;
-  font-weight: 400; 
+  margin-bottom: 50px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.page-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #3498db, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-description {
+  font-size: 1.2rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.device-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.device-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.device-info {
+  margin-bottom: 20px;
+}
+
+.device-title {
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.device-description {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.device-link {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.device-link:hover {
+  transform: scale(1.02);
+}
+
+.device-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.device-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(52, 152, 219, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: 15px;
+}
+
+.device-link:hover .device-overlay {
+  opacity: 1;
+}
+
+.overlay-text {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .device-overview-container {
+    padding: 20px;
+  }
+  
+  .device-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .device-overview-container {
+    padding: 15px;
+  }
+  
+  .device-overview-header {
+    padding: 30px 20px;
+    margin-bottom: 30px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-description {
+    font-size: 1rem;
+  }
+  
+  .device-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .device-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .device-overview-container {
+    padding: 10px;
+  }
+  
+  .device-overview-header {
+    padding: 25px 15px;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .device-title {
+    font-size: 1.2rem;
+  }
 }
 </style>
 

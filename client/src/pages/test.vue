@@ -3,7 +3,7 @@
     <!-- 设备相关内容 -->
     <el-dropdown>
       <el-button type="primary" v-show="Pinia.type_len > 1">
-        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+        工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
       </el-button>
       <template #dropdown>
         <el-dropdown-menu>
@@ -18,7 +18,7 @@
       </template>
     </el-dropdown>
     <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-      当前机房：{{ Pinia.signzhi }}</div>  
+      当前工位：{{ Pinia.signzhi }}</div>  
 
 
     <!-- 设备信息  --> 
@@ -124,6 +124,9 @@ let sum_hao = 0;
 
 // 计时秒变量
 let jishu_second = 0;
+
+// 定义测试起始时间变量
+let start_time;
 
 
 
@@ -242,6 +245,8 @@ async function test(value) {
       test_qidong = 0;
     }
   }else {//开启测试
+    //为获取当前起始时间
+    start_time = moment().format("YYYY-MM-DD HH:mm:ss");
     if( !(wendu_input.value&&shidu_input.value) || (wendu_input.value<-10)&&(wendu_input.value>30) || (shidu_input.value<-50)&&(shidu_input.value>50)){
       alert("目标值设定必须为数值");
     }else{
@@ -306,21 +311,26 @@ async function print() {
     
     // 在底部添加时间戳和其他信息
     ctx.font = '12px Arial';
-    ctx.fillText(`生成时间: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, canvas.width / 2, canvas.height - 20);
+    ctx.fillText(`打印时间段:${start_time} 到 ${moment().format('YYYY-MM-DD HH:mm:ss')}`, canvas.width / 2, canvas.height - 20);
     
     // 在底部添加测试状态
     const testStatus = test_qidong === 1 ? "测试中" : "测试已停止";
     ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height);
 
     // 底部添加工位信息
-    ctx.fillText(`测试工位: ${Pinia.signzhi}`, canvas.width / 2, canvas.height+20);
+    ctx.fillText(`测试工位: ${Pinia.signzhi} 测试次数: ${Pinia.times}`, canvas.width / 2, canvas.height+20);
 
     //计算当前温湿平均值
-    const wen_average = sum_wen/jishu_second;
-    const shi_average = sum_shi/jishu_second;
+    const wen_average = sum_wen/(jishu_second+1);
+    const shi_average = sum_shi/(jishu_second+1);
     ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height+40);
 
-    
+    //调试行
+    // ctx.fillText(`总温度: ${sum_wen};总湿度: ${sum_shi};总时长: ${jishu_second}`, canvas.width / 2, canvas.height+70);
+
+    //耗电量显示
+    ctx.fillText(`期间耗电量: ${sum_hao}`, canvas.width / 2, canvas.height+60);
+
     // 创建下载链接
     const link = document.createElement('a');
     link.download = `测试数据_${Pinia.signzhi}_${moment().format('YYYYMMDD_HHmmss')}.png`;
@@ -359,6 +369,9 @@ socket.onmessage = function(event) {
       console.log("当前实际的data.data数组："+data.data);
       time_array.push(data.data[9]);//格式化时间值
       console.log("当前实际的time_array内容:"+time_array);
+      //提前保存data.data
+      const data_data = [...data.data];
+
       //插入图像数组
       if(nowArray.value.length<=1){
         nowArray.value[0] = data.data[0];
@@ -371,9 +384,9 @@ socket.onmessage = function(event) {
       }
       console.log("当前的nowArray:"+nowArray.value);
       //统计总量
-      sum_wen += data.data[1];
-      sum_shi += data.data[2];
-      sum_hao += data.data[8];
+      sum_wen += data_data[1];
+      sum_shi += data_data[2];
+      sum_hao += data_data[8];
 
 
       //立即完成x轴赋值
@@ -609,11 +622,6 @@ onUnmounted(() => {
     background-color: aqua !important;
   }
 
-  /* 为容器标签设计左边框 */
-  .container.fit-view {
-    border-left: 36px solid gray;
-  }
-
   /* 设计切换图像按钮盒子的样式 */
   .change,
   .change1 {
@@ -737,8 +745,8 @@ onUnmounted(() => {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     min-width: 300px;
     max-width: 80%;
-    overflow: auto;
-    overflow: hidden;
+    /* overflow: auto;
+    overflow: hidden; */
   }
 
   /* 为弹窗按钮添加样式 */
@@ -834,7 +842,7 @@ onUnmounted(() => {
     background-color: #409eff;
   }
   .print {
-    margin-left: 254px;
+    margin-left: 100px;
     width: 90px;
     height: 32px;
     text-align: center;

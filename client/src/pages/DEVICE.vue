@@ -1,50 +1,53 @@
 <template>
-  <div class="content1" v-show="Pinia.Action_sign">
+  <div class="device-container" v-show="Pinia.Action_sign">
     <!-- 上半部分 -->
-    <div class="top_part">
-
+    <div class="device-header">
       <!-- 设备查询下拉框--动态对a_length获取用于进行当前应当展现内容的判断 -->
-      <el-dropdown>
-        <el-button type="primary" v-show="Pinia.type_len > 1">
-          机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      <el-dropdown class="room-selector">
+        <el-button type="primary" v-show="Pinia.type_len > 1" class="room-btn">
+          工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
             <div>
-              <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
+              <div class="device-list" v-for="item in Pinia.type_array" :key="item[0]">
                 <el-dropdown-item>
-                  <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+                  <div class="room-option" @click="change_jifang(item[0])">{{ item[0] }}</div>
                 </el-dropdown-item>
               </div>
             </div>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-        当前机房：{{ Pinia.signzhi }}</div>
+      <div class="current-room" v-if="type_len <= 1">
+        {{ Pinia.signzhi }}
+      </div>
     </div>
 
     <!-- 表格部分 -->
-    <div class="bottom_part">
-      <table>
-        <thead>
-          <tr>
-            <th>地点</th>
-            <th>设备名称</th>
-            <th>注释</th>
-            <th>创建时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 遍历的是设备数组的内容 -->
-          <tr v-for="item in device_array" :key="item.id">
-            <td>{{ item[3] }}</td>
-            <td>{{ item[0] }}</td>
-            <td>{{ item[1] }}</td>
-            <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="device-table-section">
+      <h2 class="section-title">设备信息表</h2>
+      <div class="table-container">
+        <table class="device-table">
+          <thead class="table-header">
+            <tr>
+              <th>地点</th>
+              <th>设备名称</th>
+              <th>注释</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <!-- 遍历的是设备数组的内容 -->
+            <tr v-for="item in device_array" :key="item.id" class="table-row">
+              <td>{{ item[3] }}</td>
+              <td>{{ item[0] }}</td>
+              <td>{{ item[1] }}</td>
+              <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -174,14 +177,12 @@ div.gray {
   justify-content: center;
 }
 
-div.content1 {
-  background-color: white;
+.device-container {
   width: 100%;
-  height: 646px;
-  position: relative;
-  border-left: 18px solid gray;
-  margin-left: 0 !important;
-  /* top:40px; */
+  min-height: 100vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 对输入框和选择框进行样式设计 */
@@ -211,15 +212,17 @@ button.Big {
   margin-left: 0;
 }
 
-.top_part {
-  width: 100%;
-  height: 43px;
-  background-color: gray;
-  /* 垂直方向上子元素靠齐侧轴的起点位置(也就是子标签的顶部对齐) */
+.device-header {
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-bottom: 3px solid black;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .top_part>input:nth-child(3) {

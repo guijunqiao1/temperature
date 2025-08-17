@@ -1,67 +1,70 @@
 <template>
   <!-- 顶部导航 -->
-  <div class="nav_top">
-    <div class="ren">桂军桥的项目</div>
-    <div class="aler" @click="aler" style="cursor:pointer">#</div>
-    <div class="getnew" @click="getnew" style="cursor:pointer">@</div>
-    <span ref="add" class="add">主页</span>
-     <!-- 全局告警盒子 -->
+  <div class="nav-top">
+    <div class="nav-brand">桂军桥的项目</div>
+    <div class="nav-actions">
+      <div class="nav-btn alert-btn" @click="aler" title="告警">#</div>
+      <div class="nav-btn refresh-btn" @click="getnew" title="刷新">@</div>
+    </div>
+    <span ref="add" class="nav-home">主页</span>
+    <!-- 全局告警盒子 -->
     <div class="alarm_all"></div>
     <!-- 下方标签专门用于向后端发送请求，并且后端的router文件夹中的route.js文件提前设置好对应的路由，主页面为当前App.vue文件所搭载的内容，
     而路由发生跳转的文件为后端的view中的.ejs文件临时渲染的内容 -->
-    <a href="#" class="register_outer"><img src="../public/ok2.png" alt="" class="register_inner"></a>
+    <a href="#" class="register-outer">
+      <img src="../public/ok2.png" alt="" class="register-inner">
+    </a>
   </div>
   <!-- 底部主区域 -->
   <div class="content">
     <!-- 侧边栏 -->
     <!-- 下方对于没有多余的pages页面用于呈现的路由部分统一设置为/home主页面的路由 -->
-    <div class="left">
+    <div class="sidebar">
       <el-row class="tac">
         <el-col>
-          <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
-            default-active="2" text-color="#fff">
+          <el-menu active-text-color="#409eff" background-color="#2c3e50" class="el-menu-vertical-demo"
+            default-active="2" text-color="#ecf0f1">
             <!-- 下方的3、4个el-menu-item标签的路由路径设置为首页(因为要求中只提供了2个路径条件：/t_device、/t-error-msg) -->
-            <el-menu-item index="1-1">
-            <RouterLink to="/t_device"> 机房导航
+            <el-menu-item index="1-1" class="menu-item">
+            <RouterLink to="/t_device" class="menu-link"> 机房导航
               </RouterLink>
             </el-menu-item>
             <!-- 此处需要注意的是使用了div包裹原先的el-menu-item组件标签中的内容实现整体内容发生插槽优化后的div嵌套原先内容的效果的实现，
             这么做的好处是原先针对这个el-menu-item组件标签而言无法直接对标签进行事件的绑定后的$event进行准确的获取，但是通过这种嵌套的
             方式则能在传递参数的时候的$event进行明确的事件对象进行获取--补充：对于原生事件而言$event一般获取到的是事件对象(针对普通标签，而非组件标签) -->
-            <el-menu-item index="1-2">
-              <RouterLink to="/test">
+            <el-menu-item index="1-2" class="menu-item">
+              <RouterLink to="/test" class="menu-link">
                 测试模块
               </RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-3">
-              <RouterLink to="/History"> 历史数据</RouterLink>
+            <el-menu-item index="1-3" class="menu-item">
+              <RouterLink to="/History" class="menu-link"> 历史数据</RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-4">
-              <RouterLink to="/t_error_msg"> 错误内容
+            <el-menu-item index="1-4" class="menu-item">
+              <RouterLink to="/t_error_msg" class="menu-link"> 错误内容
               </RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-5">
-              <RouterLink to="/t_Control"> 指令控制台</RouterLink>
+            <el-menu-item index="1-5" class="menu-item">
+              <RouterLink to="/t_Control" class="menu-link"> 指令控制台</RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-6">
-              <RouterLink to="/DEVICE"> 铭牌信息</RouterLink>
+            <el-menu-item index="1-6" class="menu-item">
+              <RouterLink to="/DEVICE" class="menu-link"> 铭牌信息</RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-7">
-              <RouterLink to="/sensor_set"> 传感设置</RouterLink>
+            <el-menu-item index="1-7" class="menu-item">
+              <RouterLink to="/sensor_set" class="menu-link"> 传感设置</RouterLink>
             </el-menu-item>
-            <el-menu-item index="1-8">
-              <RouterLink to="/New"> 实时页面</RouterLink>
+            <el-menu-item index="1-8" class="menu-item">
+              <RouterLink to="/New" class="menu-link"> 实时页面</RouterLink>
             </el-menu-item>
           </el-menu>
         </el-col>
       </el-row>
     </div>
-    <div class="nothing2"></div>
+    <div class="sidebar-spacer"></div>
     <!-- 内容区--第一个container标签用于将整体的位置控制在div.left标签的右方(需要占用display)，第二个则设置内容区域的布局(需要占用display) -->
     <!-- 同时需要注意的是，如果需要将多个元素共行，则必须同时满足都不是块级元素的性质 -->
-    <div class="container1">
-      <div class="nothing"></div>
-      <div class="container2">
+    <div class="main-container">
+      <div class="content-wrapper">
         <!-- 需要注意：Router-Link\RouterView的通信结构中后者被当做所有子组件的复合体,需要注意子组件中暴露的变量名不可重名 -->
         <RouterView class="fit-view"></RouterView>
       </div>
@@ -70,7 +73,7 @@
   </div>
 
   <div class="calculator">
-    <button @click="calculator">计算器</button>
+    <button @click="calculator" class="calc-btn">计算器</button>
   </div>
 
   
@@ -223,155 +226,238 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
 </script>
 
 <style>
-/* 上部导航栏样式 */
-.nav_top {
-  /* 此处需要注意的是开启fixed布局并不会脱离标准文档流 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow: visible;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* 顶部导航栏 */
+.nav-top {
   position: fixed;
-  /* 此处开启了fixed定位可被其中的子元素作为包含块进行绝对定位 */
-  top: 0px;
+  top: 0;
   width: 100%;
-  background-color: #317C77;
-  height: 40px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  height: 70px;
   display: flex;
   align-items: center;
-  z-index: 2;
+  padding: 0 30px;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.nav_top>div {
-  font-size: 17px;
-  color: white;
-  position: relative;
-  /* left:12px; */
+.nav-brand {
+  font-size: 22px;
+  font-weight: 700;
+  margin-right: 30px;
+  background: linear-gradient(45deg, #3498db, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.nav_top .ren {
-  font-weight: 800;
-  position: relative;
-  left: 40px;
+.nav-actions {
+  display: flex;
+  gap: 15px;
+  margin-right: 30px;
 }
 
-.nav_top .aler {
-  position: relative;
-  left: 60px;
-}
-
-.nav_top .getnew {
-  position: relative;
-  left: 80px;
-  bottom: 2px;
-}
-
-.nav_top>span {
-  font-size: 10px;
-  color: white;
-  position: relative;
-  left: 100px;
-}
-
-/* 侧边栏导航样式*/
-.content>.left {
-  display: inline-block;
-  width: 151.15px;
-  /* 显式地指定子元素的布局方式为垂直方向排布(block标签的默认排列方式) */
-  vertical-align: top;
-}
-
-.content .el-col,
-.content .el-col-12 {
-  width: 151.15px;
-}
-
-/* 设置被选中的侧边导航栏中的元素的呈现的颜色 */
-.el-menu-item.is-active {
-  color: white;
-  background-color: rgb(64, 203, 157);
-}
-
-/* 覆盖掉RouterLink标签的默认样式,需要注意是选择器选中的应该是发生转化后的标签对象 */
-li.el-menu-item>a {
-  text-decoration: none;
-  color: white;
-}
-
-/* 将RouterView标签中呈现的内容的位置进行样式设计 */
-.container1 {
-  /* 此处需要注意的是在top_nav中使用width:100%的方式将视口的宽度用于提供给自身元素的方式会将原先的div#app标签进行不完全的撑开，
-    并且需要注意的是.content标签的宽度容量是依据div#app的 */
-  width: 1104.33px;
-  display: inline-block;
-  position: relative;
-  height: 646px;
-}
-
-.container2 {
-  width: 100%;
-  height: 100%;
+.nav-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 开启相对定位，用于后续的container的绝对定位的设置 */
-  position: relative;
-  /* left: 53px; */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 16px;
 }
 
-/* 需要注意的是样式中进行属性的赋值的时候如果需要使用连串的方式进行值的赋取必须使用特殊的表达式进行操作，而不能像：width:100vw - 40px;这样 */
+.alert-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
 
-/* 父元素容器清除浮动 */
+.alert-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.nav-home {
+  font-size: 18px;
+  margin-right: 30px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.alarm-all {
+  width: 250px;
+  height: 40px;
+  font-size: 14px;
+  text-align: center;
+  line-height: 40px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border-radius: 20px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  animation: pulse 2s infinite;
+  color: white;
+}
+
+@keyframes pulse {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.register-outer {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.register-outer:hover {
+  transform: scale(1.1);
+}
+
+.register-inner {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 主内容区域 */
 .content {
   width: 100%;
   position: relative;
-  top: 40px;
+  top: 70px;
   clear: both;
   display: flex;
   justify-content: start;
+  min-height: calc(100vh - 70px);
 }
 
-/* 将正常溢出的文本中自动添加的滚动条进行撤销--原先这种自动添加的滚动条属于html中的滚动条，并且进行实际滚动的时候实际产生效果也仅发生在RouterView中 */
-
-/*防止出现多余的滚动条*/
-/* 确保页面整体的容器可以滚动-- */
-html,
-body {
-  overflow: visible;
-  margin: 0;
-}
-
-/* div.container {
-    overflow: hidden;
-  } */
-div.nothing {
-  width: 1204.33px;
-  height: 7.19px;
-  background-color: gray;
-  position: relative;
-  /* left:16px; */
-  /* 自身在原先的基础上进行向上位移 */
-}
-
-.nothing2 {
+/* 侧边栏 */
+.sidebar {
   display: inline-block;
-  width: 18px !important;
-  /* 防止当前使用!important关键字设置的width被flex压缩 ,此处可得出结论flex布局的优先级大于被指定的!important的内容*/
-  flex-shrink: 0;
-  height: 653px;
-  background-color: gray;
+  width: 280px;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  padding: 20px 0;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  vertical-align: top;
 }
 
-/* 将标签自带的右白色边框进行删除 */
-.el-menu.el-menu--vertical.el-menu-vertical-demo {
-  border: 0;
-}
-
-/* 对标签的内以及外进行样式设计 */
-.register_outer,
-.register_inner {
-  height: 25px;
-}
-
-/* 需要注意的是在一个父容器被postuon:relative进行定位的时候，其中的子元素被同步进行定位 */
-.register_outer {
+.sidebar::before {
+  content: '';
   position: absolute;
-  right: 100px;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, #3498db, #e74c3c);
+}
+
+.sidebar-spacer {
+  display: inline-block;
+  width: 20px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+/* 主容器 */
+.main-container {
+  flex: 1;
+  display: flex;
+  min-height: calc(100vh - 70px);
+}
+
+.content-spacer {
+  width: 20px;
+}
+
+.content-wrapper {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  margin: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-y: auto;
+}
+
+.fit-view {
+  width: 100%;
+  height: 100%;
+}
+
+/* 菜单样式 */
+.el-menu-vertical-demo {
+  border: none;
+  background: transparent !important;
+}
+
+.el-menu-item.is-active {
+  color: white;
+  background-color: #409eff !important;
+}
+
+.menu-item {
+  margin: 5px 15px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background: rgba(52, 152, 219, 0.1) !important;
+  transform: translateX(5px);
+}
+
+.menu-link {
+  color: #ecf0f1 !important;
+  text-decoration: none;
+  display: block;
+  padding: 12px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.menu-link:hover {
+  color: #3498db !important;
+  background: rgba(52, 152, 219, 0.1);
+}
+
+/* 覆盖掉RouterLink标签的默认样式 */
+li.el-menu-item>a {
+  text-decoration: none;
+  color: white;
 }
 
 /* 为列表中的内容进行标签进行居中设计 */
@@ -380,7 +466,12 @@ div.nothing {
   justify-content: center;
 }
 
-/* 为错误表中的时间选择器布局  */
+/* 将标签自带的右白色边框进行删除 */
+.el-menu.el-menu--vertical.el-menu-vertical-demo {
+  border: 0;
+}
+
+/* 为错误表中的时间选择器布局 */
 .error_date_time>.el-date-editor.el-date-editor--datetimerange.el-input__wrapper.el-range-editor.el-tooltip__trigger.el-tooltip__trigger {
   height: 24px !important;
 }
@@ -390,27 +481,99 @@ div.nothing {
   height: 1734px;
 }
 
-/* 为全局告警标签进行样式设计 */
-.alarm_all {
-  width:200px;
-  height:30px;
-  font-size: 12px;
-  text-align: center;
-  line-height: 30px;
-  background-color: red;
-  position: relative;
-  left:350px;
-  display: none;
-}
-.calculator>button {
-  z-index:100;
-  width: 50px;
-  height: 23px;
-  cursor: pointer;
-  font-size: 10px;
+/* 计算器按钮 */
+.calculator {
   position: fixed;
-  top: 10px;
-  right: 200px;
+  top: 20px;
+  right: 250px;
+  z-index: 1000;
+}
+
+.calc-btn {
+  width: 60px;
+  height: 35px;
+  cursor: pointer;
+  font-size: 12px;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.calc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 250px;
+  }
+  
+  .nav-top {
+    padding: 0 20px;
+  }
+  
+  .nav-brand {
+    font-size: 20px;
+    margin-right: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-top {
+    height: 60px;
+    padding: 0 15px;
+    flex-wrap: wrap;
+  }
+  
+  .nav-brand {
+    font-size: 18px;
+    margin-right: 15px;
+  }
+  
+  .nav-actions {
+    gap: 10px;
+    margin-right: 15px;
+  }
+  
+  .nav-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+  
+  .sidebar {
+    width: 200px;
+  }
+  
+  .content-wrapper {
+    margin: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-top {
+    padding: 0 10px;
+  }
+  
+  .nav-brand {
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  .sidebar {
+    width: 180px;
+  }
+  
+  .content-wrapper {
+    padding: 15px;
+    margin: 10px;
+  }
 }
 </style>
 

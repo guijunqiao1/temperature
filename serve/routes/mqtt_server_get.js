@@ -43,7 +43,7 @@ let connection1;//定义数据库连接对象--project02
     test_times.push(rows2[0]['times']);
     console.log("此时完成了test_times的赋值~~~~~~~~:"+test_times);
   }
-  catch(error){
+  catch(error){ 
     console.log("数据库3连接失败");
   }
 })();
@@ -88,7 +88,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://192.168.1.101',{
+export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
 });  
 
@@ -395,7 +395,7 @@ client.on('message',async (topic, message)=>{
       // 发送消息
       sendToAllClients(JSON.stringify({
         type: 'data',
-        data: ['工位'+value,obj.T,obj.S,obj.L,V,I,P,Q,W,time_base,type,test_times[value-1]]
+        data: ['工位'+value,obj.T,obj.S,obj.L,V,I,P,Q,W,time_base,type,test_times[value-1]],
       }));
     }
     async function gong_tem(value){
@@ -646,6 +646,6 @@ client.on('message',async (topic, message)=>{
 
 
 //模拟发送传感器数据的客户端
-// setInterval(async()=>{
-//   client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
-// },5000);
+setInterval(async()=>{
+  client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
+},1000);

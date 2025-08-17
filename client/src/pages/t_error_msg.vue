@@ -1,64 +1,78 @@
 <template>
-  <div class="content1" v-if="Pinia.Device_sign">
+  <div class="error-container" v-if="Pinia.Device_sign">
     <!-- 设备选择 -->
-    <el-dropdown>
-      <el-button type="primary" v-show="Pinia.type_len > 1">
-        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
-      </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <div>
-            <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
-              <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
-              </el-dropdown-item>
+    <div class="error-header">
+      <el-dropdown class="room-selector">
+        <el-button type="primary" v-show="Pinia.type_len > 1" class="room-btn">
+          机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <div>
+              <div class="device-list" v-for="item in Pinia.type_array" :key="item[0]">
+                <el-dropdown-item>
+                  <div class="room-option" @click="change_jifang(item[0])">{{ item[0] }}</div>
+                </el-dropdown-item>
+              </div>
             </div>
-          </div>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-      当前机房：{{ Pinia.signzhi }}</div>
-
-
-
-
-
-    <!-- 上半部分 -->
-    <div class="top_part">
-      <!-- 设备表的时间选择器 -->
-      <div class="error_date_time">
-        <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
-          :default-time="defaultTime1" @change="submit" />
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <div class="current-room" v-if="type_len <= 1">
+        当前机房：{{ Pinia.signzhi }}
       </div>
     </div>
 
+    <!-- 时间选择器部分 -->
+    <div class="time-selector-section">
+      <div class="time-selector-container">
+        <h3 class="section-title">选择时间范围</h3>
+        <div class="error-date-time">
+          <el-date-picker 
+            v-model="value1" 
+            type="datetimerange" 
+            start-placeholder="开始时间" 
+            end-placeholder="结束时间"
+            :default-time="defaultTime1" 
+            @change="submit"
+            class="date-picker"
+          />
+        </div>
+      </div>
+    </div>
 
-    <!-- 下半部分 -->
-    <!-- 表格部分 -->
-    <div class="bottom_part">
-      <table>
-        <thead>
-          <tr>
-            <th>场景</th>
-            <th>错误信息</th>
-            <th>出错时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 遍历的是设备数组的内容 -->
-          <tr v-for="item in device_array" :key="item.id">
-            <td v-show="Pinia.device_sign">{{ item[0] }}</td>
-            <td>{{ item[1] }}</td>
-            <td>{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- 错误信息表格部分 -->
+    <div class="error-table-section">
+      <h2 class="section-title">错误信息记录</h2>
+      <div class="table-container">
+        <table class="error-table">
+          <thead class="table-header">
+            <tr>
+              <th>场景</th>
+              <th>错误信息</th>
+              <th>出错时间</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <!-- 遍历的是设备数组的内容 -->
+            <tr v-for="item in device_array" :key="item.id" class="table-row">
+              <td v-show="Pinia.device_sign" class="scene-cell">{{ item[0] }}</td>
+              <td class="error-cell">{{ item[1] }}</td>
+              <td class="time-cell">{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
       <!-- 分页栏部分 -->
       <div class="pagination-container">
-        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="Number(total1)"
-          layout=" prev ,pager, next" />
-        <!-- 上述前者用于响应式提供当前选中的页数；第二者用于设置固定的每页中应当呈现的数据；第三者用于获取到总数，则element标签会自动进行计算用于将当前应当呈现的页数；第四者为分页标签的顺序设置；最后者表示设置当前的分页的标签的整体的大小为默认大小 -->
+        <el-pagination 
+          v-model:current-page="currentPage" 
+          v-model:page-size="pageSize" 
+          :total="Number(total1)"
+          layout="prev, pager, next" 
+          class="custom-pagination"
+        />
       </div>
     </div>
   </div>
@@ -250,103 +264,261 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 设置了scoped则当前组件固定按照当前的style规则进行样式呈现,否则可能出现全局样式的一系列问题导致当前组件的样式无法正常呈现 */
-* {
-  text-decoration: none;
-  color: black;
+.error-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-div.gray {
-  background-color: gray;
-  /* 开启弹性盒模型的布局对内容进行居中处理 */
+.error-header {
   display: flex;
   align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.room-selector {
+  margin-right: 20px;
+}
+
+.room-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.room-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.room-option {
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.room-option:hover {
+  background-color: #f0f2f5;
+}
+
+.current-room {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #409eff, #36a3f7);
+  color: white;
+  border-radius: 25px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
+}
+
+.time-selector-section {
+  margin-bottom: 40px;
+}
+
+.time-selector-container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #3498db;
+  font-weight: 700;
+}
+
+.error-date-time {
+  display: flex;
   justify-content: center;
-}
-
-div.content1 {
-  background-color: white;
-  width: 100%;
-  height: 646px;
-  position: relative;
-  /* top:40px; */
-}
-
-/* 对输入框和选择框进行样式设计 */
-button.Big {
-  box-sizing: border-box;
-  width: 127.2px;
-  height: 20px;
-  border: 0;
-  border: 1px solid rgb(118, 118, 118);
-  border-radius: 0;
-  margin-left: 5px;
-  font-size: 14px;
-  /* 此处的font-size不仅可以设置input中placeholder中的字体大小同时还能设置上主动输入的内容的大小 */
-}
-
-/* 确保输入框在被选中时保持一致 */
-input:focus,
-select:focus {
-  outline: none;
-  /* 设置被选中的时候的input的样式发生改变,outline属性本意用于控制主题的类型，并且默认值为auto */
-}
-
-/* 上述需要注意的是input输入框和select输入框前者默认的box-sizing为contnet-box;后者为border-box */
-
-button.Big {
-  width: 25px;
-  margin-left: 0;
-}
-
-.top_part {
-  width: 100%;
-  height: 25px;
-  background-color: gray;
-  /* 垂直方向上子元素靠齐侧轴的起点位置(也就是子标签的顶部对齐) */
-  display: flex;
   align-items: center;
-  border-bottom: 2px solid black;
 }
 
-.top_part>input:nth-child(3) {
-  border-right: 0;
+.date-picker {
+  min-width: 300px;
 }
 
-button.Big::before {
-  content: "\e608";
+.error-table-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.Big:hover,
-.search:hover,
-.delete:hover,
-.add:hover,
-a:hover {
-  cursor: pointer;
+.table-container {
+  overflow-x: auto;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
-/* 对表格进行样式设计 */
-table {
-  border-top: 5px solid gray;
+.error-table {
   width: 100%;
-  /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
-  border-spacing: 0;
-  /* 下方设置使得table标签变得其中的th、td标签不会随着内容的变化而发生变化 */
-  table-layout: fixed;
+  border-collapse: collapse;
+  border-radius: 15px;
+  overflow: hidden;
+  background: white;
 }
 
-table>thead,
-table>tbody {
-  min-height: 0;
-  width: 100%;
-  height: 40px;
-  background-color: #cecece;
+.table-header {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
 }
 
-table thead>tr,
-table tbody>tr {
-  width: 100%;
-  height: 40px;
+.table-header th {
+  padding: 18px 15px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  position: relative;
+}
+
+.table-header th:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 60%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.table-body {
+  background: white;
+}
+
+.table-row {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-row:hover {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  transform: scale(1.01);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table-body td {
+  padding: 18px 15px;
+  text-align: center;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+}
+
+.scene-cell {
+  font-weight: 600;
+  color: #3498db;
+}
+
+.error-cell {
+  color: #e74c3c;
+  font-weight: 600;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.time-cell {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.custom-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-text-color: #2c3e50;
+  --el-pagination-border-color: #e9ecef;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .error-container {
+    padding: 20px;
+  }
+  
+  .time-selector-container,
+  .error-table-section {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .error-container {
+    padding: 15px;
+  }
+  
+  .error-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .date-picker {
+    min-width: 250px;
+  }
+  
+  .table-header th,
+  .table-body td {
+    padding: 12px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-container {
+    padding: 10px;
+  }
+  
+  .time-selector-container,
+  .error-table-section {
+    padding: 20px;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .date-picker {
+    min-width: 200px;
+  }
+  
+  .table-header th,
+  .table-body td {
+    padding: 10px 5px;
+    font-size: 0.8rem;
+  }
 }
 
 table thead>tr>th,
@@ -494,8 +666,8 @@ table tbody>tr>td {
 /* 为设备列表盒子进行样式设计 */
 .el-dropdown {
   position: absolute;
-  left: 200px;
-  top: -9px;
+  left: 42px;
+  top: 4px;
   height: 10px;
 }
 

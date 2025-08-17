@@ -329,7 +329,7 @@ Router5.get("/action", async (ctx) => {
   let { start, end, currentPage, pageSize, d_no } = ctx.query;
   const [result_now] = await connection.query(`
     SELECT * 
-    FROM t_behavior_data 
+    FROM t_behavior_data
   `);
   let sql_string = '';
   for (const item in result_now[0]) {

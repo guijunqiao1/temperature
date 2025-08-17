@@ -90,7 +90,7 @@ Router5.get("/action", function _callee2(ctx) {
 
           _ctx$query = ctx.query, start = _ctx$query.start, end = _ctx$query.end, currentPage = _ctx$query.currentPage, pageSize = _ctx$query.pageSize, d_no = _ctx$query.d_no;
           _context2.next = 7;
-          return regeneratorRuntime.awrap(connection.query("\n    SELECT * \n    FROM t_behavior_data \n  "));
+          return regeneratorRuntime.awrap(connection.query("\n    SELECT * \n    FROM t_behavior_data\n  "));
 
         case 7:
           _ref = _context2.sent;

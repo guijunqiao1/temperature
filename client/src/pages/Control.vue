@@ -322,7 +322,7 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: skyblue;
+  background-color: #7e80a8;
   margin-top: 0;
   flex-direction: column;
 }

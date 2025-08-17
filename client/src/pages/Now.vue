@@ -1319,7 +1319,7 @@ h2 {
 
 #latestData {
   display: flex;
-  width: 1200px;
+  width: 100%;
   height: 100px;
   flex-wrap: wrap;
 }
@@ -1445,11 +1445,6 @@ h2.newest_action {
 /* 为选中元素进行样式设计 */
 .active {
   background-color: aqua !important;
-}
-
-/* 为容器标签设计左边框 */
-.container.fit-view {
-  border-left: 36px solid gray;
 }
 
 /* 设计切换图像按钮盒子的样式 */

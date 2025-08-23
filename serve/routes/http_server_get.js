@@ -153,6 +153,13 @@ const publicDir = path.join('D:', 'temperature', 'project01', 'client', 'public'
 router.post('/insert_img', async (ctx) => {
   let { image, d_no, person, confidence } = ctx.request.body;
 
+  console.log("当前数据:");
+  console.log(image);
+  console.log(d_no);
+  console.log(person);
+  console.log(confidence);
+
+
   // 判断场景
   d_no = d_no ? d_no : null;
   console.log("成功进入插入路由");

@@ -88,7 +88,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://127.0.0.1',{
+export const client = mqtt.connect('mqtt://192.168.1.100',{
   clientId:"client_control",//唯一标识符
 });  
 
@@ -214,9 +214,6 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
 //主题订阅数组(硬转软)
 const topic_array = ['sensorData','state'];
 
-
-
-
 //控制台客户端对象连接设置
 client.on('connect', () => {
   console.log("接收方连接成功");
@@ -243,9 +240,6 @@ console.log('WebSocket 服务器启动，端口：8081');
 
 // 存储所有WebSocket客户端
 const clients = [];
-
-
-
 
 // WebSocket连接处理
 wss.on('connection', (ws, req) => {
@@ -336,29 +330,42 @@ client.on('message',async (topic, message)=>{
     // 首先获取到指标变量的内容
     console.log("接收到传感器数据");
     console.log(JSON.parse(message));
-    let { d_no,temperature1,temperature2,temperature3,smog1,smog2,smog3,waterlevel1,waterlevel2,waterlevel3,I,V,type } = JSON.parse(message);
+    let { d_no,temperature1,temperature2,temperature3,humility1,humility2,humility3,light1,light2,light3,I1,I2,I3,V1,V2,V3,type } = JSON.parse(message);
 
     //定义对象名称映射变量
     const reflect = { };
     reflect['temperature1'] = temperature1;
     reflect['temperature2'] = temperature2;
     reflect['temperature3'] = temperature3;
-    reflect['smog1'] = smog1;
-    reflect['smog2'] = smog2;
-    reflect['smog3'] = smog3;
-    reflect['waterlevel1'] = waterlevel1;
-    reflect['waterlevel2'] = waterlevel2;
-    reflect['waterlevel3'] = waterlevel3;
+    reflect['humility1'] = humility1;
+    reflect['humility2'] = humility2;
+    reflect['humility3'] = humility3;
+    reflect['light1'] = light1;
+    reflect['light2'] = light2;
+    reflect['light3'] = light3;
+    reflect['I1'] = I1;
+    reflect['I2'] = I2;
+    reflect['I3'] = I3;
+    reflect['V1'] = V1;
+    reflect['V2'] = V2;
+    reflect['V3'] = V3;
 
-
-
-    V = Math.round(V * 100) / 100;
-    I = Math.round(I * 100) / 100;
-    I = I / 1000; 
-    V = V / 1000;
-    const P = I * V;
-    const Q = I * 1;
-    const W = P * 1;
+    //封装电维度的公式
+    function toV(V){
+      return Math.round(V * 100) / 100 /1000;
+    }
+    function toI(I){
+      return Math.round(I * 100) / 100 / 1000;
+    }
+    function getP(I,V){
+      return I * V;
+    }
+    function getQ(I){
+      return I * 1;
+    }
+    function getW(P){
+      return P * 1;
+    }
 
 
     //公共块封装
@@ -372,10 +379,25 @@ client.on('message',async (topic, message)=>{
           obj[item.p_name] = reflect['temperature'+value];//由于为对象的最新属性进行初始化故无法直接使用.运算符进行属性的索引赋值而应该使用的是[]进行属性名的直接获取
         }
         else if(index===1){
-          obj[item.p_name] = reflect['smog'+value];
+          obj[item.p_name] = reflect['humility'+value];
         }
         else if(index===2){
-          obj[item.p_name] = reflect['waterlevel'+value];
+          obj[item.p_name] = reflect['light'+value];
+        }
+        else if(index===3){
+          obj[item.p_name] = toV(reflect['V'+value]);
+        }
+        else if(index===4){
+          obj[item.p_name] = toI(reflect['I'+value]);
+        }
+        else if(index===5){
+          obj[item.p_name] = getP(toV(reflect['V'+value]),toI(reflect['I'+value]));
+        }
+        else if(index===6){
+          obj[item.p_name] = getQ(toI(reflect['I'+value]));
+        }
+        else if(index===7){
+          obj[item.p_name] = getW(getP(toV(reflect['V'+value]),toI(reflect['I'+value])));
         }
       })
       // 将传感器数据存入到t_data中
@@ -389,13 +411,13 @@ client.on('message',async (topic, message)=>{
       // const time = `${time_base.split("-")[0]}-${time_base.split("-")[1]}-${time_base.split("-")[2]} ${hour}:${minute}:${second}`;
       const [rows] = await connection1.execute(`
       INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type,times)
-      VALUES ("工位${value}","${obj.T}","${obj.S}","${obj.L}","${V}","${I}","${P}","${Q}","${W}","${time_base}","${type}","${test_times[value-1]}")
+      VALUES ("工位${value}","${obj.T}","${obj.S}","${obj.L}","${obj.U}","${obj.I}","${obj.P}","${obj.Q}","${obj.W}","${time_base}","${type}","${test_times[value-1]}")
       `);
       //插入成功则发送动态数据
       // 发送消息
       sendToAllClients(JSON.stringify({
         type: 'data',
-        data: ['工位'+value,obj.T,obj.S,obj.L,V,I,P,Q,W,time_base,type,test_times[value-1]],
+        data: ['工位'+value,obj.T,obj.S,obj.L,obj.U,obj.I,obj.P,obj.Q,obj.W,time_base,type,test_times[value-1]],
       }));
     }
     async function gong_tem(value){
@@ -440,49 +462,49 @@ client.on('message',async (topic, message)=>{
     if(test&&gongwei==='工位1'){
       console.log("进入啦啦啦啦");
       //当处于test的过程的情况下
-      if(temperature_panduan(temperature1)&&smoke_panduan(smog1)&&shuiwei_panduan(waterlevel1)){ 
+      if(temperature_panduan(temperature1)&&smoke_panduan(humility1)&&shuiwei_panduan(light1)){ 
         gong_right(1);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
         if(!temperature_panduan(temperature1)){//温度出错
           gong_tem(1);
         }
-        if(!smoke_panduan(smog1)){//烟雾出错
+        if(!smoke_panduan(humility1)){//烟雾出错
           gong_smo(1);
         }
-        if(!shuiwei_panduan(waterlevel1)){//水位出错
+        if(!shuiwei_panduan(light1)){//水位出错
           gong_wat(1);
         }
       }
     }
     if(test&&gongwei==='工位2'){
-      if(temperature_panduan(temperature2)&&smoke_panduan(smog2)&&shuiwei_panduan(waterlevel2)){
+      if(temperature_panduan(temperature2)&&smoke_panduan(humility2)&&shuiwei_panduan(light2)){
         gong_right(2);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
         if(!temperature_panduan(temperature2)){//温度出错
           gong_tem(2);
         }
-        if(!smoke_panduan(smog2)){//烟雾出错
+        if(!smoke_panduan(humility2)){//烟雾出错
           gong_smo(2);
         }
-        if(!shuiwei_panduan(waterlevel2)){//水位出错
+        if(!shuiwei_panduan(light2)){//水位出错
           gong_wat(2);
         }
       }
     }
     if(test&&gongwei==='工位3'){
-      if(temperature_panduan(temperature3)&&smoke_panduan(smog3)&&shuiwei_panduan(waterlevel3)){
+      if(temperature_panduan(temperature3)&&smoke_panduan(humility3)&&shuiwei_panduan(light3)){
         gong_right(3);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
         if(!temperature_panduan(temperature3)){//温度出错
           gong_tem(3);
         }
-        if(!smoke_panduan(smog3)){//烟雾出错
+        if(!smoke_panduan(humility3)){//烟雾出错
           gong_smo(3);
         }
-        if(!shuiwei_panduan(waterlevel3)){//水位出错
+        if(!shuiwei_panduan(light3)){//水位出错
           gong_wat(3);
         }
       }
@@ -646,6 +668,6 @@ client.on('message',async (topic, message)=>{
 
 
 //模拟发送传感器数据的客户端
-setInterval(async()=>{
-  client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,smog1:1,smog2:2,smog3:3,waterlevel1:1,waterlevel2:2,waterlevel3:3,I:1,V:2,type:"实时数据"}),{qos:1});
-},1000);
+// setInterval(async()=>{
+//   client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,humility1:1,humility2:2,humility3:3,light1:1,light2:2,light3:3,I:1,V:2,type:"实时数据"}),{qos:1});
+// },1000);

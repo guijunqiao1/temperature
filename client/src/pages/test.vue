@@ -311,25 +311,25 @@ async function print() {
     
     // 在底部添加时间戳和其他信息
     ctx.font = '12px Arial';
-    ctx.fillText(`打印时间段:${start_time} 到 ${moment().format('YYYY-MM-DD HH:mm:ss')}`, canvas.width / 2, canvas.height - 20);
+    ctx.fillText(`打印时间段:${start_time} 到 ${moment().format('YYYY-MM-DD HH:mm:ss')}`, canvas.width / 2, canvas.height + 40);
     
     // 在底部添加测试状态
     const testStatus = test_qidong === 1 ? "测试中" : "测试已停止";
-    ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height);
+    ctx.fillText(`测试状态: ${testStatus}`, canvas.width / 2, canvas.height + 60);
 
     // 底部添加工位信息
-    ctx.fillText(`测试工位: ${Pinia.signzhi} 测试次数: ${Pinia.times}`, canvas.width / 2, canvas.height+20);
+    ctx.fillText(`测试工位: ${Pinia.signzhi} 测试次数: ${Pinia.times}`, canvas.width / 2, canvas.height + 80);
 
     //计算当前温湿平均值
     const wen_average = sum_wen/(jishu_second+1);
     const shi_average = sum_shi/(jishu_second+1);
-    ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height+40);
+    ctx.fillText(`目标温度: ${target_wen.value};平均温度: ${wen_average};目标湿度: ${target_shi.value};平均湿度: ${shi_average}`, canvas.width / 2, canvas.height + 100);
 
     //调试行
     // ctx.fillText(`总温度: ${sum_wen};总湿度: ${sum_shi};总时长: ${jishu_second}`, canvas.width / 2, canvas.height+70);
 
     //耗电量显示
-    ctx.fillText(`期间耗电量: ${sum_hao}`, canvas.width / 2, canvas.height+60);
+    ctx.fillText(`期间耗电量: ${sum_hao}`, canvas.width / 2, canvas.height + 120);
 
     // 创建下载链接
     const link = document.createElement('a');

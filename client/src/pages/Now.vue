@@ -2,43 +2,49 @@
   <div class="container">
     <!-- 设备相关内容 -->
     <el-dropdown>
-      <el-button type="primary" v-show="Pinia.type_len > 1">
-        机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      <el-button type="primary" v-show="Pinia.type_len > 1" class="device-selector">
+        工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
       </el-button>
       <template #dropdown>
         <el-dropdown-menu>
           <div>
             <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
               <el-dropdown-item>
-                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+                <div class="device-item" @click="change_jifang(item[0])">{{ item[0] }}</div>
               </el-dropdown-item>
             </div>
           </div>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
-      当前机房：{{ Pinia.signzhi }}</div>
+    <div class="only" v-if="type_len <= 1">
+      {{ Pinia.signzhi }}</div>
 
     <!-- 监控相关内容 -->
-    <h2>监控相关内容</h2>
+    <h2 class="section-title">监控相关内容</h2>
     <div class="containerxxx">
-      <h1 class="h1_one">实时监控</h1>
-      <img id="videoCanvas" :src="src0" alt="实时视频"></img> 
+      <h1 class="h1_one">实时监控</h1> 
+      <div class="video-container">
+        <img id="videoCanvas" :src="src0" alt="实时视频" class="video-stream"> 
+      </div>
       <button class="function" @click="jiance">检测</button>
 
       <h1 class="h1_two">检测结果：</h1>
       <div class="result">
-        检测时间:{{ moment(time).format('YYYY-MM-DD HH:mm:ss') }}
-        <div class="result_person">实际检测结果:{{ REF==='1'?'有人':'没人' }}</div>
-        <div class="confidence_person">可信度:{{ REF_confidence }}</div>
+        <div class="result-header">
+          <span class="result-time">检测时间: {{ moment(time).format('YYYY-MM-DD HH:mm:ss') }}</span>
+        </div>
+        <div class="result-content">
+          <div class="result_person">实际检测结果: {{ REF==='1'?'有人':'没人' }}</div>
+          <div class="confidence_person">可信度: {{ REF_confidence }}</div>
+        </div>
         <div class="container_child">
           <div class="img1">
-            原图片：
+            <h3>原图片：</h3>
             <img :src="src1" alt="图片1">
           </div>
           <div class="img2">
-            检测结果图片:
+            <h3>检测结果图片:</h3>
              <img :src="src2" alt="图片2">
           </div>
         </div>
@@ -46,45 +52,47 @@
     </div>
 
     <!-- 设备信息  -->
-    <div id="latestData" v-show="Pinia.Device_sign">
+    <div id="latestData" v-show="Pinia.Device_sign" class="data-section">
       <!-- 最新信息的提示 -->
-      <h2 class="newest_device" v-show="Pinia.Device_sign" style="margin-top:70px;">传感器最新记录表格</h2>
+      <h2 class="newest_device" v-show="Pinia.Device_sign">传感器最新记录表格</h2>
       <!-- 下方执行v-if语句用于优先对nowArray的值进行动态的判断之后在进行渲染(防止在控制台报错出现内容还没获取到就报错的问题，
       而之所以会报错是因为ref数据的"开始"渲染发生在"所有异步"处理完成之后) -->
-      <table v-if="nowArray && nowArray[1] && nowArray[1].length > 0 && c_length > 0" class="table_device">
-        <thead>
-          <tr>
-            <th>场景</th>
-            <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
-            <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
-            <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
-            <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
-            <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
-            <th>{{ yingshe_array[5].field6 }} ({{ unit_array[5] }})</th>
-            <th>{{ yingshe_array[6].field7 }} ({{ unit_array[6] }})</th>
-            <th>{{ yingshe_array[7].field8 }} ({{ unit_array[7] }})</th>
-            <th>收集时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ nowArray[0] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][0] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][1] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][2] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][3] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][4] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][5] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][6] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][7] }}</td>
-            <td>{{ nowArray[1][nowArray[1].length - 1][8]  }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table v-if="nowArray && nowArray[1] && nowArray[1].length > 0 && c_length > 0" class="table_device">
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
+              <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
+              <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
+              <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
+              <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
+              <th>{{ yingshe_array[5].field6 }} ({{ unit_array[5] }})</th>
+              <th>{{ yingshe_array[6].field7 }} ({{ unit_array[6] }})</th>
+              <th>{{ yingshe_array[7].field8 }} ({{ unit_array[7] }})</th>
+              <th>收集时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ nowArray[0] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][0] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][1] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][2] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][3] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][4] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][5] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][6] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][7] }}</td>
+              <td>{{ nowArray[1][nowArray[1].length - 1][8]  }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- 弹出框设计 -->
       <div id="modal">
-        <span class="X" @click="XXX">X</span>
+        <span class="X" @click="XXX">×</span>
         <div class="modal_child">
         </div>
       </div>
@@ -93,60 +101,68 @@
     <!-- 图像切换按钮--使用事件委托完成change事件的执行 -->
     <!-- 设备图像 -->
     <div class="change1" @click="change($event)" v-if="a_length > 0 && Pinia.Device_sign">
-      <button id="zhexian" class="active">折线图(默认)</button>
-      <button id="zhuzhuang">柱状图</button>
+      <button id="zhexian" class="chart-btn active">折线图(默认)</button>
+      <button id="zhuzhuang" class="chart-btn">柱状图</button>
     </div>
 
-    <ECharts :option="chartOption" style="width:600px; height: 400px;"
-      v-show="a_length > 0 && zhexian_device && Pinia.Device_sign" class="zhexian" />
-    <ECharts :option="chartOption1" style="width:600px; height:400px;" class="zhuzhuang"
-      v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
+    <div class="chart-container">
+      <ECharts :option="chartOption" style="width:100%; height: 400px;"
+        v-show="a_length > 0 && zhexian_device && Pinia.Device_sign" class="zhexian" />
+      <ECharts :option="chartOption1" style="width:100%; height:400px;" class="zhuzhuang"
+        v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
+    </div>
 
 
     <!-- 行为相关内容 -->
 
-    <h2 v-show="Pinia.action_sign && Pinia.Action_sign">不同场地下的最新资源内容</h2>
+    <h2 v-show="Pinia.action_sign && Pinia.Action_sign" class="section-title">不同场地下的最新资源内容</h2>
 
     <!-- 行为信息 -->
-    <div id="latestData" v-if="Pinia.Action_sign">
+    <div id="latestData" v-if="Pinia.Action_sign" class="data-section">
       <!-- 最新信息的提示 -->
       <h2 class="newest_action">实时数据表格</h2>
 
       <!-- 下方执行v-if语句用于优先对nowArray的值进行动态的判断之后在进行渲染(防止在控制台报错出现内容还没获取到就报错的问题，
       而之所以会报错是因为ref数据的"开始"渲染发生在"所有异步"处理完成之后) -->
-      <table v-if="nowArray1 && nowArray1[1] && nowArray1[1].length > 0 && d_length > 0" class="table_action">
-        <thead>
-          <tr>
-            <th>场景</th>
-            <th>具体资源(原始)</th>
-            <th>结果资源(结果)</th>
-            <th>创建时间</th>
-            <th>文件类型</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td v-if="Pinia.action_sign">{{ nowArray1[0] }}</td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][0] }} <button v-show="yingshe_action_array[0].type !== '0'"
-                class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][0])">查看</button> </td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }} <button v-show="yingshe_action_array[0].type !== '0'"
-                class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][1])">查看</button> </td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
-            <td>{{ nowArray1[1][nowArray1[1].length - 1][3] }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table v-if="nowArray1 && nowArray1[1] && nowArray1[1].length > 0 && d_length > 0" class="table_action">
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>具体资源(原始)</th>
+              <th>结果资源(结果)</th>
+              <th>可信度</th>
+              <th>创建时间</th>
+              <th>文件类型</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td v-if="Pinia.action_sign">{{ nowArray1[0] }}</td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][0] }} <button v-show="yingshe_action_array[0].type !== '0'"
+                  class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][0])">查看</button> </td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }} <button v-show="yingshe_action_array[0].type !== '0'"
+                  class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][1])">查看</button> </td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][4] }}</td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][3] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <!-- 图像切换按钮--使用事件委托完成change事件的执行 -->
     <div class="change" @click="change0($event)"
       v-if="b_length > 0 && yingshe_action_array && yingshe_action_array[0].is_show === '1' && Pinia.Action_sign">
-      <button id="zhexian1" class="active">折线图(默认)</button>
-      <button id="zhuzhuang1">柱状图</button>
+      <button id="zhexian1" class="chart-btn active">折线图(默认)</button>
+      <button id="zhuzhuang1" class="chart-btn">柱状图</button>
     </div>
-    <ECharts :option="chartOption0" style="width: 600px; height: 400px;" class="zhexian1"
-      v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
-    <ECharts :option="chartOption11" style="width: 600px; height:400px;" class="zhuzhuang1"
-      v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
+    <div class="chart-container">
+      <ECharts :option="chartOption0" style="width: 100%; height: 400px;" class="zhexian1"
+        v-show="b_length > 0 && zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
+      <ECharts :option="chartOption11" style="width: 100%; height:400px;" class="zhuzhuang1"
+        v-show="b_length > 0 && !zhexian_action && Pinia.Action_sign && yingshe_action_array && yingshe_action_array[0].is_show === '1'" />
+    </div>
   </div>
 </template>
 
@@ -435,30 +451,33 @@ function change_jifang(value){
 async function jiance(value){
   console.log("触发检测事件");
   let waibu;
-  if(Pinia.signzhi==='机房1'){
+  if(Pinia.signzhi==='工位1'){
     waibu = "0";
   }
-  else if(Pinia.signzhi==='机房2'){
+  else if(Pinia.signzhi==='工位2'){
     waibu = "1";
   }
   else{
     waibu = "2";
   }
   //截图
-  const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+waibu);
+  const result1 = await axios.get('http://192.168.1.100:5000/api/screenshot/'+waibu);
   console.log('最终jieguo:'+result1.data['screenshot']);
   const imageData = result1.data['screenshot'];
   //发出检测请求
-  const result = await axios.post('http://192.168.1.102:5000/infer', {
+  const result = await axios.post('http://192.168.1.100:5000/infer', {
+    // image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
     image: imageData,  // 发送 Base64 编码的图像
   });
-  console.log("confidence:"+result.data['inference_results']['confidence']);
+  console.log("result_data:");
+  console.dir(result.data);
+  console.log("confidence:"+result.data['inference_results'][0]['confidence']);
   //存到数据库中--原图和结果图
   const result_insert = await axios.post('/api/insert_img',{
     image: [imageData,result.data['processed_image']],
     d_no: Pinia.signzhi,
-    person: result.data['inference_results']['class'],
-    confidence: result.data['inference_results']['confidence']
+    person: result.data['inference_results'][0]['class'],
+    confidence: result.data['inference_results'][0]['confidence']
   }) 
   //获取库中最新记录
   const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
@@ -812,22 +831,21 @@ let y: any = 0;
 // 挂载时加载数据
 onMounted(async () => {
   //监控相关内容
-
   const cameras = [
     {
       id: 'camera_1',           // 摄像头的唯一标识符
       name: '工位1',            // 摄像头名称
-      url: 'http://192.168.1.101:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
-    },  
+      url: 'http://192.168.1.100:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
+    },
     {
       id: 'camera_2',           // 摄像头的唯一标识符
       name: '工位2',            // 摄像头名称
-      url: 'http://192.168.1.101:5000/stream/1',  // 1表示第二个摄像头
+      url: 'http://192.168.1.100:5000/stream/1',  // 1表示第二个摄像头
     },
     {
       id: 'camera_3',           // 摄像头的唯一标识符
       name: '工位3',            // 摄像头名称
-      url: 'http://192.168.1.101:5000/stream/2',  // 2表示第三个摄像头
+      url: 'http://192.168.1.100:5000/stream/2',  // 2表示第三个摄像头
     }
   ];
   cameras.forEach((item)=>{
@@ -904,7 +922,7 @@ onMounted(async () => {
       time_array.push(tem_array1.value[1][i][2]);
     }
 
-    y_zhi(OneMinute(time_array, "1"), "action");
+    y_zhi(OneMinute(time_array, "0"), "action");
   }, 2000);
   // 设备信息图像切换按钮
   change = async (value) => {
@@ -1290,10 +1308,519 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-h2 {
-  font-size: 2.5em;
+/* 全局样式重置和基础设置 */
+* {
+  box-sizing: border-box;
 }
 
+/* 响应式容器 */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* 标题样式 */
+.section-title {
+  font-size: 2.5em;
+  color: #2c3e50;
+  text-align: center;
+  margin: 30px 0;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #409eff, #67c23a);
+  border-radius: 2px;
+}
+
+/* 设备选择器样式 */
+.device-selector {
+  margin: 20px auto;
+  display: block;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.device-selector:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
+}
+
+.device-item {
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.device-item:hover {
+  background-color: #f0f9ff;
+  color: #409eff;
+}
+
+/* 唯一选择器样式 */
+.only {
+  width: 200px;
+  height: 40px;
+  font-size: 16px;
+  text-align: center;
+  line-height: 40px;
+  margin: 20px auto;
+  display: block;
+  font-weight: 500;
+  background: linear-gradient(135deg, #409eff, #67c23a);
+  color: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.only:hover {
+  cursor: pointer;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
+}
+
+/* 监控相关内容样式 */
+.containerxxx {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  margin: 30px 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.h1_one, .h1_two {
+  font-size: 2em;
+  color: #2c3e50;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* 视频容器样式 */
+.video-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px 0;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.video-stream {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 15px;
+}
+
+/* 检测按钮样式 */
+.function {
+  font-size: 16px;
+  margin: 30px auto;
+  padding: 15px 40px;
+  width: auto;
+  min-width: 200px;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border: none;
+  border-radius: 25px;
+  color: #2c3e50;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.function:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+  background: linear-gradient(135deg, #ffed4e, #ffd700);
+}
+
+/* 检测结果样式 */
+.result {
+  width: 100%;
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 25px;
+  margin: 20px 0;
+  border-left: 5px solid #409eff;
+}
+
+.result-header {
+  margin-bottom: 20px;
+}
+
+.result-time {
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.result-content {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.result_person, .confidence_person {
+  font-size: 16px;
+  color: #495057;
+  padding: 10px 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 图片容器样式 */
+.container_child {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.img1, .img2 {
+  text-align: center;
+  flex: 1;
+  min-width: 250px;
+}
+
+.img1 h3, .img2 h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.img1>img, .img2>img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.img1>img:hover, .img2>img:hover {
+  transform: scale(1.05);
+}
+
+/* 数据表格区域样式 */
+.data-section {
+  width: 100%;
+  margin: 40px 0;
+}
+
+.newest_device, .newest_action {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin: 0;
+  text-align: center;
+  padding: 20px;
+  border-radius: 15px 15px 0 0;
+  font-size: 1.8em;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 表格包装器 */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 表格样式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  background: white;
+}
+
+table>thead, table>tbody {
+  width: 100%;
+}
+
+table thead>tr {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+table thead>tr>th {
+  padding: 15px 10px;
+  color: white;
+  font-size: 14px;
+  border: none;
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+}
+
+table thead>tr>th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+table tbody>tr {
+  transition: background-color 0.3s ease;
+}
+
+table tbody>tr:hover {
+  background-color: #f8f9fa;
+}
+
+table tbody>tr>td {
+  padding: 12px 10px;
+  color: #2c3e50;
+  font-size: 14px;
+  border: 1px solid #e9ecef;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 图表切换按钮样式 */
+.change, .change1 {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+  margin-top: 100px;
+}
+
+.chart-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #e9ecef;
+  color: #495057;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.chart-btn.active {
+  background: linear-gradient(135deg, #409eff, #67c23a);
+  color: white;
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
+}
+
+/* 图表容器样式 */
+.chart-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 30px auto;
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 弹窗样式 */
+#modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal_child {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
+}
+
+.X {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  color: #dc3545;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.X:hover {
+  background: #f8d7da;
+  transform: scale(1.1);
+}
+
+/* 弹窗按钮样式 */
+.btn_modal {
+  background: linear-gradient(135deg, #409eff, #67c23a);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.btn_modal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.4);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .section-title {
+    font-size: 2em;
+  }
+  
+  .h1_one, .h1_two {
+    font-size: 1.6em;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .section-title {
+    font-size: 1.8em;
+  }
+  
+  .h1_one, .h1_two {
+    font-size: 1.4em;
+  }
+  
+  .containerxxx {
+    padding: 20px;
+  }
+  
+  .result-content {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .container_child {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .change, .change1 {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .chart-btn {
+    width: 200px;
+  }
+  
+  .table-wrapper {
+    font-size: 12px;
+  }
+  
+  table thead>tr>th,
+  table tbody>tr>td {
+    padding: 8px 5px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 5px;
+  }
+  
+  .section-title {
+    font-size: 1.5em;
+  }
+  
+  .h1_one, .h1_two {
+    font-size: 1.2em;
+  }
+  
+  .containerxxx {
+    padding: 15px;
+  }
+  
+  .function {
+    padding: 12px 30px;
+    font-size: 14px;
+  }
+  
+  .result {
+    padding: 15px;
+  }
+  
+  .img1>img, .img2>img {
+    max-width: 250px;
+  }
+}
+
+/* 保持原有的特定样式 */
 .example-showcase .el-dropdown+.el-dropdown {
   margin-left: 15px;
 }
@@ -1305,15 +1832,7 @@ h2 {
   align-items: center;
 }
 
-.container {
-  width: 100%;
-  border: 2px solid gray;
-  position: relative;
-  top: 20px;
-}
-
-.c_time1,
-.c_time2 {
+.c_time1, .c_time2 {
   font-size: 20px;
 }
 
@@ -1335,7 +1854,6 @@ h2 {
 }
 
 .echarts {
-  margin-top: 150px;
   width: 900px !important;
   justify-self: center;
 }
@@ -1349,8 +1867,7 @@ h2 {
 }
 
 /* 用于作为设备列表参考的盒子 */
-.container22,
-.container222 {
+.container22, .container222 {
   width: 100%;
   position: relative;
 }
@@ -1359,7 +1876,7 @@ h2 {
 .container222>.el-dropdown:nth-child(1) {
   position: absolute;
   left: 570px;
-  top:50px;
+  top: 50px;
 }
 
 .container22>.el-dropdown:nth-child(2),
@@ -1369,132 +1886,11 @@ h2 {
 }
 
 /* 行为设备选择器 */
-.container222>.el-dropdown{
-  top:0px !important;  
+.container222>.el-dropdown {
+  top: 0px !important;
 }
 
-
-
-/* 对最新数据表格进行渲染 */
-/* 对表格进行样式设计 */
-table {
-  margin-top: 50px;
-  border-top: 5px solid gray;
-  height: 66px;
-  /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
-  border-spacing: 0;
-  /* 下方设置使得table标签变得其中的th、td标签不会随着内容的变化而发生变化 */
-  table-layout: fixed;
-}
-
-table>thead,
-table>tbody {
-  min-height: 0;
-  width: 1090px;
-  height: 33px;
-  background-color: #cecece;
-}
-
-table thead>tr,
-table tbody>tr {
-  width: 1090px;
-  height: 32px;
-}
-
-table thead>tr>th,
-table tbody>tr>td {
-  width: 180px;
-  height: 32px;
-  color: black;
-  font-size: 14px;
-  border: 1px solid #9DA79F;
-  font-weight: 800;
-  text-align: center;
-}
-
-/* 为唯一的选择的盒子进行样式设计 */
-.only,
-.only1 {
-  width: 176.33px;
-  height: 32px;
-  font-size: 14px;
-  text-align: center;
-  line-height: 32px;
-  position: absolute;
-  left: 480px;
-  font-weight: 500;
-  background-color: #409eff;
-}
-
-.only:hover,
-.only1:hover {
-  cursor: pointer;
-}
-
-/* 为最新消息h2标签进行样式设计 */
-h2.newest_device,
-h2.newest_action {
-  width: 100%;
-  position: relative;
-  top: 50px;
-  background-color: #9da79f;
-  margin: 0;
-  text-align: center;
-}
-
-/* 为选中元素进行样式设计 */
-.active {
-  background-color: aqua !important;
-}
-
-/* 设计切换图像按钮盒子的样式 */
-.change,
-.change1 {
-  display: block;
-  position: relative;
-  top: 105px;
-  left: 15px;
-  /* width: 280px;
-  height: 32px; */
-}
-
-.change1 {
-  margin-top: 300px;
-}
-
-/* 单独设计切换图像按钮盒子 */
-#zhexian,
-#zhexian1 {
-  width: 100px;
-  height: 28px;
-  background-color: gray;
-  border: 0.667px solid black;
-  font-size: 14px;
-}
-
-#zhexian:hover,
-#zhexian1:hover {
-  cursor: pointer;
-  box-shadow: 1px 1px 1px 1px gray;
-}
-
-#zhuzhuang,
-#zhuzhuang1 {
-  margin-left: 30px;
-  width: 100px;
-  height: 28px;
-  border: 0.667px solid black;
-  background-color: gray;
-  font-size: 14px;
-}
-
-#zhuzhuang:hover,
-#zhuzhuang1:hover {
-  cursor: pointer;
-  box-shadow: 1px 1px 1px 1px gray;
-}
-
-/* 为屏蔽器进行样式设计  */
+/* 为屏蔽器进行样式设计 */
 .h2_checkbox {
   width: 100% !important;
   height: 19px !important;
@@ -1509,7 +1905,6 @@ h2.newest_action {
   background-color: gray;
   display: flex;
   justify-content: center;
-
 }
 
 .table_checkbox {
@@ -1518,7 +1913,6 @@ h2.newest_action {
   display: flex;
   justify-content: center;
   background-color: gray;
-
 }
 
 .change_checkbox {
@@ -1527,7 +1921,6 @@ h2.newest_action {
   display: flex;
   justify-content: center;
   background-color: gray;
-
 }
 
 .image_checkbox {
@@ -1540,7 +1933,7 @@ h2.newest_action {
 
 /* 使得表格宽度铺满整个页面 */
 .table_action {
-  width:100%;
+  width: 100%;
 }
 
 /* 为屏蔽器添加上悬浮样式 */
@@ -1552,94 +1945,54 @@ input[type="checkbox"]:hover {
   width: 100% !important;
 }
 
-/* modal样式设计 */
-#modal {
-  position: fixed;
-  top: 160px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  display: none;
-}
-
-.modal_child {
-  height: 200px;
-  background-color: white;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  min-width: 300px;
-  max-width: 80%;
-  overflow: auto;
-  overflow: hidden;
-}
-
-/* 为弹窗按钮添加样式 */
-.btn_modal:hover {
-  cursor: pointer;
-}
-
-/* 为弹窗X按钮进行样式设计 */
-.X {
-  color: red;
-  position: relative;
-  top: 18px;
-  left: 325px;
-}
-
-.X:hover {
-  cursor: pointer;
-}
-
 /* 为机房修改进行样式设计 */
 .change_jifang {
-
-}
-#videoCanvas{
-  width: 80%;
-  height: auto;
-  max-width: 80%;
-  max-height: 80%;
-}
-.containerxxx {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.h1_one {
-  margin-left: 44%;
-}
-.function {
-  font-size: 14px;
-  margin-top: 50px;
-  margin-left: 30%;
-  width:30%;
-  background-color: yellow;
-}
-.function:hover {
-  cursor:pointer;
-  box-shadow: 1px 1px 1px 1px black;
 }
 
-.container_child {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-}
-/* 控制图片大小 */
-.img1>img,
-.img2>img {
-  margin-top: 50px;
-  width: 200px;
-  height: 150px;
-  max-width: 200px;
-  max-height: 150px;
-}
-
+/* 保持原有的特定样式 */
 .el-dropdown {
-  margin-left: 435px;
-  margin-top: 40px;
+  margin-left: 376px;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .el-dropdown {
+    margin-left: 20px;
+    margin-top: 20px;
+  }
+  
+  .container22>.el-dropdown:nth-child(1),
+  .container222>.el-dropdown:nth-child(1) {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 20px;
+  }
+  
+  .container22>.el-dropdown:nth-child(2),
+  .container222>.el-dropdown:nth-child(2) {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .el-dropdown {
+    margin-left: 10px;
+    margin-top: 15px;
+  }
+  
+  .container22>.el-dropdown:nth-child(1),
+  .container222>.el-dropdown:nth-child(1),
+  .container22>.el-dropdown:nth-child(2),
+  .container222>.el-dropdown:nth-child(2) {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 10px auto;
+    display: block;
+  }
 }
 </style>
 

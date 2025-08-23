@@ -389,6 +389,7 @@ Router.get("/open-calculator", function _callee6(ctx) {
       }
     }
   });
-});
+}); //截图接口
+
 var _default = Router;
 exports["default"] = _default;

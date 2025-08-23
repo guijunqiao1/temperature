@@ -349,7 +349,7 @@ Router5.get("/action", async (ctx) => {
       row.field2.toString(),
       dayjs(row.c_time).format('YYYY-MM-DD HH:mm:ss'),
       row.is_saved,
-      row.file_type
+      row.file_type,
     ]);
     return formattedRows;
   }

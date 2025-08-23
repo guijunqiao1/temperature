@@ -234,6 +234,8 @@ Router.get("/open-calculator",async(ctx)=>{
   });
 })
  
+//截图接口
+
 
 
 export default Router;

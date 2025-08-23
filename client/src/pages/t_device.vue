@@ -11,7 +11,7 @@
           <h3 class="device-title">工位编号：{{ item[1] }}</h3>
           <p class="device-description">点击进入工位详情</p>
         </div>
-        <RouterLink to="/test" @click="change(item[0])" class="device-link">
+        <RouterLink to="/New" @click="change(item[0])" class="device-link">
           <img src="../../public/jifang.webp" alt="工位图片" class="device-image" />
           <div class="device-overlay">
             <span class="overlay-text">进入工位</span>

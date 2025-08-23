@@ -321,6 +321,7 @@ Router.get("/recent/list_obj", async (ctx) => {
 // 最新图片资源记录
 Router.get("/recent/img", async (ctx) => {
   const { d_no } = ctx.query;
+  console.log("d_no:"+d_no);
   const [rows] = await connection2.execute(`
     SELECT *
     FROM t_behavior_data

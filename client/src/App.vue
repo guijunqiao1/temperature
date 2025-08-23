@@ -54,7 +54,7 @@
               <RouterLink to="/sensor_set" class="menu-link"> 传感设置</RouterLink>
             </el-menu-item>
             <el-menu-item index="1-8" class="menu-item">
-              <RouterLink to="/New" class="menu-link"> 实时页面</RouterLink>
+              <RouterLink to="/New" class="menu-link"> 监控室</RouterLink>
             </el-menu-item>
           </el-menu>
         </el-col>

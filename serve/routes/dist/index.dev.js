@@ -216,16 +216,17 @@ Router.get("/recent/img", function _callee5(ctx) {
       switch (_context5.prev = _context5.next) {
         case 0:
           d_no = ctx.query.d_no;
-          _context5.next = 3;
+          console.log("d_no:" + d_no);
+          _context5.next = 4;
           return regeneratorRuntime.awrap(connection2.execute("\n    SELECT *\n    FROM t_behavior_data\n    WHERE d_no = '".concat(d_no, "'\n    ORDER BY c_time DESC\n    LIMIT 1\n  ")));
 
-        case 3:
+        case 4:
           _ref11 = _context5.sent;
           _ref12 = _slicedToArray(_ref11, 1);
           rows = _ref12[0];
           ctx.body = rows[0];
 
-        case 7:
+        case 8:
         case "end":
           return _context5.stop();
       }

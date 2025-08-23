@@ -97,6 +97,8 @@ export async function t_direct_control() {
             console.log("最终进入的是此处");
             console.log("最终进入的是此处");
             tem1 = item.f_value.split("|")[0].split(":")[1];
+            //临时content转化
+            content = content === '开'?4:0;
             tem11 = 'on' + d_no.split("工位")[1] + '_' + content;
           }
           obj1[tem1] = tem11;

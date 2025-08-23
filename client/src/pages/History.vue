@@ -1654,7 +1654,6 @@ input[type="checkbox"]:hover {
 }
 
 /* 为次数选择器进行样式设计 */
-
 .container.fit-view .only1 {
   position: relative;
   left:700px;

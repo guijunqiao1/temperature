@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.beifen = beifen;
-exports.client = exports.active = exports.test_times = exports.gongwei = exports.test = void 0;
+exports.error_quene = exports.client = exports.active = exports.test_times = exports.gongwei = exports.test = void 0;
 
 var _mqtt = _interopRequireDefault(require("mqtt"));
 
@@ -122,10 +122,13 @@ var tem = 0; //设备存储
 var client = _mqtt["default"].connect('mqtt://192.168.1.100', {
   clientId: "client_control" //唯一标识符
 
-}); //定义延时函数
+}); //暴露错误队列，用于配合前端检测路由的指令发送
 
 
 exports.client = client;
+var error_quene = [[], [], []]; //定义延时函数
+
+exports.error_quene = error_quene;
 
 function delay(ms) {
   return new Promise(function (resolve) {
@@ -378,38 +381,67 @@ function sendToAllClients(data) {
 
 
 client.on('message', function _callee2(topic, message) {
-  var temperature_panduan, smoke_panduan, shuiwei_panduan, toV, toI, getP, getQ, getW, gong_right, gong_tem, gong_smo, gong_wat, _ref7, _ref8, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, humility1, humility2, humility3, light1, light2, light3, I1, I2, I3, V1, V2, V3, type, reflect, _JSON$parse2, _d_no, _JSON$parse3, current, _ref11, _ref12, rows, _ref13, _ref14, _rows;
+  var tem_Y1, tem_Y2, shi_Y1, shi_Y2, light_Y1, light_Y2, temperature_panduan, smoke_panduan, shuiwei_panduan, toV, toI, getP, getQ, getW, sensorTolittle, gong_right, gong_tem, gong_smo, gong_wat, _ref7, _ref8, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, humility1, humility2, humility3, light1, light2, light3, I1, I2, I3, V1, V2, V3, type, reflect, _JSON$parse2, _d_no, _JSON$parse3, current, _ref11, _ref12, rows, _ref13, _ref14, _rows;
 
   return regeneratorRuntime.async(function _callee2$(_context8) {
     while (1) {
       switch (_context8.prev = _context8.next) {
         case 0:
           shuiwei_panduan = function _ref17(value) {
-            if (value >= 0 && value <= 100) return true;else return false;
+            if (value >= light_Y1 && value <= light_Y2) return false;else {
+              if (value < light_Y1) {
+                return 1;
+              } else {
+                return 2;
+              }
+            }
+            ;
           };
 
           smoke_panduan = function _ref16(value) {
-            if (value >= 0 && value <= 100) return true;else return false;
+            if (value >= shi_Y1 && value <= shi_Y2) return false;else {
+              if (value < shi_Y1) {
+                return 1;
+              } else {
+                return 2;
+              }
+            }
+            ;
           };
 
           temperature_panduan = function _ref15(value) {
-            if (value >= 0 && value <= 100) return true;else return false;
+            if (value >= tem_Y1 && value <= tem_Y2) return false;else {
+              if (value < tem_Y1) {
+                return 1;
+              } else {
+                return 2;
+              }
+            }
+            ;
           };
+
+          //初始化温度、湿度、光照阈值的变量
+          tem_Y1 = 0;
+          tem_Y2 = 100;
+          shi_Y1 = 0;
+          shi_Y2 = 100;
+          light_Y1 = 15;
+          light_Y2 = 100; //阈值越界方法定义
 
           console.log("成功接收到消息"); //告警
 
           if (!(topic === "sensorData")) {
-            _context8.next = 47;
+            _context8.next = 54;
             break;
           }
 
           //封装电维度的公式
           toV = function toV(V) {
-            return Math.round(V * 100) / 100 / 1000;
+            return Number(V).toFixed(2);
           };
 
           toI = function toI(I) {
-            return Math.round(I * 100) / 100 / 1000;
+            return Number(I).toFixed(2);
           };
 
           getP = function getP(I, V) {
@@ -422,6 +454,11 @@ client.on('message', function _callee2(topic, message) {
 
           getW = function getW(P) {
             return P * 1;
+          }; //减少小数点的方法
+
+
+          sensorTolittle = function sensorTolittle(value) {
+            return value.toFixed(1);
           }; //公共块封装
 
 
@@ -488,15 +525,44 @@ client.on('message', function _callee2(topic, message) {
             });
           };
 
-          gong_tem = function gong_tem(value) {
+          gong_tem = function gong_tem(value, value1) {
             return regeneratorRuntime.async(function gong_tem$(_context5) {
               while (1) {
                 switch (_context5.prev = _context5.next) {
                   case 0:
-                    _context5.next = 2;
-                    return regeneratorRuntime.awrap(connection1.execute("\n        INSERT INTO t_error_msg(d_no,e_msg,c_time)\n        VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6E29\u5EA6\u8D8A\u754C',\"").concat(getFormattedDate1(), "\");\n        ")));
+                    if (!(value1 === 1)) {
+                      _context5.next = 8;
+                      break;
+                    }
 
-                  case 2:
+                    //过小的情况
+                    //向错误处理队列中添加上温度偏小的告警
+                    error_quene[value - 1].push({
+                      type: '温度',
+                      how: '偏小'
+                    });
+                    _context5.next = 4;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6E29\u5EA6\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5C0F');\n          ")));
+
+                  case 4:
+                    console.log("--------------------------"); // 发送消息
+
+                    sendToAllClients(JSON.stringify({
+                      type: 'welcome',
+                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u6E29\u5EA6\u8D8A\u754C")
+                    }));
+                    _context5.next = 13;
+                    break;
+
+                  case 8:
+                    error_quene[value - 1].push({
+                      type: '温度',
+                      how: '偏大'
+                    });
+                    _context5.next = 11;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6E29\u5EA6\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5927');\n          ")));
+
+                  case 11:
                     console.log("--------------------------"); // 发送消息
 
                     sendToAllClients(JSON.stringify({
@@ -504,7 +570,7 @@ client.on('message', function _callee2(topic, message) {
                       message: "\u5DE5\u4F4D".concat(value, "\u7684\u6E29\u5EA6\u8D8A\u754C")
                     }));
 
-                  case 4:
+                  case 13:
                   case "end":
                     return _context5.stop();
                 }
@@ -512,22 +578,48 @@ client.on('message', function _callee2(topic, message) {
             });
           };
 
-          gong_smo = function gong_smo(value) {
+          gong_smo = function gong_smo(value, value1) {
             return regeneratorRuntime.async(function gong_smo$(_context6) {
               while (1) {
                 switch (_context6.prev = _context6.next) {
                   case 0:
-                    _context6.next = 2;
-                    return regeneratorRuntime.awrap(connection1.execute("\n        INSERT INTO t_error_msg(d_no,e_msg,c_time)\n        VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u70DF\u96FE\u8D8A\u754C',\"").concat(getFormattedDate1(), "\");\n        ")));
+                    if (!(value1 === 1)) {
+                      _context6.next = 7;
+                      break;
+                    }
 
-                  case 2:
+                    error_quene[value - 1].push({
+                      type: '湿度',
+                      how: '偏小'
+                    });
+                    _context6.next = 4;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6E7F\u5EA6\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5C0F');\n          ")));
+
+                  case 4:
                     // 发送消息
                     sendToAllClients(JSON.stringify({
                       type: 'welcome',
-                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u70DF\u96FE\u8D8A\u754C")
+                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u6E7F\u5EA6\u8D8A\u754C")
+                    }));
+                    _context6.next = 11;
+                    break;
+
+                  case 7:
+                    error_quene[value - 1].push({
+                      type: '湿度',
+                      how: '偏大'
+                    });
+                    _context6.next = 10;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6E7F\u5EA6\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5927');\n          ")));
+
+                  case 10:
+                    // 发送消息
+                    sendToAllClients(JSON.stringify({
+                      type: 'welcome',
+                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u6E7F\u5EA6\u8D8A\u754C")
                     }));
 
-                  case 3:
+                  case 11:
                   case "end":
                     return _context6.stop();
                 }
@@ -535,22 +627,48 @@ client.on('message', function _callee2(topic, message) {
             });
           };
 
-          gong_wat = function gong_wat(value) {
+          gong_wat = function gong_wat(value, value1) {
             return regeneratorRuntime.async(function gong_wat$(_context7) {
               while (1) {
                 switch (_context7.prev = _context7.next) {
                   case 0:
-                    _context7.next = 2;
-                    return regeneratorRuntime.awrap(connection1.execute("\n        INSERT INTO t_error_msg(d_no,e_msg,c_time)\n        VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u6C34\u4F4D\u8D8A\u754C',\"").concat(getFormattedDate1(), "\");\n        ")));
+                    if (!(value1 === 1)) {
+                      _context7.next = 7;
+                      break;
+                    }
 
-                  case 2:
+                    error_quene[value - 1].push({
+                      type: '光照',
+                      how: '偏小'
+                    });
+                    _context7.next = 4;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u5149\u7167\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5C0F');\n          ")));
+
+                  case 4:
                     // 发送消息
                     sendToAllClients(JSON.stringify({
                       type: 'welcome',
-                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u6C34\u4F4D\u8D8A\u754C")
+                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u5149\u7167\u8D8A\u754C")
+                    }));
+                    _context7.next = 11;
+                    break;
+
+                  case 7:
+                    error_quene[value - 1].push({
+                      type: '光照',
+                      how: '偏大'
+                    });
+                    _context7.next = 10;
+                    return regeneratorRuntime.awrap(connection1.execute("\n          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)\n          VALUES(\"\u5DE5\u4F4D".concat(value, "\",'\u5149\u7167\u8D8A\u754C',\"").concat(getFormattedDate1(), "\",'\u504F\u5927');\n          ")));
+
+                  case 10:
+                    // 发送消息
+                    sendToAllClients(JSON.stringify({
+                      type: 'welcome',
+                      message: "\u5DE5\u4F4D".concat(value, "\u7684\u5149\u7167\u8D8A\u754C")
                     }));
 
-                  case 3:
+                  case 11:
                   case "end":
                     return _context7.stop();
                 }
@@ -560,10 +678,10 @@ client.on('message', function _callee2(topic, message) {
 
           console.log("成功接收到消息"); //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
 
-          _context8.next = 17;
+          _context8.next = 24;
           return regeneratorRuntime.awrap(connection1.execute("\n      SELECT p_name\n      FROM t_field_mapper\n      "));
 
-        case 17:
+        case 24:
           _ref7 = _context8.sent;
           _ref8 = _slicedToArray(_ref7, 1);
           rows1 = _ref8[0];
@@ -574,12 +692,12 @@ client.on('message', function _callee2(topic, message) {
           _JSON$parse = JSON.parse(message), d_no = _JSON$parse.d_no, temperature1 = _JSON$parse.temperature1, temperature2 = _JSON$parse.temperature2, temperature3 = _JSON$parse.temperature3, humility1 = _JSON$parse.humility1, humility2 = _JSON$parse.humility2, humility3 = _JSON$parse.humility3, light1 = _JSON$parse.light1, light2 = _JSON$parse.light2, light3 = _JSON$parse.light3, I1 = _JSON$parse.I1, I2 = _JSON$parse.I2, I3 = _JSON$parse.I3, V1 = _JSON$parse.V1, V2 = _JSON$parse.V2, V3 = _JSON$parse.V3, type = _JSON$parse.type; //定义对象名称映射变量
 
           reflect = {};
-          reflect['temperature1'] = temperature1;
-          reflect['temperature2'] = temperature2;
-          reflect['temperature3'] = temperature3;
-          reflect['humility1'] = humility1;
-          reflect['humility2'] = humility2;
-          reflect['humility3'] = humility3;
+          reflect['temperature1'] = sensorTolittle(temperature1);
+          reflect['temperature2'] = sensorTolittle(temperature2);
+          reflect['temperature3'] = sensorTolittle(temperature3);
+          reflect['humility1'] = sensorTolittle(humility1);
+          reflect['humility2'] = sensorTolittle(humility2);
+          reflect['humility3'] = sensorTolittle(humility3);
           reflect['light1'] = light1;
           reflect['light2'] = light2;
           reflect['light3'] = light3;
@@ -596,77 +714,77 @@ client.on('message', function _callee2(topic, message) {
           if (test && gongwei === '工位1') {
             console.log("进入啦啦啦啦"); //当处于test的过程的情况下
 
-            if (temperature_panduan(temperature1) && smoke_panduan(humility1) && shuiwei_panduan(light1)) {
+            if (!temperature_panduan(temperature1) && !smoke_panduan(humility1) && !shuiwei_panduan(light1)) {
               gong_right(1);
             } else {
               //插入告警表，最后发送错误消息到前端监听的路由中
-              if (!temperature_panduan(temperature1)) {
+              if (temperature_panduan(temperature1)) {
                 //温度出错
-                gong_tem(1);
+                gong_tem(1, temperature_panduan(temperature1));
               }
 
-              if (!smoke_panduan(humility1)) {
+              if (smoke_panduan(humility1)) {
                 //烟雾出错
-                gong_smo(1);
+                gong_smo(1, smoke_panduan(humility1));
               }
 
-              if (!shuiwei_panduan(light1)) {
+              if (shuiwei_panduan(light1)) {
                 //水位出错
-                gong_wat(1);
+                gong_wat(1, shuiwei_panduan(light1));
               }
             }
           }
 
           if (test && gongwei === '工位2') {
-            if (temperature_panduan(temperature2) && smoke_panduan(humility2) && shuiwei_panduan(light2)) {
+            if (!temperature_panduan(temperature2) && !smoke_panduan(humility2) && !shuiwei_panduan(light2)) {
               gong_right(2);
             } else {
               //插入告警表，最后发送错误消息到前端监听的路由中
-              if (!temperature_panduan(temperature2)) {
+              if (temperature_panduan(temperature2)) {
                 //温度出错
-                gong_tem(2);
+                gong_tem(2, temperature_panduan(temperature2));
               }
 
-              if (!smoke_panduan(humility2)) {
+              if (smoke_panduan(humility2)) {
                 //烟雾出错
-                gong_smo(2);
+                gong_smo(2, smoke_panduan(humility2));
               }
 
-              if (!shuiwei_panduan(light2)) {
+              if (shuiwei_panduan(light2)) {
                 //水位出错
-                gong_wat(2);
+                gong_wat(2, shuiwei_panduan(light2));
               }
             }
           }
 
           if (test && gongwei === '工位3') {
-            if (temperature_panduan(temperature3) && smoke_panduan(humility3) && shuiwei_panduan(light3)) {
+            if (!temperature_panduan(temperature3) && !smoke_panduan(humility3) && !shuiwei_panduan(light3)) {
               gong_right(3);
             } else {
               //插入告警表，最后发送错误消息到前端监听的路由中
-              if (!temperature_panduan(temperature3)) {
+              if (temperature_panduan(temperature3)) {
                 //温度出错
-                gong_tem(3);
+                gong_tem(3, temperature_panduan(temperature3));
               }
 
-              if (!smoke_panduan(humility3)) {
+              if (smoke_panduan(humility3)) {
                 //烟雾出错
-                gong_smo(3);
+                gong_smo(3, smoke_panduan(humility3));
               }
 
-              if (!shuiwei_panduan(light3)) {
+              if (shuiwei_panduan(light3)) {
                 //水位出错
-                gong_wat(3);
+                gong_wat(3, shuiwei_panduan(light3));
               }
             }
           }
 
-          _context8.next = 67;
+          _context8.next = 74;
           break;
 
-        case 47:
+        case 54:
           if (!(topic === "heartbeat")) {
-            _context8.next = 53;
+            _context8.next = 60;
             break;
           }
 
@@ -679,12 +797,12 @@ client.on('message', function _callee2(topic, message) {
           _JSON$parse2 = JSON.parse(message), _d_no = _JSON$parse2.d_no;
           reconnect_republish(_d_no); //完成对应设备的心跳置true
 
-          _context8.next = 67;
+          _context8.next = 74;
           break;
 
-        case 53:
+        case 60:
           if (!(topic === "state")) {
-            _context8.next = 67;
+            _context8.next = 74;
             break;
           }
 
@@ -712,22 +830,22 @@ client.on('message', function _callee2(topic, message) {
           // }
 
           console.log("current:" + current);
-          _context8.next = 59;
+          _context8.next = 66;
           return regeneratorRuntime.awrap(connection1.execute("\n    UPDATE t_direct\n    SET value = '".concat(current.split('_')[1] === '0' ? '关' : '开', "'\n    WHERE d_no = '\u5DE5\u4F4D").concat(current.split("n")[1][0], "';\n    ")));
 
-        case 59:
+        case 66:
           _ref11 = _context8.sent;
           _ref12 = _slicedToArray(_ref11, 1);
           rows = _ref12[0];
-          _context8.next = 64;
+          _context8.next = 71;
           return regeneratorRuntime.awrap(connection1.execute("\n    INSERT INTO operate_history(place,operate,ctime,device)\n    VALUES ('\u5DE5\u4F4D".concat(current.split("n")[1][0], "','\u4FEE\u6539\u4E3A").concat(current.split('_')[1] === '0' ? '关' : '开', "','").concat(getFormattedDate1(), "','\u7535\u78C1\u9600\u5F00\u5173')\n    ")));
 
-        case 64:
+        case 71:
           _ref13 = _context8.sent;
           _ref14 = _slicedToArray(_ref13, 1);
           _rows = _ref14[0];
 
-        case 67:
+        case 74:
         case "end":
           return _context8.stop();
       }

@@ -114,6 +114,7 @@
           <th>具体资源(后)</th>
           <th>收集时间</th>
           <th>文件类型</th>
+          <th>可信度</th>
           <th>操作</th>
         </tr>
       </thead>
@@ -126,6 +127,7 @@
           @click="start_block(item[2])">查看</button> </td>
           <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
           <td>{{ item[4] }}</td>
+          <td>{{ item[5] }}</td>
           <td><button class="delete_button" @click="delete1(item)">删除</button></td>
         </tr>
       </tbody>

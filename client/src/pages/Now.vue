@@ -27,6 +27,10 @@
       <div class="video-container">
         <img id="videoCanvas" :src="src0" alt="实时视频" class="video-stream"> 
       </div>
+      <div class="change_model">
+        <button class="auto" @click="change_to_auto">自动</button>
+        <button class="no_auto" @click="change_to_no_auto">手动</button>
+      </div>
       <button class="function" @click="jiance">检测</button>
 
       <h1 class="h1_two">检测结果：</h1>
@@ -143,9 +147,9 @@
                   class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][0])">查看</button> </td>
               <td>{{ nowArray1[1][nowArray1[1].length - 1][1] }} <button v-show="yingshe_action_array[0].type !== '0'"
                   class="btn_modal" @click="start_block(nowArray1[1][nowArray1[1].length - 1][1])">查看</button> </td>
-              <td>{{ nowArray1[1][nowArray1[1].length - 1][4] }}</td>
-              <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
               <td>{{ nowArray1[1][nowArray1[1].length - 1][3] }}</td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][2] }}</td>
+              <td>{{ nowArray1[1][nowArray1[1].length - 1][4] }}</td>
             </tr>
           </tbody>
         </table>
@@ -447,6 +451,8 @@ function change_jifang(value){
   console.log("当前机房:"+Pinia.signzhi);
 }
 
+
+
 //定义检测方法
 async function jiance(value){
   console.log("触发检测事件");
@@ -471,14 +477,48 @@ async function jiance(value){
   });
   console.log("result_data:");
   console.dir(result.data);
-  console.log("confidence:"+result.data['inference_results'][0]['confidence']);
-  //存到数据库中--原图和结果图
-  const result_insert = await axios.post('/api/insert_img',{
-    image: [imageData,result.data['processed_image']],
-    d_no: Pinia.signzhi,
-    person: result.data['inference_results'][0]['class'],
-    confidence: result.data['inference_results'][0]['confidence']
-  }) 
+  // console.log("confidence:"+result.data['inference_results'][0]['confidence']);
+
+  //遍历推理结果--得到人类所处的框对应的下标
+  let index1=0;
+  let have = false;
+  result.data['inference_results'].forEach((item,index)=>{
+    if(item['class']===0){//当为人的情况
+      index1 = index;
+      have = true;
+    }
+  })
+
+
+  //推断成功才进行内容图片的插入，失败则插入原图，同时修改全局检测变量
+  if(have){
+    //存到数据库中--原图和结果图
+    const result_insert = await axios.post('/api/insert_img',{
+      image: [imageData,result.data['processed_image']],
+      d_no: Pinia.signzhi,
+      person: result.data['inference_results'][index1]['class'],
+      confidence: result.data['inference_results'][index1]['confidence']
+    }) 
+    //检测到了人的分支下请求后端是否进行设备的管控
+    await axios.get(`/api/operate_device?d_no=${Pinia.signzhi}`);
+  }else{
+    if(result.data['inference_results']&&result.data['inference_results'].length>0){//没人但是存在物品时
+      //存到数据库中--原图和结果图
+      const result_insert = await axios.post('/api/insert_img',{
+        image: [imageData,result.data['processed_image']],
+        d_no: Pinia.signzhi,
+        person: result.data['inference_results'][0]['class'],
+        confidence: result.data['inference_results'][0]['confidence']
+      }) 
+    }else{
+      await axios.post(`/api/insert_img`,{
+        image: [imageData,imageData],
+        d_no: Pinia.signzhi
+      });
+    }
+  }
+
+
   //获取库中最新记录
   const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
   //实时更新图片内容--在当前机房的情况下
@@ -828,8 +868,37 @@ let x: any = 0;
 //定义定时器类全局id变量--控制行为信息
 let y: any = 0;
 
+//定义检测定时器变量
+let z: any = 0;
+
 // 挂载时加载数据
 onMounted(async () => {
+  //获取检测按钮
+  const jiance_button = document.querySelector(".function") as HTMLElement;
+  //自动手动按钮本身
+  const auto_button = document.querySelector(".change_model>.auto") as HTMLElement;
+  const no_auto_button = document.querySelector(".change_model>.no_auto") as HTMLElement;
+  //定义手动自动切换方法
+  function change_to_auto(value){
+    //隐藏检测按钮
+    jiance_button.style.display = 'none';
+    //清除先前定时器
+    clearInterval(z);
+    //启动检测定时器
+    z = setInterval(()=>{
+      //主动执行检测内容
+      jiance();
+    },5000);
+  }
+  function change_to_no_auto(value){
+    //显示检测按钮
+    jiance_button.stylee.display = 'block';
+    //清除定时器
+    clearInterval(z);
+  }
+
+
+
   //监控相关内容
   const cameras = [
     {
@@ -1993,6 +2062,12 @@ input[type="checkbox"]:hover {
     margin: 10px auto;
     display: block;
   }
+}
+
+
+/* 手动自动激活样式 */
+.button_active {
+  background-color: skyblue;
 }
 </style>
 

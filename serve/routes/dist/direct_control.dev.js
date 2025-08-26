@@ -13,6 +13,14 @@ var _mqtt_server_get = require("./mqtt_server_get.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -204,8 +212,187 @@ function t_direct_control() {
                   }
                 }
               });
-            });
+            }); //测试路由
+
             Router_direct_response.get('/test111', function (ctx) {
+              ctx.body = 'ok';
+            }); //检测情况下的操作设备接口
+
+            Router_direct_response.get('/operate_device', function (ctx) {
+              var d_no = ctx.query.d_no;
+              console.log("-----------------------------------------------"); //定义纯净数组
+
+              var pure_array = []; //定义纯净数组的检查方法
+
+              function pure_panduan(value) {
+                //定义标记变量
+                var sign = false;
+                pure_array.forEach(function (item, index) {
+                  if (item.type === value.type) sign = true;
+                });
+                return sign;
+              } //浅拷贝只读数组
+
+
+              var qian_array = _toConsumableArray(_mqtt_server_get.error_quene); //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
+
+
+              function qu_quene(value) {
+                for (var i = qian_array[value].length - 1; i >= 0; i--) {
+                  if (qian_array[value][i].type === '温度' && !pure_panduan(qian_array[value][i])) {
+                    pure_array.push(qian_array[value][i]);
+                  } else if (qian_array[value][i].type === '湿度' && !pure_panduan(qian_array[value][i])) {
+                    pure_array.push(qian_array[value][i]);
+                  } else if (qian_array[value][i].type === '光照' && !pure_panduan(qian_array[value][i])) {
+                    pure_array.push(qian_array[value][i]);
+                  }
+
+                  if (pure_array.length === 3) {
+                    break;
+                  }
+                }
+
+                return pure_array;
+              } //定义主题变量
+
+
+              var topic = 'send';
+
+              if (d_no === '工位1') {
+                console.log("当前成功进入指令自动push接口"); //遍历前进行error_quene的去重
+
+                qu_quene(0);
+                console.log("去重后的只读数组:");
+                console.dir(qian_array);
+                qian_array[0].forEach(function (item, index) {
+                  if (item.type === '温度') {
+                    var obj1 = {};
+                    var obj2 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj1]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj2]);
+                    }
+                  } else if (item.type === '湿度') {
+                    var _obj = {};
+                    var _obj2 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj2]);
+                    }
+                  } else if (item.type === '光照') {
+                    var _obj3 = {
+                      "deng": "on1_0"
+                    };
+                    var _obj4 = {
+                      "deng": 'on1_4'
+                    };
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj3]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj4]);
+                    }
+                  }
+                }); //静止之后进行总数组的清空
+
+                for (var i = 0; i < qian_array[0].length; i++) {
+                  qian_array[0].shift();
+
+                  _mqtt_server_get.error_quene[0].shift();
+                }
+              } else if (d_no === '工位2') {
+                //遍历前进行error_quene的去重
+                qu_quene(1);
+                qian_array[1].forEach(function (item, index) {
+                  if (item.type === '温度') {
+                    var obj1 = {};
+                    var obj2 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj1]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj2]);
+                    }
+                  } else if (item.type === '湿度') {
+                    var _obj5 = {};
+                    var _obj6 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj5]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj6]);
+                    }
+                  } else if (item.type === '光照') {
+                    var _obj7 = {};
+                    var _obj8 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj7]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj8]);
+                    }
+                  }
+                }); //静止之后进行总数组的清空
+
+                for (var _i2 = 0; _i2 < qian_array[1].length; _i2++) {
+                  qian_array[1].shift();
+
+                  _mqtt_server_get.error_quene[1].shift();
+                }
+              } else if (d_no === '工位3') {
+                //遍历前进行error_quene的去重
+                qu_quene(2);
+                qian_array[2].forEach(function (item, index) {
+                  if (item.type === '温度') {
+                    var obj1 = {};
+                    var obj2 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj1]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, obj2]);
+                    }
+                  } else if (item.type === '湿度') {
+                    var _obj9 = {};
+                    var _obj10 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj9]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj10]);
+                    }
+                  } else if (item.type === '光照') {
+                    var _obj11 = {};
+                    var _obj12 = {};
+
+                    if (item.how === '偏大') {
+                      //发送指定指令
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj11]);
+                    } else {
+                      (0, _mqtt_server_get.beifen)(d_no, [topic, _obj12]);
+                    }
+                  }
+                }); //静止之后进行总数组的清空
+
+                for (var _i3 = 0; _i3 < qian_array[2].length; _i3++) {
+                  qian_array[2].shift();
+
+                  _mqtt_server_get.error_quene[2].shift();
+                }
+              }
+
               ctx.body = 'ok';
             });
           });

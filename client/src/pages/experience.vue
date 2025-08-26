@@ -1,119 +1,73 @@
-  <template> 
-    <div class="experience-container">
-      <div class="experience-header">
-        <h1 class="page-title">实时监控</h1>
-        <p class="page-description">智能检测系统实时监控和人员识别</p>
-      </div>
-      
-      <div class="video-section">
-        <div class="video-container">
-          <img id="videoCanvas" :src="src0" alt="实时视频" class="video-stream">
-          <button class="detect-btn" @click="jiance">
-            <span class="btn-icon">🔍</span>
-            开始检测
-          </button>
-        </div>
-      </div>
+<template> 
+  <ECharts :option="chartoption" />
+</template>
 
-      <div class="results-section">
-        <h2 class="section-title">检测结果</h2>
-        <div class="results-content">
-          <div class="result-info">
-            <div class="info-item">
-              <span class="info-label">检测时间:</span>
-              <span class="info-value">{{ moment(time).format('YYYY-MM-DD HH:mm:ss') }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">检测结果:</span>
-              <span class="result-status" :class="{ 'status-person': REF==='1', 'status-no-person': REF!=='1' }">
-                {{ REF==='1'?'有人':'没人' }}
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">可信度:</span>
-              <span class="confidence-value">{{ REF_confidence }}</span>
-            </div>
-          </div>
-          
-          <div class="images-comparison">
-            <div class="image-card">
-              <h3 class="image-title">原图片</h3>
-              <img :src="src1" alt="原图片" class="result-image">
-            </div>
-            <div class="image-card">
-              <h3 class="image-title">检测结果图片</h3>
-              <img :src="src2" alt="检测结果图片" class="result-image">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </template>
+<script setup lang="ts">
+  import * as echarts from 'echarts/core';
+  import {ref,onMounted} from "vue";
+  import {
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent
+  } from 'echarts/components';
+  import { PieChart } from 'echarts/charts';
+  import { LabelLayout } from 'echarts/features';
+  import ECharts from "vue-echarts";
+  import { CanvasRenderer } from 'echarts/renderers';
 
-  <script setup lang="ts">
-    import { onMounted} from "vue";
-    import { ref } from "vue";
-    import { useUserStore } from "../store/curt";
-    import axios from "axios";
-    import moment from "moment";
-    
-    const Pinia = useUserStore();
+  echarts.use([
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+    PieChart,
+    CanvasRenderer,
+    LabelLayout
+  ]);
 
-    //定义响应式资源变量
-    const src0 = ref();
-    const src1 = ref();
-    const src2 = ref();
-    const REF = ref();
-    const REF_confidence = ref();
-    const time = ref();
-    const result_person = ref();
 
-    //定义检测方法
-    async function jiance(value){
-      console.log("触发检测事件");
-      let waibu;
-      if(Pinia.signzhi==='机房1'){
-        waibu = "0";
+  var chartoption = {
+    title: {
+      text: 'Referer of a Website',
+      subtext: 'Fake Data',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left'
+    },
+    series: [
+      {
+        name: 'Access From',
+        type: 'pie',
+        radius: '50%',
+        data: [
+          { value: 1048, name: 'Search Engine' },
+          { value: 735, name: 'Direct' },
+          { value: 580, name: 'Email' },
+          { value: 484, name: 'Union Ads' },
+          { value: 300, name: 'Video Ads' }
+        ],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
       }
-      else if(Pinia.signzhi==='机房2'){
-        waibu = "1";
-      }
-      else{
-        waibu = "2";
-      }
-      //截图
-      const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+waibu);
-      console.log('最终jieguo:'+result1.data['screenshot']);
-      const imageData = result1.data['screenshot'];
-      //发出检测请求
-      const result = await axios.post('http://192.168.1.102:5000/infer', {
-        image: imageData,  // 发送 Base64 编码的图像
-      });
-      console.log("confidence:"+result.data['inference_results']['confidence']);
-      //存到数据库中--原图和结果图
-      const result_insert = await axios.post('/api/insert_img',{
-        image: [imageData,result.data['processed_image']],
-        d_no: Pinia.signzhi,
-        person: result.data['inference_results']['class'],
-        confidence: result.data['inference_results']['confidence']
-      }) 
-      //获取库中最新记录
-      const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
-      //实时更新图片内容--在当前机房的情况下
-      src1.value = "../../public/" + result_newest.data.field1;
-      src2.value = "../../public/" + result_newest.data.field2;
-      console.log("src1:"+src1.value);
-      console.log("src2:"+src2.value);
-      //实时更新最新检测时间
-      time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
-      REF.value = result_newest.data.result;
-      REF_confidence.value = result_newest.data.confidence;
-    }
+    ]
+  };
 
-    onMounted(async()=>{
 
-    })
-  </script>
+
+  
+
+
+
+</script>
 
 <style scoped>
 .experience-container {

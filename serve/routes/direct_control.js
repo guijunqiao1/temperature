@@ -7,6 +7,8 @@ let connection;
 
 import { beifen } from "./mqtt_server_get.js";
 
+import { error_quene } from "./mqtt_server_get.js";
+
 // 获取格式化时间字符串
 function getFormattedDate() {
   const now = new Date(); 
@@ -135,9 +137,177 @@ export async function t_direct_control() {
         }
         ctx.body = "ok";
       });
+      //测试路由
       Router_direct_response.get('/test111', (ctx) => {
         ctx.body = 'ok';
       });
+      //检测情况下的操作设备接口
+      Router_direct_response.get('/operate_device',(ctx)=>{
+        const { d_no } = ctx.query;
+
+        console.log("-----------------------------------------------");
+        //定义纯净数组
+        const pure_array = [];
+
+        //定义纯净数组的检查方法
+        function pure_panduan(value){
+          //定义标记变量
+          let sign = false;
+          pure_array.forEach((item,index)=>{
+            if(item.type===value.type) sign = true;
+          })
+          return sign;
+        }
+        //浅拷贝只读数组
+        const qian_array = [...error_quene];
+
+        //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
+        function qu_quene(value){
+          for(let i=qian_array[value].length-1;i>=0;i--){
+            if(qian_array[value][i].type==='温度'&&!pure_panduan(qian_array[value][i])){
+              pure_array.push(qian_array[value][i]);
+            }
+            else if(qian_array[value][i].type==='湿度'&&!pure_panduan(qian_array[value][i])){
+              pure_array.push(qian_array[value][i]);
+            }
+            else if(qian_array[value][i].type==='光照'&&!pure_panduan(qian_array[value][i])){
+              pure_array.push(qian_array[value][i]);
+            }
+            if(pure_array.length===3){
+              break;
+            }
+          }
+          return pure_array;
+        }
+
+        //定义主题变量
+        const topic = 'send';
+        if(d_no==='工位1'){
+          console.log("当前成功进入指令自动push接口");
+          //遍历前进行error_quene的去重
+          qu_quene(0);
+          console.log("去重后的只读数组:");
+          console.dir(qian_array);
+          qian_array[0].forEach((item,index)=>{
+            if(item.type==='温度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='湿度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='光照') {
+              const obj1 = { "deng":`on1_0` };
+              const obj2 = { "deng":'on1_4' };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+          })
+          //静止之后进行总数组的清空
+          for(let i=0;i<qian_array[0].length;i++){
+            qian_array[0].shift();
+            error_quene[0].shift();
+          }
+        }else if(d_no==='工位2'){
+          //遍历前进行error_quene的去重
+          qu_quene(1);
+          qian_array[1].forEach((item,index)=>{
+            if(item.type==='温度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='湿度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='光照') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+          })
+          //静止之后进行总数组的清空
+          for(let i=0;i<qian_array[1].length;i++){
+            qian_array[1].shift();
+            error_quene[1].shift();
+          }
+        }else if(d_no==='工位3'){
+          //遍历前进行error_quene的去重
+          qu_quene(2);
+          qian_array[2].forEach((item,index)=>{
+            if(item.type==='温度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='湿度') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+            else if(item.type==='光照') {
+              const obj1 = {  };
+              const obj2 = {  };
+              if(item.how==='偏大'){
+                //发送指定指令
+                beifen(d_no, [topic , obj1]);
+              }else{
+                beifen(d_no, [topic , obj2]);
+              }
+            }
+          })
+          //静止之后进行总数组的清空
+          for(let i=0;i<qian_array[2].length;i++){
+            qian_array[2].shift();
+            error_quene[2].shift();
+          }
+        }
+        ctx.body = 'ok';
+      })
     });
     return Router_direct_response;
   } catch (error) {

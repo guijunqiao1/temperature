@@ -4,7 +4,7 @@
     <div class="error-header">
       <el-dropdown class="room-selector">
         <el-button type="primary" v-show="Pinia.type_len > 1" class="room-btn">
-          机房<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
@@ -19,7 +19,7 @@
         </template>
       </el-dropdown>
       <div class="current-room" v-if="type_len <= 1">
-        当前机房：{{ Pinia.signzhi }}
+        当前工位：{{ Pinia.signzhi }}
       </div>
     </div>
 
@@ -41,6 +41,9 @@
       </div>
     </div>
 
+    <!-- 饼状图 -->
+    <ECharts :option="chartOption_bing" style="width:100%; height:400px;" class="bingzhuang" />
+
     <!-- 错误信息表格部分 -->
     <div class="error-table-section">
       <h2 class="section-title">错误信息记录</h2>
@@ -50,6 +53,7 @@
             <tr>
               <th>场景</th>
               <th>错误信息</th>
+              <th>类型</th>
               <th>出错时间</th>
             </tr>
           </thead>
@@ -58,6 +62,7 @@
             <tr v-for="item in device_array" :key="item.id" class="table-row">
               <td v-show="Pinia.device_sign" class="scene-cell">{{ item[0] }}</td>
               <td class="error-cell">{{ item[1] }}</td>
+              <td class="error-cell">{{ item[3] }}</td>
               <td class="time-cell">{{ moment(item[2]).format('YYYY-MM-DD HH:mm:ss') }}</td>
             </tr>
           </tbody>
@@ -86,6 +91,29 @@ import axios from "axios";
 import moment from "moment";
 import { useRouter } from 'vue-router'
 import { useUserStore } from "../store/curt";
+import * as echarts from 'echarts';
+import {
+  TitleComponent,
+  TitleComponentOption,
+  TooltipComponent,
+  TooltipComponentOption,
+  LegendComponent,
+  LegendComponentOption
+} from 'echarts/components';
+import { PieChart, PieSeriesOption } from 'echarts/charts';
+import { LabelLayout } from 'echarts/features';
+import { CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  PieChart,
+  CanvasRenderer,
+  LabelLayout
+]);
+import ECharts from "vue-echarts";
+
 const Pinia = useUserStore();
 
 
@@ -111,6 +139,37 @@ let value1 = ref();//用于将时间值进行动态获取的变量
 let start: any = ref(1);
 let end: any = ref(1);
 
+// 饼状图配置变量
+let chartOption_bing = ref({
+    tooltip: {
+      trigger: 'item'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left'
+    },
+    series: [
+      {
+        name: 'Access From',
+        type: 'pie',
+        radius: '50%',
+        data: [
+          { name: '温度' },
+          { name: '湿度' },
+          { name: '光照' },
+        ],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  });
+
+
 const router = useRouter();
 const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
 
@@ -119,11 +178,12 @@ const defaultTime1 = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0
 let update = () => { };
 
 
-
 //专门用于更新的函数
 update = async () => {//最好别在挂载阶段使用function否则容易提升到最高级导致变量未定义的隐藏错误
   if (start.value === end.value && end.value !== 1) {//单向查询
     const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=end&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    //渲染饼状图
+    xuanran(result.data);
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
@@ -135,18 +195,19 @@ update = async () => {//最好别在挂载阶段使用function否则容易提升
   }
   else if (start.value === 1 && end.value === 1) {
     const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    xuanran(result.data);
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
     //得到device_array
     const result2 = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=${currentPage.value}&pageSize=${pageSize}`);//获取到总分页内容--d_no筛选后的
     device_array.value = result2.data;
-
     const result1 = await axios.get(`/api/t_error_msg/count?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}`);//获取总数据
     total1.value = result1.data;
   }
   else {
     const result = await axios.get(`/api/t_error_msg/first?d_no=${Pinia.signzhi}&start=${start.value}&end=${end.value}&currentPage=undefined&pageSize=undefined`);//获取到总内容用于type_array进行更新
+    xuanran(result.data);
     //上述为前端发送请求的示例内容
     databases_array.value = result.data;
     //得到type_array
@@ -207,7 +268,33 @@ function qu_repeate(databases) {
   return Array.from(seen);
 }
 
+//封装渲染饼状图的函数
+async function xuanran(value){
+  //清空内容
 
+  //计算各个维度下的值的分配情况
+  const result_array = [0,0,0];//分别表示的是温度、湿度、光照过界
+  //进行配置变量的维度分配
+  value.forEach((item,index)=>{
+    if(item.e_msg==='光照过界'){
+      result_array[2]++;
+    }else if(item.e_msg==='温度过界'){
+      result_array[0]++;
+    }else{
+      result_array[1]++;
+    }
+  })
+
+  // 设备配置赋值
+  chartOption_bing.value.series[0].data.forEach((item, index) => {
+    // 饼状赋值
+    item.value = result_array[index];
+  })
+
+  console.log("完成赋值后的配置：");
+  console.dir(chartOption_bing);
+  
+}
 //在onMounted方法中定义add_td方法便于后续使用DOM进行tbody标签中的tr、td标签的创建以及添加操作
 onMounted(async () => {
 
@@ -569,7 +656,7 @@ table tbody>tr>td {
   margin-top: 20px;
   text-align: center;
   position: absolute;
-  top: 595px;
+  bottom: 8px;
   right: 20px;
 }
 

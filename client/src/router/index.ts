@@ -52,6 +52,10 @@ const router = createRouter({
     {
       path: "/sensor_set",
       component: sensor_set
+    },
+    {
+      path: '/ex',
+      component: ex
     }
   ]
 });

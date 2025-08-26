@@ -467,7 +467,8 @@ Router5.get("/data/action", async (ctx) => {
         CONCAT('[', `
       + sql_string +
       `'"', c_time, '",', 
-        '"', file_type, '"', 
+        '"', file_type, '",',
+        '"', confidence, '"',
         ']') ORDER BY c_time
       ) AS data
       FROM t_behavior_data
@@ -478,13 +479,15 @@ Router5.get("/data/action", async (ctx) => {
         CONCAT('[', `
       + sql_string +
       `'"', c_time, '",', 
-        '"', file_type, '"', 
+        '"', file_type, '",',
+        '"', confidence, '"',
         ']') ORDER BY c_time
       ) AS data
       FROM t_behavior_data
       WHERE is_saved = '实时数据'
       AND d_no = "${d_no}"`;
   }
+
 
   function FORMATTIME(value) {
     const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
@@ -507,7 +510,7 @@ Router5.get("/data/action", async (ctx) => {
       const fixedData = `[${row.data}]`;
       const data = JSON.parse(fixedData);
       data.forEach(entry => {
-        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
+        formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
       });
     });
     return formattedResult;

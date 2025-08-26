@@ -357,13 +357,26 @@ const Router3 = new Router();
 
 // 获取所有的错误消息
 Router3.get("/t_error_msg/all", async (ctx) => {
-  const [rows] = await connection1.execute(`
-    SELECT *
-    FROM t_error_msg
-  `);
-  console.log("整体的内容:");
-  console.dir(rows);
-  ctx.body = rows;
+  const { d_no } = ctx.query;
+  if(!d_no){
+    const [rows] = await connection1.execute(`
+      SELECT *
+      FROM t_error_msg
+    `);
+    console.log("整体的内容:");
+    console.dir(rows);
+    ctx.body = rows;
+  }
+  else{
+    const [rows] = await connection1.execute(`
+      SELECT *
+      FROM t_error_msg
+      WHERE d_no = "${d_no}"
+    `);
+    console.log("整体的内容:");
+    console.dir(rows);
+    ctx.body = rows;
+  }
 });
 
 // 分页获取错误消息
@@ -374,12 +387,13 @@ Router3.get("/t_error_msg/first", async (ctx) => {
     // 处理 undefined 情况
     if (currentPage === "undefined") {
       if (start === "1" && end === "1") {
-        const query = `SELECT d_no, e_msg, c_time FROM t_error_msg WHERE d_no = '${d_no}'`;
+        const query = `SELECT d_no, e_msg, c_time,type FROM t_error_msg WHERE d_no = '${d_no}'`;
         const [results] = await connection1.execute(query);
         const formattedResults = results.map((row) => [
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.set("Content-Type", "application/json");
         ctx.body = JSON.stringify(formattedResults);
@@ -388,12 +402,13 @@ Router3.get("/t_error_msg/first", async (ctx) => {
           new Date(timeStr).toISOString().slice(0, 19).replace("T", " ");
         const formattedEnd = formatTime(end);
 
-        const query = `SELECT d_no,e_msg, c_time FROM t_error_msg WHERE c_time < '${formattedEnd}' AND d_no = '${d_no}'`;
+        const query = `SELECT d_no,e_msg, c_time,type FROM t_error_msg WHERE c_time < '${formattedEnd}' AND d_no = '${d_no}'`;
         const [results] = await connection1.execute(query);
         const formattedResults = results.map((row) => [
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.set("Content-Type", "application/json");
         ctx.body = JSON.stringify(formattedResults);
@@ -403,12 +418,13 @@ Router3.get("/t_error_msg/first", async (ctx) => {
         const formattedStart = formatTime(start);
         const formattedEnd = formatTime(end);
 
-        const query = `SELECT d_no,e_msg, c_time FROM t_error_msg WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' AND d_no = '${d_no}'`;
+        const query = `SELECT d_no,e_msg, c_time,type FROM t_error_msg WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}' AND d_no = '${d_no}'`;
         const [results] = await connection1.execute(query);
         const formattedResults = results.map((row) => [
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.set("Content-Type", "application/json");
         ctx.body = JSON.stringify(formattedResults);
@@ -423,7 +439,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
 
       if (start === "1" && end === "1") {
         const [rows] = await connection1.execute(`
-          SELECT d_no, e_msg, c_time
+          SELECT d_no, e_msg, c_time,type
           FROM t_error_msg
           WHERE d_no = '${d_no}'
           LIMIT ${size} OFFSET ${offset}
@@ -432,6 +448,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.body = JSON.stringify(formattedRows);
       } else if (start === "end" && end !== "1") {
@@ -439,7 +456,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
           new Date(timeStr).toISOString().slice(0, 19).replace("T", " ");
         const formattedEnd = formatTime(end);
         const [rows] = await connection1.execute(`
-          SELECT d_no,e_msg, c_time
+          SELECT d_no,e_msg, c_time,type
           FROM t_error_msg
           WHERE c_time < '${formattedEnd}'
           AND d_no = '${d_no}'
@@ -449,6 +466,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.body = JSON.stringify(formattedRows);
       } else {
@@ -457,7 +475,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
         const formattedStart = formatTime(start);
         const formattedEnd = formatTime(end);
         const [rows] = await connection1.execute(`
-          SELECT d_no,e_msg, c_time
+          SELECT d_no,e_msg, c_time,type
           FROM t_error_msg
           WHERE c_time BETWEEN '${formattedStart}' AND '${formattedEnd}'
           AND d_no = '${d_no}'
@@ -467,6 +485,7 @@ Router3.get("/t_error_msg/first", async (ctx) => {
           row.d_no,
           row.e_msg,
           row.c_time,
+          row.type,
         ]);
         ctx.set("Content-Type", "application/json");
         ctx.body = JSON.stringify(formattedRows);
@@ -531,5 +550,24 @@ Router3.get("/alarm", async (ctx) => {
     return;
   }
 });
+
+// 获取到具体总错误类型数组的路由
+Router3.get("/error_msg_all_type",async (ctx)=>{
+  const [rows] = await connection1.execute(`
+    SELECT *
+    FROM t_field_mapper
+  `);
+  console.log("查看结果：");
+  console.dir(rows);
+  //格式化数组内容
+  const format_array = [];
+  rows.forEach((item,index) => {
+    if(item.sensor==='1'){
+      format_array.push(item.f_name+'越界');//字符串拼接
+    }
+  });
+  ctx.body = format_array;
+})
+
 
 export default Router3;

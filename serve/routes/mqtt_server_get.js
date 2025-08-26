@@ -92,6 +92,10 @@ export const client = mqtt.connect('mqtt://192.168.1.100',{
   clientId:"client_control",//唯一标识符
 });  
 
+
+//暴露错误队列，用于配合前端检测路由的指令发送
+export const error_quene = [[],[],[]];
+
 //定义延时函数
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -305,18 +309,45 @@ function sendToAllClients(data) {
 
 //监听控制台客户端对象收到的消息--接收方完成即可
 client.on('message',async (topic, message)=>{
+  //初始化温度、湿度、光照阈值的变量
+  let tem_Y1 = 0;
+  let tem_Y2 = 100;
+  let shi_Y1 = 0;
+  let shi_Y2 = 100;
+  let light_Y1 = 15;
+  let light_Y2 = 100;
+
+
   //阈值越界方法定义
   function temperature_panduan(value){
-    if(value>=0&&value<=100) return true;
-    else return false;
+    if(value>=tem_Y1&&value<=tem_Y2) return false;
+    else {
+      if(value<tem_Y1){
+        return 1;
+      }else{
+        return 2;
+      }
+    };
   }
   function smoke_panduan(value){
-    if(value>=0&&value<=100) return true;
-    else return false;
+    if(value>=shi_Y1&&value<=shi_Y2) return false;
+    else {
+      if(value<shi_Y1){
+        return 1;
+      }else{
+        return 2;
+      }
+    };
   }
   function shuiwei_panduan(value){
-    if(value>=0&&value<=100) return true;
-    else return false;
+    if(value>=light_Y1&&value<=light_Y2) return false;
+    else {
+      if(value<light_Y1){
+        return 1;
+      }else{
+        return 2;
+      }
+    };
   }
   console.log("成功接收到消息");
   //告警
@@ -334,12 +365,12 @@ client.on('message',async (topic, message)=>{
 
     //定义对象名称映射变量
     const reflect = { };
-    reflect['temperature1'] = temperature1;
-    reflect['temperature2'] = temperature2;
-    reflect['temperature3'] = temperature3;
-    reflect['humility1'] = humility1;
-    reflect['humility2'] = humility2;
-    reflect['humility3'] = humility3;
+    reflect['temperature1'] = sensorTolittle(temperature1);
+    reflect['temperature2'] = sensorTolittle(temperature2);
+    reflect['temperature3'] = sensorTolittle(temperature3);
+    reflect['humility1'] = sensorTolittle(humility1);
+    reflect['humility2'] = sensorTolittle(humility2);
+    reflect['humility3'] = sensorTolittle(humility3);
     reflect['light1'] = light1;
     reflect['light2'] = light2;
     reflect['light3'] = light3;
@@ -352,10 +383,10 @@ client.on('message',async (topic, message)=>{
 
     //封装电维度的公式
     function toV(V){
-      return Math.round(V * 100) / 100 /1000;
+      return Number(V).toFixed(2);
     }
     function toI(I){
-      return Math.round(I * 100) / 100 / 1000;
+      return Number(I).toFixed(2);
     }
     function getP(I,V){
       return I * V;
@@ -366,6 +397,12 @@ client.on('message',async (topic, message)=>{
     function getW(P){
       return P * 1;
     }
+
+    //减少小数点的方法
+    function sensorTolittle(value){
+      return value.toFixed(1);
+    }
+
 
 
     //公共块封装
@@ -420,39 +457,85 @@ client.on('message',async (topic, message)=>{
         data: ['工位'+value,obj.T,obj.S,obj.L,obj.U,obj.I,obj.P,obj.Q,obj.W,time_base,type,test_times[value-1]],
       }));
     }
-    async function gong_tem(value){
-      await connection1.execute(`
-        INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("工位${value}",'温度越界',"${getFormattedDate1()}");
-        `);
-        console.log("--------------------------");
-      // 发送消息
-      sendToAllClients(JSON.stringify({
-          type: 'welcome',
-          message: `工位${value}的温度越界`,
-      }));
+    async function gong_tem(value,value1){
+      if(value1===1){//过小的情况
+        //向错误处理队列中添加上温度偏小的告警
+        error_quene[value-1].push({type:'温度',how:'偏小'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'温度越界',"${getFormattedDate1()}",'偏小');
+          `);
+          console.log("--------------------------");
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的温度越界`,
+        }));
+      }else{
+        error_quene[value-1].push({type:'温度',how:'偏大'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'温度越界',"${getFormattedDate1()}",'偏大');
+          `);
+          console.log("--------------------------");
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的温度越界`,
+        }));
+      }
     }
-    async function gong_smo(value){
-      await connection1.execute(`
-        INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("工位${value}",'烟雾越界',"${getFormattedDate1()}");
-        `);
-      // 发送消息
-      sendToAllClients(JSON.stringify({
-          type: 'welcome',
-          message: `工位${value}的烟雾越界`,
-      }));
+    async function gong_smo(value,value1){
+      if(value1===1){
+        error_quene[value-1].push({type:'湿度',how:'偏小'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'湿度越界',"${getFormattedDate1()}",'偏小');
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的湿度越界`,
+        }));
+      }
+      else{
+        error_quene[value-1].push({type:'湿度',how:'偏大'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'湿度越界',"${getFormattedDate1()}",'偏大');
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的湿度越界`,
+        }));
+      }
+
     }
-    async function gong_wat(value){
-      await connection1.execute(`
-        INSERT INTO t_error_msg(d_no,e_msg,c_time)
-        VALUES("工位${value}",'水位越界',"${getFormattedDate1()}");
-        `);
-      // 发送消息
-      sendToAllClients(JSON.stringify({
-          type: 'welcome',
-          message: `工位${value}的水位越界`,
-      }));
+    async function gong_wat(value,value1){
+      if(value1===1){
+        error_quene[value-1].push({type:'光照',how:'偏小'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'光照越界',"${getFormattedDate1()}",'偏小');
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的光照越界`,
+        }));
+      }else{
+        error_quene[value-1].push({type:'光照',how:'偏大'});
+        await connection1.execute(`
+          INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
+          VALUES("工位${value}",'光照越界',"${getFormattedDate1()}",'偏大');
+          `);
+        // 发送消息
+        sendToAllClients(JSON.stringify({
+            type: 'welcome',
+            message: `工位${value}的光照越界`,
+        }));
+      }
     }
 
     console.log("条件就差一点点:");
@@ -462,50 +545,50 @@ client.on('message',async (topic, message)=>{
     if(test&&gongwei==='工位1'){
       console.log("进入啦啦啦啦");
       //当处于test的过程的情况下
-      if(temperature_panduan(temperature1)&&smoke_panduan(humility1)&&shuiwei_panduan(light1)){ 
+      if(!temperature_panduan(temperature1)&&!smoke_panduan(humility1)&&!shuiwei_panduan(light1)){ 
         gong_right(1);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
-        if(!temperature_panduan(temperature1)){//温度出错
-          gong_tem(1);
+        if(temperature_panduan(temperature1)){//温度出错
+          gong_tem(1,temperature_panduan(temperature1));
         }
-        if(!smoke_panduan(humility1)){//烟雾出错
-          gong_smo(1);
+        if(smoke_panduan(humility1)){//烟雾出错
+          gong_smo(1,smoke_panduan(humility1));
         }
-        if(!shuiwei_panduan(light1)){//水位出错
-          gong_wat(1);
+        if(shuiwei_panduan(light1)){//水位出错
+          gong_wat(1,shuiwei_panduan(light1));
         }
       }
     }
     if(test&&gongwei==='工位2'){
-      if(temperature_panduan(temperature2)&&smoke_panduan(humility2)&&shuiwei_panduan(light2)){
+      if(!temperature_panduan(temperature2)&&!smoke_panduan(humility2)&&!shuiwei_panduan(light2)){
         gong_right(2);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
-        if(!temperature_panduan(temperature2)){//温度出错
-          gong_tem(2);
+        if(temperature_panduan(temperature2)){//温度出错
+          gong_tem(2,temperature_panduan(temperature2));
         }
-        if(!smoke_panduan(humility2)){//烟雾出错
-          gong_smo(2);
+        if(smoke_panduan(humility2)){//烟雾出错
+          gong_smo(2,smoke_panduan(humility2));
         }
-        if(!shuiwei_panduan(light2)){//水位出错
-          gong_wat(2);
+        if(shuiwei_panduan(light2)){//水位出错
+          gong_wat(2,shuiwei_panduan(light2));
         }
       }
     }
     if(test&&gongwei==='工位3'){
-      if(temperature_panduan(temperature3)&&smoke_panduan(humility3)&&shuiwei_panduan(light3)){
+      if(!temperature_panduan(temperature3)&&!smoke_panduan(humility3)&&!shuiwei_panduan(light3)){
         gong_right(3);
       }else{
         //插入告警表，最后发送错误消息到前端监听的路由中
-        if(!temperature_panduan(temperature3)){//温度出错
-          gong_tem(3);
+        if(temperature_panduan(temperature3)){//温度出错
+          gong_tem(3,temperature_panduan(temperature3));
         }
-        if(!smoke_panduan(humility3)){//烟雾出错
-          gong_smo(3);
+        if(smoke_panduan(humility3)){//烟雾出错
+          gong_smo(3,smoke_panduan(humility3));
         }
-        if(!shuiwei_panduan(light3)){//水位出错
-          gong_wat(3);
+        if(shuiwei_panduan(light3)){//水位出错
+          gong_wat(3,shuiwei_panduan(light3));
         }
       }
     }

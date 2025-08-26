@@ -321,7 +321,7 @@ Router5.get("/data/action", function _callee4(ctx) {
               var fixedData = "[".concat(row.data, "]");
               var data = JSON.parse(fixedData);
               data.forEach(function (entry) {
-                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3]]);
+                formattedResult.push([row.d_no, entry[0], entry[1], entry[2], entry[3], entry[4]]);
               });
             });
             return formattedResult;
@@ -369,9 +369,9 @@ Router5.get("/data/action", function _callee4(ctx) {
           }
 
           if (!d_no) {
-            query = "SELECT d_no, \n      GROUP_CONCAT(\n        CONCAT('[', " + sql_string + "'\"', c_time, '\",', \n        '\"', file_type, '\"', \n        ']') ORDER BY c_time\n      ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'";
+            query = "SELECT d_no, \n      GROUP_CONCAT(\n        CONCAT('[', " + sql_string + "'\"', c_time, '\",', \n        '\"', file_type, '\",',\n        '\"', confidence, '\"',\n        ']') ORDER BY c_time\n      ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'";
           } else {
-            query = "SELECT d_no, \n      GROUP_CONCAT(\n        CONCAT('[', " + sql_string + "'\"', c_time, '\",', \n        '\"', file_type, '\"', \n        ']') ORDER BY c_time\n      ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'\n      AND d_no = \"".concat(d_no, "\"");
+            query = "SELECT d_no, \n      GROUP_CONCAT(\n        CONCAT('[', " + sql_string + "'\"', c_time, '\",', \n        '\"', file_type, '\",',\n        '\"', confidence, '\"',\n        ']') ORDER BY c_time\n      ) AS data\n      FROM t_behavior_data\n      WHERE is_saved = '\u5B9E\u65F6\u6570\u636E'\n      AND d_no = \"".concat(d_no, "\"");
           }
 
           groupbyd_no = "GROUP BY d_no";

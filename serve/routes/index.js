@@ -280,6 +280,7 @@ Router.get("/recent/action", async (ctx) => {
               CONCAT('[', 
               ${sql_string}
               '"', t.c_time, '",',
+              '"', t.confidence, '",',
               '"', t.file_type, '"',
               ']') ORDER BY t.c_time
           ) AS data

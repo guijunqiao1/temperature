@@ -55,24 +55,45 @@ var Router3 = new _koaRouter["default"](); // 异步连接数据库
 
 
 Router3.get("/t_error_msg/all", function _callee2(ctx) {
-  var _ref, _ref2, rows;
+  var d_no, _ref, _ref2, rows, _ref3, _ref4, _rows;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _context2.next = 2;
-          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_error_msg\n  "));
+          d_no = ctx.query.d_no;
 
-        case 2:
+          if (d_no) {
+            _context2.next = 12;
+            break;
+          }
+
+          _context2.next = 4;
+          return regeneratorRuntime.awrap(connection1.execute("\n      SELECT *\n      FROM t_error_msg\n    "));
+
+        case 4:
           _ref = _context2.sent;
           _ref2 = _slicedToArray(_ref, 1);
           rows = _ref2[0];
           console.log("整体的内容:");
           console.dir(rows);
           ctx.body = rows;
+          _context2.next = 20;
+          break;
 
-        case 8:
+        case 12:
+          _context2.next = 14;
+          return regeneratorRuntime.awrap(connection1.execute("\n      SELECT *\n      FROM t_error_msg\n      WHERE d_no = \"".concat(d_no, "\"\n    ")));
+
+        case 14:
+          _ref3 = _context2.sent;
+          _ref4 = _slicedToArray(_ref3, 1);
+          _rows = _ref4[0];
+          console.log("整体的内容:");
+          console.dir(_rows);
+          ctx.body = _rows;
+
+        case 20:
         case "end":
           return _context2.stop();
       }
@@ -81,7 +102,7 @@ Router3.get("/t_error_msg/all", function _callee2(ctx) {
 }); // 分页获取错误消息
 
 Router3.get("/t_error_msg/first", function _callee3(ctx) {
-  var _ctx$query, currentPage, pageSize, _ctx$query2, start, end, d_no, query, _ref3, _ref4, results, formattedResults, formatTime, formattedEnd, _query, _ref5, _ref6, _results, _formattedResults, _formatTime, formattedStart, _formattedEnd, _query2, _ref7, _ref8, _results2, _formattedResults2, page, size, offset, _ref9, _ref10, rows, formattedRows, _formatTime2, _formattedEnd2, _ref11, _ref12, _rows, _formattedRows, _formatTime3, _formattedStart, _formattedEnd3, _ref13, _ref14, _rows2, _formattedRows2;
+  var _ctx$query, currentPage, pageSize, _ctx$query2, start, end, d_no, query, _ref5, _ref6, results, formattedResults, formatTime, formattedEnd, _query, _ref7, _ref8, _results, _formattedResults, _formatTime, formattedStart, _formattedEnd, _query2, _ref9, _ref10, _results2, _formattedResults2, page, size, offset, _ref11, _ref12, rows, formattedRows, _formatTime2, _formattedEnd2, _ref13, _ref14, _rows2, _formattedRows, _formatTime3, _formattedStart, _formattedEnd3, _ref15, _ref16, _rows3, _formattedRows2;
 
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
@@ -101,16 +122,16 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
             break;
           }
 
-          query = "SELECT d_no, e_msg, c_time FROM t_error_msg WHERE d_no = '".concat(d_no, "'");
+          query = "SELECT d_no, e_msg, c_time,type FROM t_error_msg WHERE d_no = '".concat(d_no, "'");
           _context3.next = 8;
           return regeneratorRuntime.awrap(connection1.execute(query));
 
         case 8:
-          _ref3 = _context3.sent;
-          _ref4 = _slicedToArray(_ref3, 1);
-          results = _ref4[0];
+          _ref5 = _context3.sent;
+          _ref6 = _slicedToArray(_ref5, 1);
+          results = _ref6[0];
           formattedResults = results.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.set("Content-Type", "application/json");
           ctx.body = JSON.stringify(formattedResults);
@@ -128,16 +149,16 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
           };
 
           formattedEnd = formatTime(end);
-          _query = "SELECT d_no,e_msg, c_time FROM t_error_msg WHERE c_time < '".concat(formattedEnd, "' AND d_no = '").concat(d_no, "'");
+          _query = "SELECT d_no,e_msg, c_time,type FROM t_error_msg WHERE c_time < '".concat(formattedEnd, "' AND d_no = '").concat(d_no, "'");
           _context3.next = 22;
           return regeneratorRuntime.awrap(connection1.execute(_query));
 
         case 22:
-          _ref5 = _context3.sent;
-          _ref6 = _slicedToArray(_ref5, 1);
-          _results = _ref6[0];
+          _ref7 = _context3.sent;
+          _ref8 = _slicedToArray(_ref7, 1);
+          _results = _ref8[0];
           _formattedResults = _results.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.set("Content-Type", "application/json");
           ctx.body = JSON.stringify(_formattedResults);
@@ -151,16 +172,16 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
 
           formattedStart = _formatTime(start);
           _formattedEnd = _formatTime(end);
-          _query2 = "SELECT d_no,e_msg, c_time FROM t_error_msg WHERE c_time BETWEEN '".concat(formattedStart, "' AND '").concat(_formattedEnd, "' AND d_no = '").concat(d_no, "'");
+          _query2 = "SELECT d_no,e_msg, c_time,type FROM t_error_msg WHERE c_time BETWEEN '".concat(formattedStart, "' AND '").concat(_formattedEnd, "' AND d_no = '").concat(d_no, "'");
           _context3.next = 36;
           return regeneratorRuntime.awrap(connection1.execute(_query2));
 
         case 36:
-          _ref7 = _context3.sent;
-          _ref8 = _slicedToArray(_ref7, 1);
-          _results2 = _ref8[0];
+          _ref9 = _context3.sent;
+          _ref10 = _slicedToArray(_ref9, 1);
+          _results2 = _ref10[0];
           _formattedResults2 = _results2.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.set("Content-Type", "application/json");
           ctx.body = JSON.stringify(_formattedResults2);
@@ -183,14 +204,14 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
           }
 
           _context3.next = 53;
-          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no, e_msg, c_time\n          FROM t_error_msg\n          WHERE d_no = '".concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no, e_msg, c_time,type\n          FROM t_error_msg\n          WHERE d_no = '".concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
 
         case 53:
-          _ref9 = _context3.sent;
-          _ref10 = _slicedToArray(_ref9, 1);
-          rows = _ref10[0];
+          _ref11 = _context3.sent;
+          _ref12 = _slicedToArray(_ref11, 1);
+          rows = _ref12[0];
           formattedRows = rows.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.body = JSON.stringify(formattedRows);
           _context3.next = 83;
@@ -208,14 +229,14 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
 
           _formattedEnd2 = _formatTime2(end);
           _context3.next = 65;
-          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no,e_msg, c_time\n          FROM t_error_msg\n          WHERE c_time < '".concat(_formattedEnd2, "'\n          AND d_no = '").concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no,e_msg, c_time,type\n          FROM t_error_msg\n          WHERE c_time < '".concat(_formattedEnd2, "'\n          AND d_no = '").concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
 
         case 65:
-          _ref11 = _context3.sent;
-          _ref12 = _slicedToArray(_ref11, 1);
-          _rows = _ref12[0];
-          _formattedRows = _rows.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+          _ref13 = _context3.sent;
+          _ref14 = _slicedToArray(_ref13, 1);
+          _rows2 = _ref14[0];
+          _formattedRows = _rows2.map(function (row) {
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.body = JSON.stringify(_formattedRows);
           _context3.next = 83;
@@ -229,14 +250,14 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
           _formattedStart = _formatTime3(start);
           _formattedEnd3 = _formatTime3(end);
           _context3.next = 77;
-          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no,e_msg, c_time\n          FROM t_error_msg\n          WHERE c_time BETWEEN '".concat(_formattedStart, "' AND '").concat(_formattedEnd3, "'\n          AND d_no = '").concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
+          return regeneratorRuntime.awrap(connection1.execute("\n          SELECT d_no,e_msg, c_time,type\n          FROM t_error_msg\n          WHERE c_time BETWEEN '".concat(_formattedStart, "' AND '").concat(_formattedEnd3, "'\n          AND d_no = '").concat(d_no, "'\n          LIMIT ").concat(size, " OFFSET ").concat(offset, "\n        ")));
 
         case 77:
-          _ref13 = _context3.sent;
-          _ref14 = _slicedToArray(_ref13, 1);
-          _rows2 = _ref14[0];
-          _formattedRows2 = _rows2.map(function (row) {
-            return [row.d_no, row.e_msg, row.c_time];
+          _ref15 = _context3.sent;
+          _ref16 = _slicedToArray(_ref15, 1);
+          _rows3 = _ref16[0];
+          _formattedRows2 = _rows3.map(function (row) {
+            return [row.d_no, row.e_msg, row.c_time, row.type];
           });
           ctx.set("Content-Type", "application/json");
           ctx.body = JSON.stringify(_formattedRows2);
@@ -263,7 +284,7 @@ Router3.get("/t_error_msg/first", function _callee3(ctx) {
 }); // 获取错误消息总数
 
 Router3.get("/t_error_msg/count", function _callee4(ctx) {
-  var _ctx$query3, start, end, d_no, _ref15, _ref16, rows, formatTime, formattedEnd, _ref17, _ref18, _rows3, _formatTime4, formattedStart, _formattedEnd4, _ref19, _ref20, _rows4;
+  var _ctx$query3, start, end, d_no, _ref17, _ref18, rows, formatTime, formattedEnd, _ref19, _ref20, _rows4, _formatTime4, formattedStart, _formattedEnd4, _ref21, _ref22, _rows5;
 
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
@@ -280,9 +301,9 @@ Router3.get("/t_error_msg/count", function _callee4(ctx) {
           return regeneratorRuntime.awrap(connection1.execute("SELECT * FROM t_error_msg WHERE d_no = '".concat(d_no, "'")));
 
         case 4:
-          _ref15 = _context4.sent;
-          _ref16 = _slicedToArray(_ref15, 1);
-          rows = _ref16[0];
+          _ref17 = _context4.sent;
+          _ref18 = _slicedToArray(_ref17, 1);
+          rows = _ref18[0];
           ctx.body = "" + rows.length;
           _context4.next = 30;
           break;
@@ -302,10 +323,10 @@ Router3.get("/t_error_msg/count", function _callee4(ctx) {
           return regeneratorRuntime.awrap(connection1.execute("SELECT * FROM t_error_msg WHERE c_time<'".concat(formattedEnd, "' AND d_no = '").concat(d_no, "'")));
 
         case 15:
-          _ref17 = _context4.sent;
-          _ref18 = _slicedToArray(_ref17, 1);
-          _rows3 = _ref18[0];
-          ctx.body = "" + _rows3.length;
+          _ref19 = _context4.sent;
+          _ref20 = _slicedToArray(_ref19, 1);
+          _rows4 = _ref20[0];
+          ctx.body = "" + _rows4.length;
           _context4.next = 30;
           break;
 
@@ -320,10 +341,10 @@ Router3.get("/t_error_msg/count", function _callee4(ctx) {
           return regeneratorRuntime.awrap(connection1.execute("SELECT * FROM t_error_msg WHERE c_time BETWEEN '".concat(formattedStart, "' AND '").concat(_formattedEnd4, "' AND d_no = '").concat(d_no, "'")));
 
         case 26:
-          _ref19 = _context4.sent;
-          _ref20 = _slicedToArray(_ref19, 1);
-          _rows4 = _ref20[0];
-          ctx.body = "" + _rows4.length;
+          _ref21 = _context4.sent;
+          _ref22 = _slicedToArray(_ref21, 1);
+          _rows5 = _ref22[0];
+          ctx.body = "" + _rows5.length;
 
         case 30:
         case "end":
@@ -334,7 +355,7 @@ Router3.get("/t_error_msg/count", function _callee4(ctx) {
 }); // 获取告警数据
 
 Router3.get("/alarm", function _callee5(ctx) {
-  var level1, _ref21, _ref22, rows_level1, query1, _ref23, _ref24, rows;
+  var level1, _ref23, _ref24, rows_level1, query1, _ref25, _ref26, rows;
 
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
@@ -345,9 +366,9 @@ Router3.get("/alarm", function _callee5(ctx) {
           return regeneratorRuntime.awrap(connection1.execute(level1));
 
         case 3:
-          _ref21 = _context5.sent;
-          _ref22 = _slicedToArray(_ref21, 1);
-          rows_level1 = _ref22[0];
+          _ref23 = _context5.sent;
+          _ref24 = _slicedToArray(_ref23, 1);
+          rows_level1 = _ref24[0];
           console.log("row_level1:");
           console.dir(rows_level1);
 
@@ -361,9 +382,9 @@ Router3.get("/alarm", function _callee5(ctx) {
           return regeneratorRuntime.awrap(connection1.execute(query1));
 
         case 12:
-          _ref23 = _context5.sent;
-          _ref24 = _slicedToArray(_ref23, 1);
-          rows = _ref24[0];
+          _ref25 = _context5.sent;
+          _ref26 = _slicedToArray(_ref25, 1);
+          rows = _ref26[0];
           ctx.body = rows;
           return _context5.abrupt("return");
 
@@ -376,6 +397,39 @@ Router3.get("/alarm", function _callee5(ctx) {
         case 21:
         case "end":
           return _context5.stop();
+      }
+    }
+  });
+}); // 获取到具体总错误类型数组的路由
+
+Router3.get("/error_msg_all_type", function _callee6(ctx) {
+  var _ref27, _ref28, rows, format_array;
+
+  return regeneratorRuntime.async(function _callee6$(_context6) {
+    while (1) {
+      switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.next = 2;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_field_mapper\n  "));
+
+        case 2:
+          _ref27 = _context6.sent;
+          _ref28 = _slicedToArray(_ref27, 1);
+          rows = _ref28[0];
+          console.log("查看结果：");
+          console.dir(rows); //格式化数组内容
+
+          format_array = [];
+          rows.forEach(function (item, index) {
+            if (item.sensor === '1') {
+              format_array.push(item.f_name + '越界'); //字符串拼接
+            }
+          });
+          ctx.body = format_array;
+
+        case 10:
+        case "end":
+          return _context6.stop();
       }
     }
   });

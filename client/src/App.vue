@@ -56,6 +56,9 @@
             <el-menu-item index="1-8" class="menu-item">
               <RouterLink to="/New" class="menu-link"> 监控室</RouterLink>
             </el-menu-item>
+            <!-- <el-menu-item index="1-9" class="menu-item">
+              <RouterLink to="/ex" class="menu-link"> test</RouterLink>
+            </el-menu-item> -->
           </el-menu>
         </el-col>
       </el-row>

@@ -460,7 +460,7 @@ client.on('message',async (topic, message)=>{
     async function gong_tem(value,value1){
       if(value1===1){//过小的情况
         //向错误处理队列中添加上温度偏小的告警
-        error_quene[value-1].push({type:'温度',how:'偏小'});
+        error_quene[0].push({type:'温度',how:'偏小'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'温度越界',"${getFormattedDate1()}",'偏小');
@@ -472,7 +472,7 @@ client.on('message',async (topic, message)=>{
             message: `工位${value}的温度越界`,
         }));
       }else{
-        error_quene[value-1].push({type:'温度',how:'偏大'});
+        error_quene[0].push({type:'温度',how:'偏大'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'温度越界',"${getFormattedDate1()}",'偏大');
@@ -487,7 +487,7 @@ client.on('message',async (topic, message)=>{
     }
     async function gong_smo(value,value1){
       if(value1===1){
-        error_quene[value-1].push({type:'湿度',how:'偏小'});
+        error_quene[1].push({type:'湿度',how:'偏小'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'湿度越界',"${getFormattedDate1()}",'偏小');
@@ -499,7 +499,7 @@ client.on('message',async (topic, message)=>{
         }));
       }
       else{
-        error_quene[value-1].push({type:'湿度',how:'偏大'});
+        error_quene[1].push({type:'湿度',how:'偏大'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'湿度越界',"${getFormattedDate1()}",'偏大');
@@ -514,7 +514,7 @@ client.on('message',async (topic, message)=>{
     }
     async function gong_wat(value,value1){
       if(value1===1){
-        error_quene[value-1].push({type:'光照',how:'偏小'});
+        error_quene[2].push({type:'光照',how:'偏小'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'光照越界',"${getFormattedDate1()}",'偏小');
@@ -525,7 +525,7 @@ client.on('message',async (topic, message)=>{
             message: `工位${value}的光照越界`,
         }));
       }else{
-        error_quene[value-1].push({type:'光照',how:'偏大'});
+        error_quene[2].push({type:'光照',how:'偏大'});
         await connection1.execute(`
           INSERT INTO t_error_msg(d_no,e_msg,c_time,type)
           VALUES("工位${value}",'光照越界',"${getFormattedDate1()}",'偏大');

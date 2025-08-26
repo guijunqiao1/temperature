@@ -537,7 +537,7 @@ client.on('message', function _callee2(topic, message) {
 
                     //过小的情况
                     //向错误处理队列中添加上温度偏小的告警
-                    error_quene[value - 1].push({
+                    error_quene[0].push({
                       type: '温度',
                       how: '偏小'
                     });
@@ -555,7 +555,7 @@ client.on('message', function _callee2(topic, message) {
                     break;
 
                   case 8:
-                    error_quene[value - 1].push({
+                    error_quene[0].push({
                       type: '温度',
                       how: '偏大'
                     });
@@ -588,7 +588,7 @@ client.on('message', function _callee2(topic, message) {
                       break;
                     }
 
-                    error_quene[value - 1].push({
+                    error_quene[1].push({
                       type: '湿度',
                       how: '偏小'
                     });
@@ -605,7 +605,7 @@ client.on('message', function _callee2(topic, message) {
                     break;
 
                   case 7:
-                    error_quene[value - 1].push({
+                    error_quene[1].push({
                       type: '湿度',
                       how: '偏大'
                     });
@@ -637,7 +637,7 @@ client.on('message', function _callee2(topic, message) {
                       break;
                     }
 
-                    error_quene[value - 1].push({
+                    error_quene[2].push({
                       type: '光照',
                       how: '偏小'
                     });
@@ -654,7 +654,7 @@ client.on('message', function _callee2(topic, message) {
                     break;
 
                   case 7:
-                    error_quene[value - 1].push({
+                    error_quene[2].push({
                       type: '光照',
                       how: '偏大'
                     });

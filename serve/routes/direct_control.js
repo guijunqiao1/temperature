@@ -134,6 +134,7 @@ export async function t_direct_control() {
               WHERE config_id = ${item.id}
             `);
           }
+          //指令更新完毕后进行全局变量的阈值的赋值
         }
         ctx.body = "ok";
       });
@@ -142,7 +143,7 @@ export async function t_direct_control() {
         ctx.body = 'ok';
       });
       //检测情况下的操作设备接口
-      Router_direct_response.get('/operate_device',(ctx)=>{
+      Router_direct_response.get('/operate_device',(ctx) => {
         const { d_no } = ctx.query;
 
         console.log("-----------------------------------------------");
@@ -159,11 +160,17 @@ export async function t_direct_control() {
           return sign;
         }
         //浅拷贝只读数组
-        const qian_array = [...error_quene];
+        //模拟情况
+        const error = [[{type:'温度',how:'偏小'},{type:'温度',how:'偏大'}],[{type:'湿度',how:'偏大'},{type:'湿度',how:'偏小'}],[{type:'光照',how:'偏小'},{type:'光照',how:'偏大'}]];
+        // const qian_array = [...error_quene];
+        let qian_array = [...error];
+        console.log("查看当前数组：");
+        console.dir(qian_array);
 
         //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
         function qu_quene(value){
           for(let i=qian_array[value].length-1;i>=0;i--){
+            console.log("进入一次遍历");
             if(qian_array[value][i].type==='温度'&&!pure_panduan(qian_array[value][i])){
               pure_array.push(qian_array[value][i]);
             }
@@ -177,7 +184,6 @@ export async function t_direct_control() {
               break;
             }
           }
-          return pure_array;
         }
 
         //定义主题变量
@@ -187,8 +193,8 @@ export async function t_direct_control() {
           //遍历前进行error_quene的去重
           qu_quene(0);
           console.log("去重后的只读数组:");
-          console.dir(qian_array);
-          qian_array[0].forEach((item,index)=>{
+          console.dir(pure_array);
+          pure_array.forEach((item,index)=>{
             if(item.type==='温度') {
               const obj1 = {  };
               const obj2 = {  };

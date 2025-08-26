@@ -13,14 +13,6 @@ var _mqtt_server_get = require("./mqtt_server_get.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -232,13 +224,37 @@ function t_direct_control() {
                 });
                 return sign;
               } //浅拷贝只读数组
+              //模拟情况
 
 
-              var qian_array = _toConsumableArray(_mqtt_server_get.error_quene); //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
+              var error = [[{
+                type: '温度',
+                how: '偏小'
+              }, {
+                type: '温度',
+                how: '偏大'
+              }], [{
+                type: '湿度',
+                how: '偏大'
+              }, {
+                type: '湿度',
+                how: '偏小'
+              }], [{
+                type: '光照',
+                how: '偏小'
+              }, {
+                type: '光照',
+                how: '偏大'
+              }]]; // const qian_array = [...error_quene];
 
+              var qian_array = [].concat(error);
+              console.log("查看当前数组：");
+              console.dir(qian_array); //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
 
               function qu_quene(value) {
                 for (var i = qian_array[value].length - 1; i >= 0; i--) {
+                  console.log("进入一次遍历");
+
                   if (qian_array[value][i].type === '温度' && !pure_panduan(qian_array[value][i])) {
                     pure_array.push(qian_array[value][i]);
                   } else if (qian_array[value][i].type === '湿度' && !pure_panduan(qian_array[value][i])) {
@@ -251,8 +267,6 @@ function t_direct_control() {
                     break;
                   }
                 }
-
-                return pure_array;
               } //定义主题变量
 
 
@@ -263,8 +277,8 @@ function t_direct_control() {
 
                 qu_quene(0);
                 console.log("去重后的只读数组:");
-                console.dir(qian_array);
-                qian_array[0].forEach(function (item, index) {
+                console.dir(pure_array);
+                pure_array.forEach(function (item, index) {
                   if (item.type === '温度') {
                     var obj1 = {};
                     var obj2 = {};

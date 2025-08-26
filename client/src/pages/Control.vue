@@ -212,7 +212,8 @@ function setInter() {
     } else {
       control_array.value = result.data;
     }
-    console.log("control_array:" + control_array.value);
+    console.log("control_array:");
+    console.dir(control_array.value);
   }, 5000);
 }
 

@@ -29,12 +29,16 @@ var test;
 exports.test = test;
 var gongwei;
 exports.gongwei = gongwei;
-var test_times = [];
+var test_times = []; //定义全局阈值控制变量
+
 exports.test_times = test_times;
+var wen_array = [];
+var shi_array = [];
+var guang_array = [];
 var connection1; //定义数据库连接对象--project02
 
 (function _callee() {
-  var _ref, _ref2, rows, _ref3, _ref4, rows1, _ref5, _ref6, rows2;
+  var _ref, _ref2, rows, _ref3, _ref4, rows1, _ref5, _ref6, rows2, _ref7, _ref8, rows3, _ref9, _ref10, rows4, _ref11, _ref12, rows5, _ref13, _ref14, rows6, _ref15, _ref16, rows7, _ref17, _ref18, rows8;
 
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -72,21 +76,71 @@ var connection1; //定义数据库连接对象--project02
           _ref6 = _slicedToArray(_ref5, 1);
           rows2 = _ref6[0];
           test_times.push(rows2[0]['times']);
-          console.log("此时完成了test_times的赋值~~~~~~~~:" + test_times);
-          _context.next = 30;
-          break;
+          console.log("此时完成了test_times的赋值~~~~~~~~:" + test_times); //全局阈值变量赋值--温度上限
+
+          _context.next = 27;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 6\n    "));
 
         case 27:
-          _context.prev = 27;
+          _ref7 = _context.sent;
+          _ref8 = _slicedToArray(_ref7, 1);
+          rows3 = _ref8[0];
+          _context.next = 32;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 7\n    "));
+
+        case 32:
+          _ref9 = _context.sent;
+          _ref10 = _slicedToArray(_ref9, 1);
+          rows4 = _ref10[0];
+          _context.next = 37;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 9\n    "));
+
+        case 37:
+          _ref11 = _context.sent;
+          _ref12 = _slicedToArray(_ref11, 1);
+          rows5 = _ref12[0];
+          _context.next = 42;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 10\n    "));
+
+        case 42:
+          _ref13 = _context.sent;
+          _ref14 = _slicedToArray(_ref13, 1);
+          rows6 = _ref14[0];
+          _context.next = 47;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 21\n    "));
+
+        case 47:
+          _ref15 = _context.sent;
+          _ref16 = _slicedToArray(_ref15, 1);
+          rows7 = _ref16[0];
+          _context.next = 52;
+          return regeneratorRuntime.awrap(connection1.execute("\n    SELECT *\n    FROM t_direct\n    WHERE config_id = 22\n    "));
+
+        case 52:
+          _ref17 = _context.sent;
+          _ref18 = _slicedToArray(_ref17, 1);
+          rows8 = _ref18[0];
+          //全局变量赋值
+          wen_array.push(Number(rows3.value));
+          wen_array.push(Number(rows4.value));
+          shi_array.push(Number(rows5.value));
+          shi_array.push(Number(rows6.value));
+          guang_array.push(Number(rows7.value));
+          guang_array.push(Number(rows8.value));
+          _context.next = 66;
+          break;
+
+        case 63:
+          _context.prev = 63;
           _context.t0 = _context["catch"](0);
           console.log("数据库3连接失败");
 
-        case 30:
+        case 66:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 27]]);
+  }, null, null, [[0, 63]]);
 })(); //动态获取到多设备的总数，完成设备列表的填充
 // const [rows1] = await connection1.execute(`
 // SELECT d_no 
@@ -119,7 +173,7 @@ var tem = 0; //设备存储
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-var client = _mqtt["default"].connect('mqtt://192.168.1.100', {
+var client = _mqtt["default"].connect('mqtt://127.0.0.1', {
   clientId: "client_control" //唯一标识符
 
 }); //暴露错误队列，用于配合前端检测路由的指令发送
@@ -294,7 +348,7 @@ function beifen(value1, value2) {
 } //主题订阅数组(硬转软)
 
 
-var topic_array = ['sensorData', 'state']; //控制台客户端对象连接设置
+var topic_array = ['sensorData', 'state', 'change_yuzhi']; //控制台客户端对象连接设置
 
 client.on('connect', function () {
   console.log("接收方连接成功"); //当客户端连接成功之后订阅对应的主题
@@ -381,15 +435,15 @@ function sendToAllClients(data) {
 
 
 client.on('message', function _callee2(topic, message) {
-  var tem_Y1, tem_Y2, shi_Y1, shi_Y2, light_Y1, light_Y2, temperature_panduan, smoke_panduan, shuiwei_panduan, toV, toI, getP, getQ, getW, sensorTolittle, gong_right, gong_tem, gong_smo, gong_wat, _ref7, _ref8, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, humility1, humility2, humility3, light1, light2, light3, I1, I2, I3, V1, V2, V3, type, reflect, _JSON$parse2, _d_no, _JSON$parse3, current, _ref11, _ref12, rows, _ref13, _ref14, _rows;
+  var temperature_panduan, smoke_panduan, shuiwei_panduan, toV, toI, getP, getQ, getW, sensorTolittle, gong_right, gong_tem, gong_smo, gong_wat, _ref19, _ref20, rows1, _JSON$parse, d_no, temperature1, temperature2, temperature3, humility1, humility2, humility3, light1, light2, light3, I1, I2, I3, V1, V2, V3, type, reflect, _JSON$parse2, _d_no, L1, L2, S1, S2, T1, T2, _JSON$parse3, _d_no2, _JSON$parse4, current, _ref23, _ref24, rows, _ref25, _ref26, _rows;
 
   return regeneratorRuntime.async(function _callee2$(_context8) {
     while (1) {
       switch (_context8.prev = _context8.next) {
         case 0:
-          shuiwei_panduan = function _ref17(value) {
-            if (value >= light_Y1 && value <= light_Y2) return false;else {
-              if (value < light_Y1) {
+          shuiwei_panduan = function _ref29(value) {
+            if (value >= guang_array[0] && value <= guang_array[1]) return false;else {
+              if (value < guang_array[0]) {
                 return 1;
               } else {
                 return 2;
@@ -398,9 +452,9 @@ client.on('message', function _callee2(topic, message) {
             ;
           };
 
-          smoke_panduan = function _ref16(value) {
-            if (value >= shi_Y1 && value <= shi_Y2) return false;else {
-              if (value < shi_Y1) {
+          smoke_panduan = function _ref28(value) {
+            if (value >= shi_array[0] && value <= shi_array[1]) return false;else {
+              if (value < shi_array[0]) {
                 return 1;
               } else {
                 return 2;
@@ -409,9 +463,9 @@ client.on('message', function _callee2(topic, message) {
             ;
           };
 
-          temperature_panduan = function _ref15(value) {
-            if (value >= tem_Y1 && value <= tem_Y2) return false;else {
-              if (value < tem_Y1) {
+          temperature_panduan = function _ref27(value) {
+            if (value >= wen_array[0] && value <= wen_array[1]) return false;else {
+              if (value < wen_array[0]) {
                 return 1;
               } else {
                 return 2;
@@ -419,19 +473,11 @@ client.on('message', function _callee2(topic, message) {
             }
             ;
           };
-
-          //初始化温度、湿度、光照阈值的变量
-          tem_Y1 = 0;
-          tem_Y2 = 100;
-          shi_Y1 = 0;
-          shi_Y2 = 100;
-          light_Y1 = 15;
-          light_Y2 = 100; //阈值越界方法定义
 
           console.log("成功接收到消息"); //告警
 
           if (!(topic === "sensorData")) {
-            _context8.next = 54;
+            _context8.next = 48;
             break;
           }
 
@@ -463,7 +509,7 @@ client.on('message', function _callee2(topic, message) {
 
 
           gong_right = function gong_right(value) {
-            var time_base, obj, _ref9, _ref10, rows;
+            var time_base, obj, _ref21, _ref22, rows;
 
             return regeneratorRuntime.async(function gong_right$(_context4) {
               while (1) {
@@ -507,9 +553,9 @@ client.on('message', function _callee2(topic, message) {
                     return regeneratorRuntime.awrap(connection1.execute("\n      INSERT INTO t_data(d_no,field1,field2,field3,field4,field5,field6,field7,field8,c_time,type,times)\n      VALUES (\"\u5DE5\u4F4D".concat(value, "\",\"").concat(obj.T, "\",\"").concat(obj.S, "\",\"").concat(obj.L, "\",\"").concat(obj.U, "\",\"").concat(obj.I, "\",\"").concat(obj.P, "\",\"").concat(obj.Q, "\",\"").concat(obj.W, "\",\"").concat(time_base, "\",\"").concat(type, "\",\"").concat(test_times[value - 1], "\")\n      ")));
 
                   case 7:
-                    _ref9 = _context4.sent;
-                    _ref10 = _slicedToArray(_ref9, 1);
-                    rows = _ref10[0];
+                    _ref21 = _context4.sent;
+                    _ref22 = _slicedToArray(_ref21, 1);
+                    rows = _ref22[0];
                     //插入成功则发送动态数据
                     // 发送消息
                     sendToAllClients(JSON.stringify({
@@ -678,13 +724,13 @@ client.on('message', function _callee2(topic, message) {
 
           console.log("成功接收到消息"); //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
 
-          _context8.next = 24;
+          _context8.next = 18;
           return regeneratorRuntime.awrap(connection1.execute("\n      SELECT p_name\n      FROM t_field_mapper\n      "));
 
-        case 24:
-          _ref7 = _context8.sent;
-          _ref8 = _slicedToArray(_ref7, 1);
-          rows1 = _ref8[0];
+        case 18:
+          _ref19 = _context8.sent;
+          _ref20 = _slicedToArray(_ref19, 1);
+          rows1 = _ref20[0];
           //为{ p_name:TI,p_name:TO,p_name:L}的结构
           // 首先获取到指标变量的内容
           console.log("接收到传感器数据");
@@ -779,12 +825,43 @@ client.on('message', function _callee2(topic, message) {
             }
           }
 
-          _context8.next = 74;
+          _context8.next = 77;
           break;
 
-        case 54:
+        case 48:
+          if (!(topic === 'change_yuzhi')) {
+            _context8.next = 57;
+            break;
+          }
+
+          //进行全局变量的修改
+          //获取指令
+          _JSON$parse2 = JSON.parse(message), _d_no = _JSON$parse2.d_no, L1 = _JSON$parse2.L1, L2 = _JSON$parse2.L2, S1 = _JSON$parse2.S1, S2 = _JSON$parse2.S2, T1 = _JSON$parse2.T1, T2 = _JSON$parse2.T2; //通过指令修改全局变量
+
+          if (L1) {
+            guang_array[0] = L1;
+          } else if (L2) {
+            guang_array[1] = L2;
+          } else if (S1) {
+            shi_array[0] = S1;
+          } else if (S2) {
+            shi_array[1] = S2;
+          } else if (T1) {
+            wen_array[0] = T1;
+          } else if (T2) {
+            wen_array[1] = T2;
+          }
+
+          console.log("成功修改当前总阈值数组内容为(温度、湿度、光照)):");
+          console.dir(wen_array);
+          console.dir(shi_array);
+          console.dir(guang_array);
+          _context8.next = 77;
+          break;
+
+        case 57:
           if (!(topic === "heartbeat")) {
-            _context8.next = 60;
+            _context8.next = 63;
             break;
           }
 
@@ -794,21 +871,21 @@ client.on('message', function _callee2(topic, message) {
           // 多设备
           //获取到d_no信息
 
-          _JSON$parse2 = JSON.parse(message), _d_no = _JSON$parse2.d_no;
-          reconnect_republish(_d_no); //完成对应设备的心跳置true
+          _JSON$parse3 = JSON.parse(message), _d_no2 = _JSON$parse3.d_no;
+          reconnect_republish(_d_no2); //完成对应设备的心跳置true
 
-          _context8.next = 74;
+          _context8.next = 77;
           break;
 
-        case 60:
+        case 63:
           if (!(topic === "state")) {
-            _context8.next = 74;
+            _context8.next = 77;
             break;
           }
 
           console.log("chenggo进入cichu"); //解构赋值获取参数--需要设计参数名和路由名称一致完成遍历的条件设计
 
-          _JSON$parse3 = JSON.parse(message), current = _JSON$parse3.current; // for (let key in obj) {
+          _JSON$parse4 = JSON.parse(message), current = _JSON$parse4.current; // for (let key in obj) {
           //   //首先将中文值进行转化
           //   if(Number.isNaN(Number(obj.key))){//若为中文值
           //     if(obj.key==="start"||obj.key==="stop"){
@@ -830,22 +907,22 @@ client.on('message', function _callee2(topic, message) {
           // }
 
           console.log("current:" + current);
-          _context8.next = 66;
+          _context8.next = 69;
           return regeneratorRuntime.awrap(connection1.execute("\n    UPDATE t_direct\n    SET value = '".concat(current.split('_')[1] === '0' ? '关' : '开', "'\n    WHERE d_no = '\u5DE5\u4F4D").concat(current.split("n")[1][0], "';\n    ")));
 
-        case 66:
-          _ref11 = _context8.sent;
-          _ref12 = _slicedToArray(_ref11, 1);
-          rows = _ref12[0];
-          _context8.next = 71;
+        case 69:
+          _ref23 = _context8.sent;
+          _ref24 = _slicedToArray(_ref23, 1);
+          rows = _ref24[0];
+          _context8.next = 74;
           return regeneratorRuntime.awrap(connection1.execute("\n    INSERT INTO operate_history(place,operate,ctime,device)\n    VALUES ('\u5DE5\u4F4D".concat(current.split("n")[1][0], "','\u4FEE\u6539\u4E3A").concat(current.split('_')[1] === '0' ? '关' : '开', "','").concat(getFormattedDate1(), "','\u7535\u78C1\u9600\u5F00\u5173')\n    ")));
 
-        case 71:
-          _ref13 = _context8.sent;
-          _ref14 = _slicedToArray(_ref13, 1);
-          _rows = _ref14[0];
-
         case 74:
+          _ref25 = _context8.sent;
+          _ref26 = _slicedToArray(_ref25, 1);
+          _rows = _ref26[0];
+
+        case 77:
         case "end":
           return _context8.stop();
       }

@@ -10,6 +10,11 @@ import WebSocket from "ws";
 export let test;
 export let gongwei;
 export let test_times = [];
+//定义全局阈值控制变量
+const wen_array = [];
+const shi_array = [];
+const guang_array = [];
+
 let connection1;//定义数据库连接对象--project02
 (async ()=>{
   try{
@@ -42,6 +47,49 @@ let connection1;//定义数据库连接对象--project02
     `);
     test_times.push(rows2[0]['times']);
     console.log("此时完成了test_times的赋值~~~~~~~~:"+test_times);
+    //全局阈值变量赋值--温度上限
+    const [rows3] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 6
+    `);
+    //全局阈值变量赋值--温度下限
+    const [rows4] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 7
+    `);
+    //全局阈值变量赋值--湿度上限
+    const [rows5] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 9
+    `);
+    //全局阈值变量赋值--湿度下限
+    const [rows6] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 10
+    `);
+    //全局阈值变量赋值--光照上限
+    const [rows7] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 21
+    `);
+    //全局阈值变量赋值--光照下限
+    const [rows8] = await connection1.execute(`
+    SELECT *
+    FROM t_direct
+    WHERE config_id = 22
+    `);
+    //全局变量赋值
+    wen_array.push(Number(rows3.value));
+    wen_array.push(Number(rows4.value));
+    shi_array.push(Number(rows5.value));
+    shi_array.push(Number(rows6.value));
+    guang_array.push(Number(rows7.value));
+    guang_array.push(Number(rows8.value));
   }
   catch(error){ 
     console.log("数据库3连接失败");
@@ -80,6 +128,8 @@ let now_ID = null;
 let tem = 0;
 
 
+
+
 //设备存储
 //指令备份数组的元素格式为：
 // 设备编号,【主题，数据({payload,qos})，该设备所属的指令的类别】
@@ -88,7 +138,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://192.168.1.100',{
+export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
 });  
 
@@ -216,7 +266,7 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
 
 
 //主题订阅数组(硬转软)
-const topic_array = ['sensorData','state'];
+const topic_array = ['sensorData','state','change_yuzhi'];
 
 //控制台客户端对象连接设置
 client.on('connect', () => {
@@ -309,20 +359,11 @@ function sendToAllClients(data) {
 
 //监听控制台客户端对象收到的消息--接收方完成即可
 client.on('message',async (topic, message)=>{
-  //初始化温度、湿度、光照阈值的变量
-  let tem_Y1 = 0;
-  let tem_Y2 = 100;
-  let shi_Y1 = 0;
-  let shi_Y2 = 100;
-  let light_Y1 = 15;
-  let light_Y2 = 100;
-
-
   //阈值越界方法定义
   function temperature_panduan(value){
-    if(value>=tem_Y1&&value<=tem_Y2) return false;
+    if(value>=wen_array[0]&&value<=wen_array[1]) return false;
     else {
-      if(value<tem_Y1){
+      if(value<wen_array[0]){
         return 1;
       }else{
         return 2;
@@ -330,9 +371,9 @@ client.on('message',async (topic, message)=>{
     };
   }
   function smoke_panduan(value){
-    if(value>=shi_Y1&&value<=shi_Y2) return false;
+    if(value>=shi_array[0]&&value<=shi_array[1]) return false;
     else {
-      if(value<shi_Y1){
+      if(value<shi_array[0]){
         return 1;
       }else{
         return 2;
@@ -340,9 +381,9 @@ client.on('message',async (topic, message)=>{
     };
   }
   function shuiwei_panduan(value){
-    if(value>=light_Y1&&value<=light_Y2) return false;
+    if(value>=guang_array[0]&&value<=guang_array[1]) return false;
     else {
-      if(value<light_Y1){
+      if(value<guang_array[0]){
         return 1;
       }else{
         return 2;
@@ -592,6 +633,33 @@ client.on('message',async (topic, message)=>{
         }
       }
     }
+  }
+  else if(topic === 'change_yuzhi'){//进行全局变量的修改
+    //获取指令
+    let { d_no,L1,L2,S1,S2,T1,T2 } = JSON.parse(message);
+    //通过指令修改全局变量
+    if(L1){
+      guang_array[0] = L1;
+    }
+    else if(L2){
+      guang_array[1] = L2;
+    }
+    else if(S1){
+      shi_array[0] = S1;
+    }
+    else if(S2){
+      shi_array[1] = S2;
+    }
+    else if(T1){
+      wen_array[0] = T1;
+    }
+    else if(T2){
+      wen_array[1] = T2;
+    }
+    console.log("成功修改当前总阈值数组内容为(温度、湿度、光照)):");
+    console.dir(wen_array);
+    console.dir(shi_array);
+    console.dir(guang_array);
   }
   //重发数据
   // else if(topic === "miss_data"){

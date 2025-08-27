@@ -135,6 +135,13 @@ export async function t_direct_control() {
             `);
           }
           //指令更新完毕后进行全局变量的阈值的赋值
+          if(item.f_type==='2'){//针对阈值情况进行单独全局变量的修改
+            console.log("检查后发现的内容为,item:");
+            console.dir(item);
+            console.log("检查后发现的内容为,obj1:");
+            console.dir(obj1);
+            beifen(d_no, ['change_yuzhi', obj1]);
+          }
         }
         ctx.body = "ok";
       });

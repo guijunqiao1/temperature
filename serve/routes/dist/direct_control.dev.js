@@ -158,7 +158,7 @@ function t_direct_control() {
 
                     case 37:
                       if (!d_no) {
-                        _context.next = 57;
+                        _context.next = 58;
                         break;
                       }
 
@@ -196,9 +196,20 @@ function t_direct_control() {
                       return regeneratorRuntime.awrap(connection.execute("\n              UPDATE t_direct\n              SET value = \"".concat(content, "\"\n              WHERE config_id = ").concat(item.id, "\n            ")));
 
                     case 57:
-                      ctx.body = "ok";
+                      //指令更新完毕后进行全局变量的阈值的赋值
+                      if (item.f_type === '2') {
+                        //针对阈值情况进行单独全局变量的修改
+                        console.log("检查后发现的内容为,item:");
+                        console.dir(item);
+                        console.log("检查后发现的内容为,obj1:");
+                        console.dir(obj1);
+                        (0, _mqtt_server_get.beifen)(d_no, ['change_yuzhi', obj1]);
+                      }
 
                     case 58:
+                      ctx.body = "ok";
+
+                    case 59:
                     case "end":
                       return _context.stop();
                   }

@@ -19,6 +19,12 @@
         </RouterLink>
       </div>
     </div>
+
+    <div class="the_best_great">
+      <div>最优工位：{{ best_great }}</div>
+      <ECharts :option="chartoption" style="width:100%; height:400px;" class="zhuzhuang"
+        v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
+    </div>
   </div>
 </template>
 
@@ -108,6 +114,72 @@
     //每执行一次update函数都对实际的文本的内容进行一次更新
     // }
   }
+
+  //柱状图配置变量
+  const chartoption = ref({
+    title: {
+      text: ""
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: []
+      // yingshe_array.value[0].field1, yingshe_array.value[1].field2, yingshe_array.value[2].field3
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: ['20%', '10%'],  // 左边偏移20%，右边偏移10%
+      data: [],
+      axisLabel: {//使得横轴文本纵向排列
+        fontSize: 10,
+        color: '#333',
+        fontWeight: '400',
+        rotate: 90
+      }
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      // {
+      //   name: yingshe_array.value[0].field1,
+      //   type: 'bar',
+      //   data: []
+      // },
+      // {
+      //   name: yingshe_array.value[1].field2,
+      //   type: 'bar',
+      //   data: []
+      // },
+      // {
+      //   name: yingshe_array.value[2].field3,
+      //   type: 'bar',
+      //   data: []
+      // }
+    ]
+  });
+
+  // 设备配置赋值
+  ['工位1','工位2','工位3'].forEach((item, index) => {
+    // 折线赋值
+    chartoption.value.legend.data.push(item);
+    chartoption.value.series.push({
+      name: '用电量',
+      type: 'bar',
+      data: []
+    })
+  })
+
+  // 柱状比较图时间横轴赋值
+  chartoption.value.xAxis.data = [];
+
 
   //在onMounted方法中定义add_td方法便于后续使用DOM进行tbody标签中的tr、td标签的创建以及添加操作
   onMounted(async () => {

@@ -9,7 +9,7 @@ export const useUserStore = defineStore('user', {
     Action_sign:true,//控制行为总内容
     action_sign:true,//控制行为控件
     Device_sign:true,//控制设备总内容
-    all:false,
+    all:true,
     device:true,
     signzhi:null,
     type_array:null,

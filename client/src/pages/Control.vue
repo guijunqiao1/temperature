@@ -28,7 +28,7 @@
       <h1 class="section-title">全局指令</h1>
       <!-- 同步时间    -->
       <div class="control-grid">
-        <div v-for="item in control_array" :key="item.id" class="control-item">
+        <div v-for="item in all_array" :key="item.id" class="control-item">
           <!-- 类型1： -->
           <div class="switch control-card" v-if="item.f_type === '1' && (item.mode === '1' || item.mode === 'null')">
             <label class="control-label">{{ item.t_name }}：</label>
@@ -173,7 +173,11 @@ import { useRouter } from 'vue-router'
 
 const Pinia = useUserStore();
 //获取到渲染数组
+
 //全局数组变量
+const all_array:any = ref();
+
+//设备数组变量
 const control_array: any = ref();
 
 //设备相关变量
@@ -245,11 +249,14 @@ function change_jifang(value){
 
 (async () => {
   signzhi.value = Pinia.signzhi;
+  const result_all = await axios.get(`/api/zhiling?mode=1`);
   const result = await axios.get(`/api/zhiling?mode=0&d_no=${signzhi.value}`);
   control_array.value = result.data;
+  all_array.value = result_all.data;
   console.log("control_array:");
   console.dir(control_array.value);
-
+  console.log("all_array:");
+  console.dir(all_array.value);
 
   //立即执行一次定时器内容
   console.log("定时器正常运转");

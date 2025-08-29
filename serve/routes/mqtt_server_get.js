@@ -583,7 +583,7 @@ client.on('message',async (topic, message)=>{
     console.log("gongwei:"+gongwei);
     console.log("test:"+test);
     //首先判断值是否合法后进行插入
-    if(test&&gongwei==='工位1'){
+    if(gongwei==='工位1'){
       console.log("进入啦啦啦啦");
       //当处于test的过程的情况下
       if(!temperature_panduan(temperature1)&&!smoke_panduan(humility1)&&!shuiwei_panduan(light1)){ 
@@ -601,7 +601,7 @@ client.on('message',async (topic, message)=>{
         }
       }
     }
-    if(test&&gongwei==='工位2'){
+    if(gongwei==='工位2'){
       if(!temperature_panduan(temperature2)&&!smoke_panduan(humility2)&&!shuiwei_panduan(light2)){
         gong_right(2);
       }else{
@@ -617,7 +617,7 @@ client.on('message',async (topic, message)=>{
         }
       }
     }
-    if(test&&gongwei==='工位3'){
+    if(gongwei==='工位3'){
       if(!temperature_panduan(temperature3)&&!smoke_panduan(humility3)&&!shuiwei_panduan(light3)){
         gong_right(3);
       }else{

@@ -1,5 +1,10 @@
 <template>
   <div class="device-overview-container" v-show="Pinia.Device_sign">
+    <div class="block1 block">
+      <el-date-picker v-model="timeArray_value" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
+        :default-time="defaultTime" />
+    </div>
+
     <div class="device-overview-header">
       <h1 class="page-title">设备概览</h1>
       <p class="page-description">查看和管理所有工位设备状态</p>
@@ -21,20 +26,49 @@
     </div>
 
     <div class="the_best_great">
+      <h1>用电量对比图像</h1>
       <div>最优工位：{{ best_great }}</div>
-      <ECharts :option="chartoption" style="width:100%; height:400px;" class="zhuzhuang"
-        v-show="a_length > 0 && !zhexian_device && Pinia.Device_sign" />
+      <ECharts :option="chartoption" style="width:100%; height:400px;" class="zhuzhuang" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  //导入echart启动函数
+  import { use } from 'echarts/core';
+  //导入渲染器
+  import { CanvasRenderer } from 'echarts/renderers';
+  import ECharts from "vue-echarts";
+  //导入柱状图剩余所需要的其它配置项
+  import { LineChart } from 'echarts/charts';
+  import { BarChart } from 'echarts/charts';
+  import { LabelLayout } from 'echarts/features';
+  import { UniversalTransition } from 'echarts/features';
+  import { ArrowDown } from '@element-plus/icons-vue'
+  import {
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    LegendComponent,
+    ToolboxComponent
+  } from 'echarts/components'
+  use([
+    CanvasRenderer,
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    LegendComponent,
+    ToolboxComponent,
+    BarChart,
+    LineChart,
+    LabelLayout,
+    UniversalTransition
+  ]);
   import { onMounted, ref } from "vue";
   import { defineProps } from "vue";
   import axios from "axios";
   //格式化时间变量(数据库中的datetime类型)的包
   import moment from "moment";
-  import { ArrowDown } from '@element-plus/icons-vue'
   import { onUpdated } from "vue";
   import { RouterView, RouterLink } from "vue-router";
   import { useUserStore } from "../store/curt";
@@ -52,8 +86,18 @@
   let update_one = 0;//用于控制update函数中执行编辑的只能是一次
   let change_ok = 0;//用于标记是否为点击后的状态
 
+  //最优解变量
+  const best_great = ref();
+
   //时间选择器捕捉值
-  const value1 = ref();
+  const timeArray_value = ref();
+
+  //时间选择器配置变量
+  const defaultTime = [new Date(2000, 1, 1, 12, 0), new Date(2000, 1, 1, 12, 0, 0)]; // '12:00:00'
+
+  //时间范围比较值参考数组
+  const nowArray = ref();
+
 
   //方法
   let change = (value) => { };//设备列表的方法
@@ -121,7 +165,7 @@
       text: ""
     },
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
     },
     legend: {
       data: []
@@ -173,12 +217,51 @@
     chartoption.value.series.push({
       name: '用电量',
       type: 'bar',
-      data: []
+      data: [0]
     })
   })
 
   // 柱状比较图时间横轴赋值
   chartoption.value.xAxis.data = [];
+
+  //柱状图值的配置函数
+  function yong_calculator(value1) {
+    // 确保为每个系列创建单独的数据数组
+    let seriesData = [[], [], []];
+    
+    // 处理每个工位的数据
+    for (let j = 0; j < 3; j++) {
+      if (nowArray.value && nowArray.value[j] && nowArray.value[j][1]) {
+        let records = nowArray.value[j][1];
+        let sum = 0;
+        
+        records.forEach(record => {
+          if (record && record[0]) {
+            sum += parseFloat(record[0]);
+          }
+        });
+        
+        seriesData[j] = sum; // 存储计算的和
+      } else {
+        seriesData[j] = 0; // 没有数据时设为0
+      }
+    }
+    
+    // 更新图表数据
+    for (let i = 0; i < seriesData.length; i++) {
+      if (chartoption.value.series[i]) {
+        chartoption.value.series[i].data = [seriesData[i]]; // 注意这里要是数组
+      }
+    }
+    
+    // 更新最优解
+    const min = Math.min(...seriesData);
+    if (seriesData[0] === min) best_great.value = '工位1';
+    else if (seriesData[1] === min) best_great.value = '工位2';
+    else best_great.value = '工位3';
+    
+    console.log("更新后的图表配置:", chartoption.value);
+  }
 
 
   //在onMounted方法中定义add_td方法便于后续使用DOM进行tbody标签中的tr、td标签的创建以及添加操作
@@ -207,6 +290,46 @@
     //完成数组的内容重置获取
     const result = await axios.get(`/api/Test_array_get`);
     Pinia.change_Test_array = result.data;
+
+
+    //获取nowArray，进行图像初次赋值
+    const result_nowArray = await axios.get("/api/get_array_by_time?start=1&end=1");//初次查询
+    nowArray.value = result_nowArray.data;
+    console.log("当前Nowarray:");
+    console.dir(nowArray);
+    yong_calculator(nowArray.value);
+
+    
+    //分别获取时间选择器的btn以及ok按钮
+    const ok = document.querySelector(".el-button.el-button--small.is-disabled.is-plain.el-picker-panel__link-btn") as HTMLElement;
+    const btn = document.querySelector(".el-icon.el-input__icon.el-range__close-icon.el-range__close-icon--hidden") as HTMLElement;
+
+    ok.addEventListener("click",async(e)=>{
+      //获取到时间值
+      const start = timeArray_value.value[0];
+      const end = timeArray_value.value[1];
+      //请求发送
+      const result = await axios.get(`/api/get_array_by_time?start=${start}&end=${end}`);
+      nowArray.value = result.data;
+      console.log("nowArray:");
+      console.dir(nowArray.value);
+      yong_calculator(nowArray.value);
+      //判断检查
+      if(nowArray.value.length<1){
+        alert("得到的内容为空");
+        best_great.value = '无';
+      }
+    })
+    btn.addEventListener("click",async(e)=>{
+      //请求发送
+      const result = await axios.get(`/api/get_array_by_time?start=1&end=1`);
+      nowArray.value = result.data;
+      console.log("nowArray:");
+      console.dir(nowArray.value);
+      yong_calculator(nowArray.value);
+
+    })
+
   });
 </script>
 

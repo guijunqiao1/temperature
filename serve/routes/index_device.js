@@ -101,4 +101,59 @@ Router2.get("/DEVICE", async (ctx) => {
   }
 });
 
+//添加时间选择专用获取多机位的数组的路由
+Router2.get("/get_array_by_time", async (ctx) => {//参考的是recent路由
+  const { start,end } = ctx.query;
+  try {
+    await connection2.query("SET SESSION group_concat_max_len = 1000000");
+    const x = `'"', t.` + 'field8' + `, '",', `;
+    const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');//格式化时间方法
+    let yuju;//限制语句
+    if(start==='1'&&end==='1'){//初次
+      yuju = '';
+    }else if(start!=='1'&&end!=='1'&&start===end){//向前查询
+      //格式化时间值
+    const formattime = formatTime(start);
+      yuju = `WHERE t.c_time < "${formattime}"`;
+    }else{//限制查询
+      const formatstart = formatTime(start);
+      const formatend = formatTime(end);
+      yuju = `WHERE t.c_time BETWEEN "${formatstart}" AND "${formatend}"`;
+    }
+
+    const [results] = await connection2.query(`
+      SELECT 
+          t.d_no, 
+          GROUP_CONCAT(
+              CONCAT(
+                  '[', ${x} '"', t.c_time, '"', 
+                  ']'
+              ) ORDER BY t.c_time
+          ) AS data
+      FROM t_data t
+      ${yuju}
+      GROUP BY t.d_no;
+    `);
+
+    const formattedResult = results.map(row => {
+      try {
+        if (!row.data) return [row.d_no, []];
+        const fixedData = `[${row.data}]`;
+        let data = JSON.parse(fixedData);
+        data = data.map(entry => entry);
+        return [row.d_no, data];
+      } catch (error) {
+        console.error(`JSON 解析失败: ${row.data}`, error);
+        return [row.d_no, []];
+      }
+    });
+
+    ctx.set('Access-Control-Allow-Origin', '*');
+    ctx.body = formattedResult;
+  } catch (err) {
+    console.error("数据库查询失败", err);
+  }
+});
+
+
 export default Router2;

@@ -70,8 +70,6 @@ Router2.get("/t_device", async (ctx) => {
     ctx.body = { error: "数据库查询失败" };
   }
 });
-
-
 // 设备列表使用
 
 // 不需要分页的路由 -- 多设备表格

@@ -334,6 +334,10 @@ onMounted(async () => {
 
 
 })
+//卸载阶段完成定时器销毁
+onUnmounted(async () => {
+  clearInterval(x);
+})
 </script>
 
 <style scoped>

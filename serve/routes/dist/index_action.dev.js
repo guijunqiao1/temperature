@@ -308,13 +308,13 @@ Router5.get("/action_count", function _callee3(ctx) {
   }, null, null, [[1, 33]]);
 });
 Router5.get("/data/action", function _callee4(ctx) {
-  var _ctx$query3, start, end, d_no, _ref25, _ref26, result_now, sql_string, item, x, query, FORMATTIME, groupbyd_no, toBig, formattedStart, formattedEnd, search_result, formattedResult, _ref27, _ref28, results, _ref29, _ref30, _results, _ref31, _ref32, _results2;
+  var _ctx$query3, start, end, currentPage, pageSize, d_no, page_boolean, offset, OFFSET, _ref25, _ref26, result_now, sql_string, item, x, query, FORMATTIME, groupbyd_no, toBig, formattedStart, formattedEnd, search_result, formattedResult, _ref27, _ref28, results, _ref29, _ref30, _results, _ref31, _ref32, _results2;
 
   return regeneratorRuntime.async(function _callee4$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
         case 0:
-          search_result = function _ref35(value) {
+          search_result = function _ref36(value) {
             var formattedResult = [];
             value.forEach(function (row) {
               if (!row.data) return;
@@ -327,7 +327,7 @@ Router5.get("/data/action", function _callee4(ctx) {
             return formattedResult;
           };
 
-          toBig = function _ref34() {
+          toBig = function _ref35() {
             return regeneratorRuntime.async(function toBig$(_context4) {
               while (1) {
                 switch (_context4.prev = _context4.next) {
@@ -343,7 +343,7 @@ Router5.get("/data/action", function _callee4(ctx) {
             });
           };
 
-          FORMATTIME = function _ref33(value) {
+          FORMATTIME = function _ref34(value) {
             var formatTime = function formatTime(timeStr) {
               return new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
             };
@@ -351,11 +351,21 @@ Router5.get("/data/action", function _callee4(ctx) {
             return formatTime(value);
           };
 
-          _ctx$query3 = ctx.query, start = _ctx$query3.start, end = _ctx$query3.end, d_no = _ctx$query3.d_no;
-          _context5.next = 6;
+          OFFSET = function _ref33(value1, value2) {
+            return (parseInt(value1) - 1) * parseInt(value2);
+          };
+
+          _ctx$query3 = ctx.query, start = _ctx$query3.start, end = _ctx$query3.end, currentPage = _ctx$query3.currentPage, pageSize = _ctx$query3.pageSize, d_no = _ctx$query3.d_no;
+          page_boolean = !pageSize || !currentPage || currentPage === "undefined" || pageSize === "undefined" || currentPage === undefined || pageSize === undefined;
+
+          if (!page_boolean) {
+            offset = OFFSET(currentPage, pageSize);
+          }
+
+          _context5.next = 9;
           return regeneratorRuntime.awrap(connection.query("\n    SELECT * \n    FROM t_behavior_data\n  "));
 
-        case 6:
+        case 9:
           _ref25 = _context5.sent;
           _ref26 = _slicedToArray(_ref25, 1);
           result_now = _ref26[0];
@@ -378,57 +388,57 @@ Router5.get("/data/action", function _callee4(ctx) {
           ;
           formattedStart = FORMATTIME(start !== "end" || start !== "1" ? start : '2025-06-13 15:51:16');
           formattedEnd = FORMATTIME(end !== "1" ? end : '2025-06-13 15:51:16');
-          _context5.next = 18;
+          _context5.next = 21;
           return regeneratorRuntime.awrap(toBig());
 
-        case 18:
+        case 21:
           if (!(start === "1" && end === "1")) {
-            _context5.next = 27;
+            _context5.next = 30;
             break;
           }
 
-          _context5.next = 21;
+          _context5.next = 24;
           return regeneratorRuntime.awrap(connection.query(query + groupbyd_no));
 
-        case 21:
+        case 24:
           _ref27 = _context5.sent;
           _ref28 = _slicedToArray(_ref27, 1);
           results = _ref28[0];
           formattedResult = search_result(results);
-          _context5.next = 42;
+          _context5.next = 45;
           break;
 
-        case 27:
+        case 30:
           if (!(start === "end" && end !== "1")) {
-            _context5.next = 36;
+            _context5.next = 39;
             break;
           }
 
-          _context5.next = 30;
+          _context5.next = 33;
           return regeneratorRuntime.awrap(connection.query(query + "\n      AND c_time < \"".concat(formattedEnd, "\"\n    ") + groupbyd_no));
 
-        case 30:
+        case 33:
           _ref29 = _context5.sent;
           _ref30 = _slicedToArray(_ref29, 1);
           _results = _ref30[0];
           formattedResult = search_result(_results);
-          _context5.next = 42;
+          _context5.next = 45;
           break;
 
-        case 36:
-          _context5.next = 38;
+        case 39:
+          _context5.next = 41;
           return regeneratorRuntime.awrap(connection.query(query + "\n      AND c_time BETWEEN \"".concat(formattedStart, "\" AND \"").concat(formattedEnd, "\"\n    ") + groupbyd_no));
 
-        case 38:
+        case 41:
           _ref31 = _context5.sent;
           _ref32 = _slicedToArray(_ref31, 1);
           _results2 = _ref32[0];
           formattedResult = search_result(_results2);
 
-        case 42:
+        case 45:
           ctx.body = formattedResult;
 
-        case 43:
+        case 46:
         case "end":
           return _context5.stop();
       }

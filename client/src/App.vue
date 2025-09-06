@@ -211,7 +211,7 @@ onMounted(async () => {//此处在setup中设置onMounted()的回调
   //进行全局选中测试次数以及全局总测试次数的变量的赋值
   const result = await axios.get(`/api/times?id=1`);
   Pinia.change_Test_array(result.data);
-  //取默认times的值
+  //取默认的值
   console.log("响应内容："+result.data);
   Pinia.change_times(0);
   console.log("全局次数:"+Pinia.times);

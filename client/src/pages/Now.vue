@@ -467,11 +467,11 @@ async function jiance(value){
     waibu = "2";
   }
   //截图
-  const result1 = await axios.get('http://192.168.1.100:5000/api/screenshot/'+waibu);
+  const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+waibu);
   console.log('最终jieguo:'+result1.data['screenshot']);
   const imageData = result1.data['screenshot'];
   //发出检测请求
-  const result = await axios.post('http://192.168.1.100:5000/infer', {
+  const result = await axios.post('http://192.168.1.102:5000/infer', {
     // image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
     image: imageData,  // 发送 Base64 编码的图像
   });
@@ -904,17 +904,17 @@ onMounted(async () => {
     {
       id: 'camera_1',           // 摄像头的唯一标识符
       name: '工位1',            // 摄像头名称
-      url: 'http://192.168.1.100:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
+      url: 'http://192.168.1.102:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
     },
     {
       id: 'camera_2',           // 摄像头的唯一标识符
       name: '工位2',            // 摄像头名称
-      url: 'http://192.168.1.100:5000/stream/1',  // 1表示第二个摄像头
+      url: 'http://192.168.1.102:5000/stream/1',  // 1表示第二个摄像头
     },
     {
       id: 'camera_3',           // 摄像头的唯一标识符
       name: '工位3',            // 摄像头名称
-      url: 'http://192.168.1.100:5000/stream/2',  // 2表示第三个摄像头
+      url: 'http://192.168.1.102:5000/stream/2',  // 2表示第三个摄像头
     }
   ];
   cameras.forEach((item)=>{

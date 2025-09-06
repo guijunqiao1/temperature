@@ -168,12 +168,9 @@ export async function t_direct_control() {
         }
         //浅拷贝只读数组
         //模拟情况
-        const error = [[{type:'温度',how:'偏小'},{type:'温度',how:'偏大'}],[{type:'湿度',how:'偏大'},{type:'湿度',how:'偏小'}],[{type:'光照',how:'偏小'},{type:'光照',how:'偏大'}]];
-        // const qian_array = [...error_quene];
-        let qian_array = [...error];
-        console.log("查看当前数组：");
+        let qian_array = [...error_quene];
+        console.log("查看当前数组："); 
         console.dir(qian_array);
-
         //定义错误队列的相同维度下优先取得后续维度情况下的how的取值的处理去重方法
         function qu_quene(value){
           for(let i=qian_array[value].length-1;i>=0;i--){
@@ -192,132 +189,58 @@ export async function t_direct_control() {
             }
           }
         }
-
         //定义主题变量
         const topic = 'send';
+        //定义工位标准偏移索引变量
+        let d_no_index;
         if(d_no==='工位1'){
-          console.log("当前成功进入指令自动push接口");
-          //遍历前进行error_quene的去重
-          qu_quene(0);
-          console.log("去重后的只读数组:");
-          console.dir(pure_array);
-          pure_array.forEach((item,index)=>{
-            if(item.type==='温度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-            else if(item.type==='湿度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-            else if(item.type==='光照') {
-              const obj1 = { "deng":`on1_0` };
-              const obj2 = { "deng":'on1_4' };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-          })
-          //静止之后进行总数组的清空
-          for(let i=0;i<qian_array[0].length;i++){
-            qian_array[0].shift();
-            error_quene[0].shift();
-          }
+          d_no_index = 0;
         }else if(d_no==='工位2'){
-          //遍历前进行error_quene的去重
-          qu_quene(1);
-          qian_array[1].forEach((item,index)=>{
-            if(item.type==='温度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-            else if(item.type==='湿度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-            else if(item.type==='光照') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-          })
-          //静止之后进行总数组的清空
-          for(let i=0;i<qian_array[1].length;i++){
-            qian_array[1].shift();
-            error_quene[1].shift();
-          }
+          d_no_index = 1;
         }else if(d_no==='工位3'){
-          //遍历前进行error_quene的去重
-          qu_quene(2);
-          qian_array[2].forEach((item,index)=>{
-            if(item.type==='温度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
+          d_no_index = 2;
+        }
+        console.log("当前成功进入指令自动push接口");
+        //遍历前进行error_quene的去重
+        qu_quene(d_no_index);
+        console.log("去重后的只读数组:");
+        console.dir(pure_array);
+        pure_array.forEach((item,index)=>{
+          if(item.type==='温度') {
+            const obj1 = {  };
+            const obj2 = {  };
+            if(item.how==='偏大'){
+              //发送指定指令
+              beifen(d_no, [topic , obj1]);
+            }else{
+              beifen(d_no, [topic , obj2]);
             }
-            else if(item.type==='湿度') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-            else if(item.type==='光照') {
-              const obj1 = {  };
-              const obj2 = {  };
-              if(item.how==='偏大'){
-                //发送指定指令
-                beifen(d_no, [topic , obj1]);
-              }else{
-                beifen(d_no, [topic , obj2]);
-              }
-            }
-          })
-          //静止之后进行总数组的清空
-          for(let i=0;i<qian_array[2].length;i++){
-            qian_array[2].shift();
-            error_quene[2].shift();
           }
+          else if(item.type==='湿度') {
+            const obj1 = {  };
+            const obj2 = {  };
+            if(item.how==='偏大'){
+              //发送指定指令
+              beifen(d_no, [topic , obj1]);
+            }else{
+              beifen(d_no, [topic , obj2]);
+            }
+          }
+          else if(item.type==='光照') { 
+            const obj1 = { "deng":`on${d_no_index+1}_0` };
+            const obj2 = { "deng":`on${d_no_index+1}_4` };
+            if(item.how==='偏大'){
+              //发送指定指令
+              beifen(d_no, [topic , obj1]);
+            }else{
+              beifen(d_no, [topic , obj2]);
+            }
+          }
+        })
+        //静止之后进行总数组的清空
+        for(let i=0;i<qian_array[d_no_index].length;i++){
+          qian_array[d_no_index].shift();
+          error_quene[d_no_index].shift();
         }
         ctx.body = 'ok';
       })

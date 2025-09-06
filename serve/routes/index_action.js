@@ -448,11 +448,16 @@ Router5.get("/action_count", async (ctx) => {
 });
 
 Router5.get("/data/action", async (ctx) => {
-  const { start, end, d_no } = ctx.query;
+  const { start, end, currentPage, pageSize, d_no } = ctx.query;
+  const page_boolean = (!pageSize || !currentPage || currentPage === "undefined" || pageSize === "undefined" || currentPage === undefined || pageSize === undefined);
+
+  // 首先不分页获取所有符合条件的数据
   const [result_now] = await connection.query(`
     SELECT * 
     FROM t_behavior_data
+    LIMIT 1
   `);
+  
   let sql_string = '';
   for (const item in result_now[0]) {
     if (result_now[0][item] !== null && item.includes("field")) {
@@ -460,6 +465,7 @@ Router5.get("/data/action", async (ctx) => {
       sql_string += x;
     }
   }
+  
   let query;
   if (!d_no) {
     query = `SELECT d_no, 
@@ -488,7 +494,6 @@ Router5.get("/data/action", async (ctx) => {
       AND d_no = "${d_no}"`;
   }
 
-
   function FORMATTIME(value) {
     const formatTime = (timeStr) => new Date(timeStr).toISOString().slice(0, 19).replace('T', ' ');
     return formatTime(value);
@@ -496,11 +501,9 @@ Router5.get("/data/action", async (ctx) => {
 
   const groupbyd_no = `GROUP BY d_no`;
 
-  async function toBig() {
-    await connection.query("SET SESSION group_concat_max_len = 1000000");
-  };
+  await connection.query("SET SESSION group_concat_max_len = 1000000");
 
-  const formattedStart = FORMATTIME((start !== "end" || start !== "1") ? start : '2025-06-13 15:51:16');
+  const formattedStart = FORMATTIME((start !== "end" && start !== "1") ? start : '2025-06-13 15:51:16');
   const formattedEnd = FORMATTIME((end !== "1") ? end : '2025-06-13 15:51:16');
 
   function search_result(value) {
@@ -517,8 +520,9 @@ Router5.get("/data/action", async (ctx) => {
   }
 
   let formattedResult;
+  let finalResult;
 
-  await toBig();
+  // 根据条件构建查询
   if (start === "1" && end === "1") {
     const [results] = await connection.query(query + groupbyd_no);
     formattedResult = search_result(results);
@@ -534,7 +538,17 @@ Router5.get("/data/action", async (ctx) => {
     formattedResult = search_result(results);
   }
 
-  ctx.body = formattedResult;
+  // 在展开后的数据上应用分页
+  if (!page_boolean) {
+    const startIndex = (parseInt(currentPage) - 1) * parseInt(pageSize);
+    const endIndex = startIndex + parseInt(pageSize);
+    finalResult = formattedResult.slice(startIndex, endIndex);
+  } else {
+    finalResult = formattedResult;
+  }
+
+  ctx.body = finalResult;
 });
+
 
 export default Router5;

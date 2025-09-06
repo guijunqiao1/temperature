@@ -180,7 +180,7 @@
     xAxis: {
       type: 'category',
       boundaryGap: ['20%', '10%'],  // 左边偏移20%，右边偏移10%
-      data: [],
+      data: [1],
       axisLabel: {//使得横轴文本纵向排列
         fontSize: 10,
         color: '#333',
@@ -215,14 +215,14 @@
     // 折线赋值
     chartoption.value.legend.data.push(item);
     chartoption.value.series.push({
-      name: '用电量',
+      name: item,
       type: 'bar',
       data: [0]
     })
   })
 
   // 柱状比较图时间横轴赋值
-  chartoption.value.xAxis.data = [];
+  chartoption.value.xAxis.data = [''];
 
   //柱状图值的配置函数
   function yong_calculator(value1) {
@@ -338,98 +338,183 @@
   width: 100%;
   min-height: 100vh;
   padding: 30px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.device-overview-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.block1 {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.block1 .el-date-picker {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .device-overview-header {
   text-align: center;
   margin-bottom: 50px;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 50px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.device-overview-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
 }
 
 .page-title {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.page-description {
+  font-size: 1.3rem;
+  color: #5a6c7d;
+  line-height: 1.8;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 35px;
+  margin: 40px 0;
+  padding: 0 10px;
+}
+
+.device-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 30px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.device-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+.device-card:hover::before {
+  left: 100%;
+}
+
+.device-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+}
+
+.device-info {
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.device-title {
+  font-size: 1.6rem;
   color: #2c3e50;
   margin-bottom: 15px;
   font-weight: 700;
-  background: linear-gradient(45deg, #3498db, #e74c3c);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.page-description {
-  font-size: 1.2rem;
-  color: #666;
-  line-height: 1.6;
-}
-
-.device-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.device-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.device-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-.device-info {
-  margin-bottom: 20px;
-}
-
-.device-title {
-  font-size: 1.4rem;
-  color: #2c3e50;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
 .device-description {
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.5;
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 .device-link {
   display: block;
   position: relative;
   text-decoration: none;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .device-link:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
 .device-image {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: cover;
   display: block;
-  border-radius: 15px;
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  transition: all 0.4s ease;
+  filter: brightness(0.9);
+}
+
+.device-link:hover .device-image {
+  filter: brightness(1.1);
+  transform: scale(1.05);
 }
 
 .device-overlay {
@@ -438,13 +523,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(52, 152, 219, 0.8);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.3s ease;
-  border-radius: 15px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
 }
 
 .device-link:hover .device-overlay {
@@ -453,32 +539,145 @@
 
 .overlay-text {
   color: white;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.the_best_great {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  padding: 40px;
+  margin-top: 50px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-align: center;
+}
+
+.the_best_great h1 {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.the_best_great div {
+  font-size: 1.3rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin-bottom: 30px;
+  padding: 15px 25px;
+  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+  border-radius: 15px;
+  display: inline-block;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.zhuzhuang {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* 响应式设计 */
+@media (max-width: 1400px) {
+  .device-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+  
+  .page-title {
+    font-size: 2.8rem;
+  }
+}
+
 @media (max-width: 1200px) {
   .device-overview-container {
-    padding: 20px;
+    padding: 25px;
   }
   
   .device-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .the_best_great h1 {
+    font-size: 2rem;
   }
 }
 
 @media (max-width: 768px) {
+  .device-overview-container {
+    padding: 20px;
+  }
+  
+  .device-overview-header {
+    padding: 40px 25px;
+    margin-bottom: 40px;
+  }
+  
+  .page-title {
+    font-size: 2.2rem;
+  }
+  
+  .page-description {
+    font-size: 1.1rem;
+  }
+  
+  .device-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin: 30px 0;
+  }
+  
+  .device-card {
+    padding: 25px;
+  }
+  
+  .device-title {
+    font-size: 1.4rem;
+  }
+  
+  .the_best_great {
+    padding: 30px 25px;
+    margin-top: 40px;
+  }
+  
+  .the_best_great h1 {
+    font-size: 1.8rem;
+  }
+  
+  .the_best_great div {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 480px) {
   .device-overview-container {
     padding: 15px;
   }
   
   .device-overview-header {
     padding: 30px 20px;
-    margin-bottom: 30px;
+    border-radius: 20px;
   }
   
   .page-title {
@@ -489,17 +688,39 @@
     font-size: 1rem;
   }
   
-  .device-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
   .device-card {
     padding: 20px;
+    border-radius: 20px;
+  }
+  
+  .device-title {
+    font-size: 1.3rem;
+  }
+  
+  .device-description {
+    font-size: 1rem;
+  }
+  
+  .device-image {
+    height: 180px;
+  }
+  
+  .the_best_great {
+    padding: 25px 20px;
+    border-radius: 20px;
+  }
+  
+  .the_best_great h1 {
+    font-size: 1.6rem;
+  }
+  
+  .the_best_great div {
+    font-size: 1rem;
+    padding: 10px 15px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 360px) {
   .device-overview-container {
     padding: 10px;
   }
@@ -512,8 +733,16 @@
     font-size: 1.8rem;
   }
   
-  .device-title {
-    font-size: 1.2rem;
+  .device-grid {
+    gap: 20px;
+  }
+  
+  .device-card {
+    padding: 18px;
+  }
+  
+  .the_best_great {
+    padding: 20px 15px;
   }
 }
 </style>

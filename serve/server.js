@@ -241,8 +241,6 @@ app.get('/screenshot/:camIndex', (req, res) => {
   }
 });
 
-
-
 // 启动服务
 function startServer() {
   // 启动所有摄像头流处理

@@ -1,96 +1,91 @@
 <template>
   <div class="container">
 
-    <h1 class="page-title">当前选中的测试次数：{{ Pinia.times }}</h1>
+    <h1>当前选中的测试次数：{{ Pinia.times }}</h1>
 
 
     <!-- 设备相关内容 -->
-    <div class="control-section">
-      <el-dropdown class="control-dropdown">
-        <el-button type="primary" v-show="Pinia.type_len > 1" class="control-btn">
-          工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div>
-              <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
-                <el-dropdown-item>
-                  <div class="device-item" @click="change_jifang(item[0])">{{ item[0] }}</div>
-                </el-dropdown-item>
-              </div>
+    <el-dropdown>
+      <el-button type="primary" v-show="Pinia.type_len > 1">
+        工位<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.type_array" :key="item[0]">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_jifang(item[0])">{{ item[0] }}</div>
+              </el-dropdown-item>
             </div>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <div class="only" v-if="type_len <= 1">
-        当前工位：{{ Pinia.signzhi }}
-      </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only" style="border-radius: 5px;background-color: #409eff;" v-if="type_len <= 1">
+      当前工位：{{ Pinia.signzhi }}</div>
+
 
       <!-- 测试次数 -->
-      <el-dropdown class="control-dropdown">
-        <el-button type="primary" v-if="Pinia.test_type_len > 1" class="control-btn">
-          测试次数<el-icon class="el-icon--right"><arrow-down /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <div>
-              <div class="device_list" v-for="item in Pinia.test_array">
-                <el-dropdown-item>
-                  <div class="device-item" @click="change_cishu(item)">{{ item }}</div>
-                </el-dropdown-item>
-              </div>
+    <el-dropdown>
+      <el-button type="primary" v-if="Pinia.test_type_len > 1">
+        测试次数<el-icon class="el-icon--right"><arrow-down /></el-icon>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <div>
+            <div class="device_list" v-for="item in Pinia.test_array">
+              <el-dropdown-item>
+                <div style="border-radius: 5px;" @click="change_cishu(item)">{{ item }}</div>
+              </el-dropdown-item>
             </div>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <div class="only1" v-if="Pinia.test_type_len < 1">
-        当前选中的测试次数：{{ Pinia.times }}
-      </div>
-    </div>
+          </div>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <div class="only1" style="border-radius: 5px;background-color: #409eff;" v-if="Pinia.test_type_len < 1">
+      当前选中的测试次数：{{ Pinia.times }}</div>
 
 
     <div class="block1 block" v-show="Pinia.Device_sign">
       <el-date-picker v-model="value1" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
-        :default-time="defaultTime1" class="date-picker" />
+        :default-time="defaultTime1" />
     </div>
 
     <!-- 用于表格信息提示的标签 -->
     <h2 class="h1" v-show="Pinia.Device_sign">设备表格内容</h2>
     <!-- 当激活了设备列表的时候 -->
-    <div class="table-container" v-show="Pinia.Device_sign">
-      <table class="device_table">
-        <thead v-if="yingshe_array && unit_array">
-          <tr>
-            <!-- 直接考虑是否为多设备的情况 -->
-            <th>场景</th>
-            <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
-            <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
-            <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
-            <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
-            <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
-            <th>{{ yingshe_array[5].field6 }} ({{ unit_array[5] }})</th>
-            <th>{{ yingshe_array[6].field7 }} ({{ unit_array[6] }})</th>
-            <th>{{ yingshe_array[7].field8 }} ({{ unit_array[7] }})</th>
-            <th>收集时间</th>
-            <!-- <th>数据类型</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in device_page_array">
-            <td>{{ item[0] }}</td>
-            <td>{{ item[1] }}</td>
-            <td>{{ item[2] }}</td>
-            <td>{{ item[3] }}</td>
-            <td>{{ item[4] }}</td>
-            <td>{{ item[5] }}</td>
-            <td>{{ item[6] }}</td>
-            <td>{{ item[7] }}</td>
-            <td>{{ item[8] }}</td>
-            <td>{{ moment(item[9]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="device_table" v-show="Pinia.Device_sign">
+      <thead v-if="yingshe_array && unit_array">
+        <tr>
+          <!-- 直接考虑是否为多设备的情况 -->
+          <th>场景</th>
+          <th>{{ yingshe_array[0].field1 }} ({{ unit_array[0] }})</th>
+          <th>{{ yingshe_array[1].field2 }} ({{ unit_array[1] }})</th>
+          <th>{{ yingshe_array[2].field3 }} ({{ unit_array[2] }})</th>
+          <th>{{ yingshe_array[3].field4 }} ({{ unit_array[3] }})</th>
+          <th>{{ yingshe_array[4].field5 }} ({{ unit_array[4] }})</th>
+          <th>{{ yingshe_array[5].field6 }} ({{ unit_array[5] }})</th>
+          <th>{{ yingshe_array[6].field7 }} ({{ unit_array[6] }})</th>
+          <th>{{ yingshe_array[7].field8 }} ({{ unit_array[7] }})</th>
+          <th>收集时间</th>
+          <!-- <th>数据类型</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in device_page_array">
+          <td>{{ item[0] }}</td>
+          <td>{{ item[1] }}</td>
+          <td>{{ item[2] }}</td>
+          <td>{{ item[3] }}</td>
+          <td>{{ item[4] }}</td>
+          <td>{{ item[5] }}</td>
+          <td>{{ item[6] }}</td>
+          <td>{{ item[7] }}</td>
+          <td>{{ item[8] }}</td>
+          <td>{{ moment(item[9]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+        </tr>
+      </tbody>
+    </table>
     <!-- 分页栏部分 -->
     <div class="pagination-container" v-show="Pinia.Device_sign">
       <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="Number(total1)"
@@ -98,53 +93,49 @@
       <!-- 上述前者用于响应式提供当前选中的页数；第二者用于设置固定的每页中应当呈现的数据；第三者用于获取到总数，则element标签会自动进行计算用于将当前应当呈现的页数；第四者为分页标签的顺序设置；最后者表示设置当前的分页的标签的整体的大小为默认大小 -->
     </div>
     <!-- 设备图像 -->
-    <div class="chart-controls" @click="change($event)" v-show="Pinia.Device_sign">
-      <button id="zhexian" class="chart-btn active">折线图(默认)</button>
-      <button id="zhuzhuang" class="chart-btn">柱状图</button>
+    <div class="change1" @click="change($event)" v-show="Pinia.Device_sign">
+      <button id="zhexian" class="active">折线图(默认)</button>
+      <button id="zhuzhuang">柱状图</button>
     </div>
-    <div class="chart-container">
-      <ECharts :option="chartOption" class="zhexian chart" />
-      <ECharts :option="chartOption1" class="zhuzhuang chart" />
-    </div>
+    <ECharts :option="chartOption" style="width: 600px; height: 400px; display:block;" class="zhexian" />
+    <ECharts :option="chartOption1" style="width:600px; height:400px;display:none;" class="zhuzhuang" />
     <!-- 行为相关内容 -->
     <h2 v-show="Pinia.Action_sign" class="h2_action">不同传感器设备的行为数据记录</h2>
     <div class="block2 block" v-show="Pinia.Action_sign">
       <el-date-picker v-model="value2" type="datetimerange" start-placeholder="Start Date" end-placeholder="End Date"
-        :default-time="defaultTime2" class="date-picker" />
+        :default-time="defaultTime2" />
     </div>
     <!-- 行为表格 -->
-    <div class="table-container" v-if="Pinia.Action_sign">
-      <table class="action_table">
-        <thead>
-          <tr v-if="yingshe_action && unit_action_array">
-            <th>场景</th>
-            <th>具体资源(原)</th>
-            <th>具体资源(后)</th>
-            <th>收集时间</th>
-            <th>文件类型</th>
-            <th>可信度</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="yingshe_action" v-for="item in device_array_action_page_array">
-            <td>{{ item[0] }}</td>
-            <td>{{ item[1] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
-                @click="start_block(item[1])">查看</button> </td>
-            <td>{{ item[2] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
-            @click="start_block(item[2])">查看</button> </td>
-            <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
-            <td>{{ item[4] }}</td>
-            <td>{{ item[5] }}</td>
-            <td><button class="delete_button" @click="delete1(item)">删除</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="action_table" v-if="Pinia.Action_sign">
+      <thead>
+        <tr v-if="yingshe_action && unit_action_array">
+          <th>场景</th>
+          <th>具体资源(原)</th>
+          <th>具体资源(后)</th>
+          <th>收集时间</th>
+          <th>文件类型</th>
+          <th>可信度</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="yingshe_action" v-for="item in device_array_action_page_array">
+          <td>{{ item[0] }}</td>
+          <td>{{ item[1] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
+              @click="start_block(item[1])">查看</button> </td>
+          <td>{{ item[2] }} <button v-show="yingshe_action[0].type !== '0'" class="btn_modal"
+          @click="start_block(item[2])">查看</button> </td>
+          <td>{{ moment(item[3]).format('YYYY-MM-DD HH:mm:ss') }}</td>
+          <td>{{ item[4] }}</td>
+          <td>{{ item[5] }}</td>
+          <td><button class="delete_button" @click="delete1(item)">删除</button></td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- 弹出框设计 -->
-    <div id="modal" class="modal-overlay">
-      <span class="X" @click="XXX">×</span>
+    <div id="modal">
+      <span class="X" @click="XXX">X</span>
       <div class="modal_child">
       </div>
     </div>
@@ -157,16 +148,16 @@
     </div>
 
     <!-- 设备行为图像 -->
-    <div class="chart-controls" @click="change1($event)"
+    <div class="change2" @click="change1($event)"
       v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show != '0'">
-      <button id="zhexian1" class="chart-btn active">折线图(默认)</button>
-      <button id="zhuzhuang1" class="chart-btn">柱状图</button>
+      <button id="zhexian1" class="active">折线图(默认)</button>
+      <button id="zhuzhuang1">柱状图</button>
     </div>
 
-    <div class="chart-container" v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show !== '0'">
-      <ECharts :option="chartOption0" class="zhexian1 chart" />
-      <ECharts :option="chartOption11" class="zhuzhuang1 chart" />
-    </div>
+    <ECharts :option="chartOption0" style="width: 600px; height: 400px; display:block;" class="zhexian1"
+      v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show !== '0'" />
+    <ECharts :option="chartOption11" style="width:600px; height:400px; display:none;" class="zhuzhuang1"
+      v-show="Pinia.Action_sign && yingshe_action && yingshe_action[0].is_show !== '0'" />
 
   </div>
 </template>
@@ -385,7 +376,7 @@ update1 = async () => {//用于自动触发分页路由
   const boolean_x = start1 !== 1 && end1 !== 1 && start1.getTime() === end1.getTime();
   //直接进行赋值(由于本身databases_array就随着ok的变化而变化所以不需要进行条件判断)
   const result = await axios.get(`/api/data/action?currentPage=${currentPage1.value}&pageSize=${pageSize}&start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);
-  device_array_action_page_array.value = result.data;//进行设备分页数组的赋值
+  device_array_action_page_array.value = result.data;//进行设备分页数组的赋值  
   const result1 = await axios.get(`/api/data/action?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//将设备编号与指定时间内容进行获取用于device_array的赋值(该数组用于ecahrts渲染)--该路由需要设计current的判断
   device_array1.value = result1.data;
   const result_count = await axios.get(`/api/action_count?start=${boolean_x ? "end" : start1}&end=${end1}&d_no=${signzhi1.value}`);//用于获取总数
@@ -1195,410 +1186,58 @@ onMounted(async () => {
 <style scoped>
 .container {
   width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.page-title {
-  text-align: center;
-  color: white;
-  font-size: 2.5em;
-  margin-bottom: 30px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-  font-weight: 300;
-}
-
-.control-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.control-dropdown {
-  margin: 0;
-}
-
-.control-btn {
-  background: linear-gradient(45deg, #409eff, #67c23a);
-  border: none;
-  border-radius: 25px;
-  padding: 12px 24px;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-.control-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
-}
-
-.only, .only1 {
-  background: linear-gradient(45deg, #409eff, #67c23a);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 25px;
-  text-align: center;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.only:hover, .only1:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
+  position: absolute;
+  top: 0px;
 }
 
 .block {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  margin: 20px 0;
-}
-
-.date-picker {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.h1, .h2_action {
-  background: linear-gradient(45deg, #9da79f, #7a8c7a);
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
+  display: inline-block;
+  padding: 30px 0;
   text-align: center;
-  margin: 30px 0 20px 0;
-  font-size: 1.8em;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border-right: 0;
+  flex: 1;
+  position: relative;
+  left: 40px;
+  bottom: 0px;
+  margin-top: 10px !important;
 }
 
-.table-container {
-  overflow-x: auto;
-  margin: 20px 0;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  padding: 20px;
+.block:last-child {
+  border-right: none;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-table thead {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-}
-
-table thead th {
-  color: white;
-  padding: 15px 10px;
-  font-weight: 600;
-  text-align: center;
-  border: none;
-  font-size: 14px;
-}
-
-table tbody tr {
-  transition: all 0.3s ease;
-}
-
-table tbody tr:nth-child(even) {
-  background: rgba(102, 126, 234, 0.05);
-}
-
-table tbody tr:hover {
-  background: rgba(102, 126, 234, 0.1);
-  transform: scale(1.01);
-}
-
-table tbody td {
-  padding: 12px 10px;
-  text-align: center;
-  border: 1px solid rgba(102, 126, 234, 0.1);
-  font-size: 14px;
-  color: #333;
-}
-
-.pagination-container, .pagination-container1 {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-  padding: 20px;
-}
-
-.pagination-container .el-pagination, .pagination-container1 .el-pagination {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.chart-controls {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 30px 0;
-}
-
-.chart-btn {
-  background: linear-gradient(45deg, #61aab8, #4a8a9a);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(97, 170, 184, 0.3);
-}
-
-.chart-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(97, 170, 184, 0.4);
-}
-
-.chart-btn.active {
-  background: linear-gradient(45deg, #00d4ff, #0099cc);
-  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
-}
-
-.chart-container {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.chart {
-  width: 600px !important;
-  height: 400px !important;
+.block .demonstration {
   display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 
-.zhexian1, .zhuzhuang1 {
-  display: none;
+#timeTotime {
+  width: 1200px;
+  height: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  position: static;
+  left: 10px;
 }
 
-.device_list > div {
-  border: none;
+.device_list>div {
+  border: 1px solid gray;
   width: 200px;
-  height: 35px;
+  height: 25px;
   text-align: center;
-  line-height: 35px;
-  background: linear-gradient(45deg, #23d588, #1db954);
-  color: white;
+  line-height: 25px;
+  background-color: rgb(35, 213, 136);
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
 }
 
-.device_list > div:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(35, 213, 136, 0.4);
-}
-
-.device-item {
-  border-radius: 8px;
-  padding: 8px 16px;
-  transition: all 0.3s ease;
-}
-
-.device-item:hover {
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  display: none;
-  backdrop-filter: blur(5px);
-}
-
-.modal_child {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  min-width: 400px;
-  max-width: 80%;
-  max-height: 80%;
-  overflow: auto;
-}
-
-.X {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  color: #ff4757;
-  font-size: 24px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.X:hover {
-  color: #c44569;
-  transform: scale(1.1);
-}
-
-.btn_modal {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-left: 8px;
-}
-
-.btn_modal:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-}
-
-.delete_button {
-  background: linear-gradient(45deg, #ff4757, #c44569);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.delete_button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
-}
-
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .container {
-    padding: 15px;
-  }
-  
-  .control-section {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .chart {
-    width: 100% !important;
-    max-width: 500px !important;
-  }
-  
-  .table-container {
-    padding: 15px;
-  }
-  
-  table {
-    font-size: 12px;
-  }
-  
-  table thead th, table tbody td {
-    padding: 8px 6px;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 2em;
-  }
-  
-  .h1, .h2_action {
-    font-size: 1.5em;
-    padding: 12px;
-  }
-  
-  .control-btn, .only, .only1 {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-  
-  .chart-controls {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .chart-btn {
-    width: 200px;
-  }
-  
-  .modal_child {
-    min-width: 300px;
-    padding: 20px;
-  }
-  
-  .pagination-container .el-pagination, .pagination-container1 .el-pagination {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 10px;
-  }
-  
-  .page-title {
-    font-size: 1.8em;
-  }
-  
-  .control-section {
-    padding: 15px;
-  }
-  
-  .table-container {
-    padding: 10px;
-  }
-  
-  .chart {
-    height: 300px !important;
-  }
-  
-  .modal_child {
-    min-width: 280px;
-    padding: 15px;
-  }
-}
-
-/* 保持原有的特定样式 */
 .device_list {
-  height: 35px;
+  height: 25px;
+}
+
+h2 {
+  font-size: 2.5em;
 }
 
 .container.fit-view {
@@ -1612,7 +1251,7 @@ table tbody td {
   justify-self: center;
 }
 
-.echarts > div {
+.echarts>div {
   transform: scale(1.5);
 }
 
@@ -1620,7 +1259,16 @@ table tbody td {
   display: none;
 }
 
-#timeTotime1, #timeTotime2 {
+/* 控制下拉框组件居中--统一样式 */
+/* .el-dropdown {
+  position: relative;
+  left: 380px;
+  bottom: 30px;
+} */
+
+/* 控制下拉框盒子居右 */
+#timeTotime1,
+#timeTotime2 {
   display: inline-block;
   position: relative;
   left: 380px;
@@ -1628,38 +1276,297 @@ table tbody td {
   margin-top: 10px;
 }
 
+/* 开启相对定位用于only的绝对定位布局 */
 #timeTotime1 {
   left: 850px;
 }
 
-.el-dropdown > button {
+
+
+/* 控制下拉框组件标签的宽度 */
+.el-dropdown>button {
   width: 176.33px;
 }
 
-.el-dropdown > button > span > i > svg {
+/* 控制标志的位置 */
+.el-dropdown>button>span>i>svg {
   position: absolute;
   left: 10px;
 }
 
-#timeTotime {
-  width: 1200px;
-  height: 100px;
+
+/* 对表格进行样式设计 */
+table {
+  margin-top: 18px;
+  border-top: 5px solid gray;
+  height: 66px;
+  /* 需要注意的是此处不能设置固定的table的高度否则则会导致其中只有一个tr的情况下会占据整个tbody的高度 */
+  border-spacing: 0;
+  /* 下方设置使得table标签变得其中的th、td标签不会随着内容的变化而发生变化 */
+  table-layout: fixed;
+}
+
+table>thead,
+table>tbody {
+  min-height: 0;
+  width: 1020px;
+  height: 33px;
+  background-color: #cecece;
+}
+
+table thead>tr,
+table tbody>tr {
+  width: 1020px;
+  height: 32px;
+}
+
+table thead>tr>th,
+table tbody>tr>td {
+  width: 154.1px;
+  height: 32px;
+  color: black;
+  font-size: 14px;
+  border: 1px solid #9DA79F;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* 分页标签样式 */
+.pagination-container {
+  position: relative;
+  margin-top: 20px;
+  text-align: center;
+  top: 20px;
+}
+
+/* 对按钮标签样式进行修改--设备信息 */
+#zhexian:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px 1px gray;
+}
+
+#zhexian {
+  width: 100px;
+  font-size: 14px;
+  align-items: center;
+  line-height: 28px;
+  height: 28px;
+  border: 1px solid gray;
+  background-color: rgb(97, 170, 172);
+}
+
+#zhuzhuang:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px 1px gray;
+}
+
+#zhuzhuang {
+  width: 100px;
+  height: 28px;
+  font-size: 14px;
+  align-items: center;
+  line-height: 28px;
+  border: 1px solid gray;
+  background-color: rgb(97, 170, 172);
+  position: relative;
+  left: 25px;
+}
+
+/* 对按钮标签样式进行修改--行为信息 */
+#zhexian1:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px 1px gray;
+}
+
+#zhexian1 {
+  width: 100px;
+  font-size: 14px;
+  align-items: center;
+  line-height: 28px;
+  height: 28px;
+  border: 1px solid gray;
+  background-color: rgb(97, 170, 172);
+}
+
+#zhuzhuang1:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px 1px gray;
+}
+
+#zhuzhuang1 {
+  width: 100px;
+  height: 28px;
+  font-size: 14px;
+  align-items: center;
+  line-height: 28px;
+  border: 1px solid gray;
+  background-color: rgb(97, 170, 172);
+  position: relative;
+  left: 25px;
+}
+
+#baifenbi1 {
+  width: 100px;
+  height: 28px;
+  font-size: 14px;
+  align-items: center;
+  line-height: 28px;
+  border: 1px solid gray;
+  background-color: rgb(97, 170, 172);
+  position: relative;
+  left: 50px;
+}
+
+#baifenbi1:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px 1px gray;
+}
+
+/* 设计提示标签的样式 */
+.h1 {
+  width: 100%;
+  position: relative;
+  top: 22px;
+  background-color: #9da79f;
+  margin: 0;
+  text-align: center;
+}
+
+.h2 {
+  width: 1103.8px;
+  position: relative;
+  top: 22px;
+  background-color: #9da79f;
+  margin: 0;
+  text-align: center;
+}
+
+/* 进行单标签的样式设计 */
+.only {
+  width: 176.33px;
+  height: 32px;
+  position: absolute;
+  left: 0px;
+  top: -21px;
+
+  background-color: #409eff;
+  text-align: center;
+  line-height: 32px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.only:hover {
+  cursor: pointer;
+}
+
+.only1 {
+  width: 176.33px;
+  height: 32px;
+  position: absolute;
+  left: 290px;
+  bottom: 34px;
+  text-align: center;
+  line-height: 32px;
+  font-size: 14px;
+  font-weight: 400;
+  background-color: #409eff;
+}
+
+.only1:hover {
+  cursor: pointer;
+}
+
+
+/* 为选中元素进行样式设计 */
+.active {
+  background-color: aqua !important;
+}
+
+/* 为屏蔽器进行样式设计 */
+.select_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
   display: flex;
-  flex-wrap: wrap;
-  position: static;
-  left: 10px;
+  justify-content: center;
+
 }
 
-.pagination-container1 > .el-pagination {
+.time_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+}
+
+.table_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+
+}
+
+.change_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+
+}
+
+.h2_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+
+}
+
+.image_checkbox {
+  width: 100%;
+  height: 19px !important;
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+}
+
+/* 为屏蔽器添加上悬浮样式 */
+input[type="checkbox"]:hover {
+  cursor: pointer;
+}
+
+/* 控制表格宽度铺满全屏  */
+/* .device_table {
+  width: 100% !important;
+} */
+
+.action_table {
+  width: 100%;
+}
+
+.pagination-container1>.el-pagination {
   margin-left: 800px;
   margin-top: 30px;
 }
 
-.pagination-container > .el-pagination {
+.pagination-container1,
+.pagination-container {
+  margin-bottom: 34px !important;
+}
+
+.pagination-container>.el-pagination {
   margin-left: 800px;
   margin-top: 30px;
 }
 
+
+/* 为查询条件统一样式设计  */
 .search {
   height: 32px;
   margin-left: 0;
@@ -1688,6 +1595,7 @@ table tbody td {
   cursor: pointer;
 }
 
+/* 为查询按钮进行样式设计 */
 .submit {
   margin-left: 2px;
   font-size: 10px;
@@ -1702,66 +1610,66 @@ table tbody td {
   cursor: pointer;
 }
 
-.select_checkbox, .time_checkbox, .table_checkbox, .change_checkbox, .h2_checkbox, .image_checkbox {
-  width: 100%;
-  height: 19px !important;
-  background-color: gray;
-  display: flex;
-  justify-content: center;
+
+/* modal样式设计 */
+#modal {
+  position: fixed;
+  top: 160px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  display: none;
 }
 
-input[type="checkbox"]:hover {
+.modal_child {
+  height: 200px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+  max-width: 80%;
+  overflow: auto;
+  overflow: hidden;
+}
+
+/* 为弹窗按钮添加样式 */
+.btn_modal:hover {
   cursor: pointer;
 }
 
-.action_table {
-  width: 100%;
+/* 为弹窗X按钮进行样式设计 */
+.X {
+  color: red;
+  position: relative;
+  top: 18px;
+  left: 325px;
 }
 
+.X:hover {
+  cursor: pointer;
+}
+
+.el-dropdown {
+  margin-left: 269px;
+  margin-top: 40px;
+}
+
+/* 为次数选择器进行样式设计 */
 .container.fit-view .only1 {
   position: relative;
-  left: 700px;
+  left:700px;
 }
 
-/* 动画效果 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* 为删除按钮进行样式设计  */
+.delete_button {
+  font-size: 12px;
+  width: 70px;
+}
+.delete_button:hover {
+  cursor: pointer;
 }
 
-.container > * {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.container > *:nth-child(2) { animation-delay: 0.1s; }
-.container > *:nth-child(3) { animation-delay: 0.2s; }
-.container > *:nth-child(4) { animation-delay: 0.3s; }
-.container > *:nth-child(5) { animation-delay: 0.4s; }
-.container > *:nth-child(6) { animation-delay: 0.5s; }
-
-/* 滚动条美化 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #5a6fd8, #6a4190);
-}
 </style>
+<!-- flex-flow属性可用于同时控制flex-direction和flex-wrap  -->
+<!-- 实时数据用于在前端进行对应的表格的内容设计的时候如果该变量发生了变化则导致template表格的内容发生动态的变化方便响应式布局的设计 -->

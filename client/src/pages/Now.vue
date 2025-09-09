@@ -28,8 +28,8 @@
         <img id="videoCanvas" :src="src0" alt="实时视频" class="video-stream"> 
       </div>
       <div class="change_model">
+        <button class="no_auto button_active" @click="change_to_no_auto">手动</button>
         <button class="auto" @click="change_to_auto">自动</button>
-        <button class="no_auto" @click="change_to_no_auto">手动</button>
       </div>
       <button class="function" @click="jiance">检测</button>
 
@@ -871,6 +871,10 @@ let y: any = 0;
 //定义检测定时器变量
 let z: any = 0;
 
+//定义手动自动模式修改的方法变量
+let change_to_auto:any = ()=>{};
+let change_to_no_auto:any = ()=>{};
+
 // 挂载时加载数据
 onMounted(async () => {
   //获取检测按钮
@@ -879,9 +883,13 @@ onMounted(async () => {
   const auto_button = document.querySelector(".change_model>.auto") as HTMLElement;
   const no_auto_button = document.querySelector(".change_model>.no_auto") as HTMLElement;
   //定义手动自动切换方法
-  function change_to_auto(value){
+  change_to_auto = () => {
+    console.log('成功触');
     //隐藏检测按钮
     jiance_button.style.display = 'none';
+    //修改样式
+    auto_button.classList.add('button_active');
+    no_auto_button.classList.remove('button_active');
     //清除先前定时器
     clearInterval(z);
     //启动检测定时器
@@ -890,9 +898,13 @@ onMounted(async () => {
       jiance();
     },5000);
   }
-  function change_to_no_auto(value){
+  change_to_no_auto = () => {
+    console.log('成功触');
     //显示检测按钮
-    jiance_button.stylee.display = 'block';
+    jiance_button.style.display = 'block';
+    //修改样式
+    auto_button.classList.remove('button_active');
+    no_auto_button.classList.add('button_active');
     //清除定时器
     clearInterval(z);
   }
@@ -2067,8 +2079,23 @@ input[type="checkbox"]:hover {
 
 /* 手动自动激活样式 */
 .button_active {
-  background-color: skyblue;
+  background-color: green;
 }
+
+/* 手动自动样式 */
+.change_model {
+  width: 300px;
+  height: 60px;
+}
+.change_model>button {
+  width: 50%;
+  height: 50%;
+  font-size: 14px;
+}
+.change_model>button:hover {
+  cursor:pointer;
+}
+
 </style>
 
 <!-- 

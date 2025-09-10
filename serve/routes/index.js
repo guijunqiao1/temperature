@@ -274,10 +274,10 @@ Router.get("/recent/action", async (ctx) => {
         FROM t_behavior_data
         GROUP BY d_no
       )
-      SELECT 
-          t.d_no, 
+      SELECT
+          t.d_no,
           GROUP_CONCAT(
-              CONCAT('[', 
+              CONCAT('[',
               ${sql_string}
               '"', t.c_time, '",',
               '"', t.confidence, '",',

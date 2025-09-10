@@ -143,7 +143,7 @@ export const client = mqtt.connect('mqtt://192.168.1.102',{
   clientId:"client_control",//唯一标识符
 });
 
- 
+  
 //暴露错误队列，用于配合前端检测路由的指令发送
 export const error_quene = [[],[],[]]; 
 
@@ -209,7 +209,7 @@ function reconnect_republish(value){//参数对应上了实际的响应的设备
 };
 
 //定义重发函数--广义
-async function republish(){
+async function republish(){ 
   // 多设备
   // const length = zhiling_beifen_array.length;
   // for(let i=0;i<length;i++){
@@ -260,7 +260,7 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
   // })
   // 单设备指令备份
   if(active===false){
-    zhiling_beifen_array.push(value2);
+    zhiling_beifen_array.push(value2); 
     console.log("zhiling_beifen_array.length:"+zhiling_beifen_array.length);
   }
 } 
@@ -402,7 +402,7 @@ client.on('message',async (topic, message)=>{
   }
   console.log("成功接收到消息");
   //告警
-  if(topic === "sensorData"){
+  if(topic === "sensorData"){ 
     console.log("成功接收到消息");
     //需要注意使用await使得promise对象的值被解析进而允许使用[x]= 的方式完成数组顺序赋值
     const [rows1] = await connection1.execute(`

@@ -151,7 +151,7 @@ export async function t_direct_control() {
       });
       //检测情况下的操作设备接口
       Router_direct_response.get('/operate_device',(ctx) => {
-        const { d_no } = ctx.query;
+        const { d_no,shoudong } = ctx.query;
 
         console.log("-----------------------------------------------");
         //定义纯净数组

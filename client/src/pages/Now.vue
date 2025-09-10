@@ -20,6 +20,12 @@
     <div class="only" v-if="type_len <= 1">
       {{ Pinia.signzhi }}</div>
 
+    <div class="jiance_container">
+      <div class="jiance_text">全局自动检测</div>
+      <button @click="start_all_jiance">开启</button>
+      <button @click="end_all_jiance">关闭</button>
+    </div>
+
     <!-- 监控相关内容 -->
     <h2 class="section-title">监控相关内容</h2>
     <div class="containerxxx">
@@ -267,6 +273,10 @@ let unit_action_array = ref();
 //存储渲染块的变量
 let xuanran_block_device = ref();
 
+//定义全局检测button事件
+let start_all_jiance = ()=>{};
+let end_all_jiance = ()=>{};
+
 //定义弹出框绑定的事件
 async function start_block(value) {
   console.log("成功触发事件");
@@ -439,12 +449,24 @@ function y_zhi0(value1, value2) {
   }
 }
 
+//定义定时器类全局id变量--控制设备信息
+let x: any = 0;
+//定义定时器类全局id变量--控制行为信息
+let y: any = 0;
+
+//定义检测定时器变量
+let z: any = 0;
+
 //机房修改函数
 function change_jifang(value){
   //全局变量修改
   Pinia.change(value);
   //当前页面的重置(携带上Pinia.signzhi)
   //页面重置,先跳到一个空路由，再跳回来
+
+  //优先清除定时器
+  clearInterval(z);
+
   router.replace('/empty').then(() => {
     router.replace('/New');
   })
@@ -453,7 +475,7 @@ function change_jifang(value){
 
 
 
-//定义检测方法
+//定义检测方法--单工位
 async function jiance(value){
   console.log("触发检测事件");
   let waibu;
@@ -516,6 +538,9 @@ async function jiance(value){
         d_no: Pinia.signzhi
       });
     }
+
+    //没人情况下主动发送关灯指令
+    await axios.get(`/api/zhiling/led?d_no=${Pinia.signzhi}&content=关`);
   }
 
 
@@ -533,6 +558,89 @@ async function jiance(value){
 
   alert("成功完成本次的检测");
 
+}
+
+//定义检测方法--全工位
+async function jiance_all(value){
+  console.log("触发检测事件");
+  let waibu;
+  //截图
+  const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/0');
+  const imageData = result1.data['screenshot'];
+  //截图
+  const result11 = await axios.get('http://192.168.1.102:5000/api/screenshot/1');
+  const imageData1 = result11.data['screenshot'];
+  //截图
+  const result111 = await axios.get('http://192.168.1.102:5000/api/screenshot/2');
+  const imageData11 = result111.data['screenshot'];
+  //发出检测请求
+  const result = await axios.post('http://192.168.1.102:5000/infer', {
+    image: imageData,  // 发送 Base64 编码的图像
+  });
+  //发出检测请求
+  const result0 = await axios.post('http://192.168.1.102:5000/infer', {
+    // image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    image: imageData1,  // 发送 Base64 编码的图像
+  });
+  //发出检测请求
+  const result00 = await axios.post('http://192.168.1.102:5000/infer', {
+    // image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    image: imageData11,  // 发送 Base64 编码的图像
+  });
+
+  //遍历推理结果--得到人类所处的框对应的下标
+  let index1=0;
+  let have = false;
+  result.data['inference_results'].forEach((item,index)=>{
+    if(item['class']===0){//当为人的情况
+      index1 = index;
+      have = true;
+    }
+  })
+  
+
+
+  //推断成功才进行内容图片的插入，失败则插入原图，同时修改全局检测变量
+  if(have){
+    //存到数据库中--原图和结果图
+    const result_insert = await axios.post('/api/insert_img',{
+      image: [imageData,result.data['processed_image']],
+      d_no: Pinia.signzhi,
+      person: result.data['inference_results'][index1]['class'],
+      confidence: result.data['inference_results'][index1]['confidence']
+    }) 
+    //检测到了人的分支下请求后端是否进行设备的管控
+    await axios.get(`/api/operate_device?d_no=${Pinia.signzhi}`);
+  }else{
+    if(result.data['inference_results']&&result.data['inference_results'].length>0){//没人但是存在物品时
+      //存到数据库中--原图和结果图
+      const result_insert = await axios.post('/api/insert_img',{
+        image: [imageData,result.data['processed_image']],
+        d_no: Pinia.signzhi,
+        person: result.data['inference_results'][0]['class'],
+        confidence: result.data['inference_results'][0]['confidence']
+      }) 
+    }else{
+      await axios.post(`/api/insert_img`,{
+        image: [imageData,imageData],
+        d_no: Pinia.signzhi
+      });
+    }
+
+    //没人情况下主动发送关灯指令
+    await axios.get(`/api/zhiling/led?d_no=${Pinia.signzhi}&content=关`);
+  }
+
+
+  //获取库中最新记录
+  const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
+  //实时更新图片内容--在当前机房的情况下
+  src1.value = "../../public/" + result_newest.data.field1;
+  src2.value = "../../public/" + result_newest.data.field2;
+  //实时更新最新检测时间
+  time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
+  REF.value = result_newest.data.result;
+  REF_confidence.value = result_newest.data.confidence;
 }
 
 //立即执行函数
@@ -863,13 +971,7 @@ async function jiance(value){
   y_zhi0(OneMinute(time_array, "0"), "action");
 })()
 
-//定义定时器类全局id变量--控制设备信息
-let x: any = 0;
-//定义定时器类全局id变量--控制行为信息
-let y: any = 0;
 
-//定义检测定时器变量
-let z: any = 0;
 
 //定义手动自动模式修改的方法变量
 let change_to_auto:any = ()=>{};
@@ -882,6 +984,9 @@ onMounted(async () => {
   //自动手动按钮本身
   const auto_button = document.querySelector(".change_model>.auto") as HTMLElement;
   const no_auto_button = document.querySelector(".change_model>.no_auto") as HTMLElement;
+  //获取全局自动检测button
+  const start_all_button = document.querySelector(".jiance_text>button:nth-child(1)") as HTMLElement;
+  const end_all_button = document.querySelector(".jiance_text>button:nth-child(2)") as HTMLElement;
   //定义手动自动切换方法
   change_to_auto = () => {
     console.log('成功触');
@@ -907,6 +1012,16 @@ onMounted(async () => {
     no_auto_button.classList.add('button_active');
     //清除定时器
     clearInterval(z);
+  }
+  //定义全局自动检测button方法
+  start_all_button = ()=>{
+    //屏蔽单工位的自动检测button
+    auto_button.styleText.display = 'hidden';
+  }
+  end_all_button = ()=>{
+    //显示单工位的自动检测button
+    auto_button.styleText.display = 'block';
+
   }
 
 
@@ -2094,6 +2209,23 @@ input[type="checkbox"]:hover {
 }
 .change_model>button:hover {
   cursor:pointer;
+}
+
+/* 全局检测样式 */
+/* 全局检测容器 */
+.jiance_container {
+
+}
+/* 全局检测文本 */
+.jiance_text {
+
+}
+/* 全局检测时间button */
+.jiance_text>button:nth-child(1) {
+
+}
+.jiance_text>button:nth-child(2) {
+
 }
 
 </style>

@@ -589,6 +589,26 @@ async function start_jiance_all(){
     })
     //推断成功才进行内容图片的插入，失败则插入原图，同时修改全局检测变量
     if(have){
+      //存到数据库中--原图和结果图
+      const result_insert = await axios.post('/api/insert_img',{
+        image: [imageData,result.data['processed_image']],
+        d_no: Pinia.signzhi,
+        person: result.data['inference_results'][index1]['class'],
+        confidence: result.data['inference_results'][index1]['confidence']
+      }) 
+      //更新面板状态
+      //获取库中最新记录
+      const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
+      //实时更新图片内容--在当前机房的情况下
+      src1.value = "../../public/" + result_newest.data.field1;
+      src2.value = "../../public/" + result_newest.data.field2;
+      console.log("src1:"+src1.value);
+      console.log("src2:"+src2.value);
+      //实时更新最新检测时间
+      time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
+      REF.value = result_newest.data.result;
+      REF_confidence.value = result_newest.data.confidence;
+
       //检测到了人的分支下请求后端是否进行设备的管控
       await axios.get(`/api/operate_device?d_no=${value}`);
     }else{

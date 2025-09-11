@@ -102,7 +102,6 @@ app.get('/stream/:camIndex', (req, res) => {
   // 定期发送最新帧
   const sendFrame = () => {
     if (res.destroyed) return;
-    
     const frame = latestFrames[camIndex];
     if (frame) {
       res.write(`--frame\r\n`);
@@ -112,7 +111,6 @@ app.get('/stream/:camIndex', (req, res) => {
       res.write(frame);
       res.write(`\r\n`);
     }
-    
     setTimeout(sendFrame, 50); // 约20FPS
   };
 

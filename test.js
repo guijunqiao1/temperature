@@ -1,68 +1,94 @@
 /**
- * @param {number[]} nums
- * @param {number} k
- * @return {number[]}
+ * @param {string} s
+ * @param {string} t
+ * @return {string}
  */
-class MyQueue {
-    constructor(que) {
-        //字面量化队列变量，使得自定义pop、push方法和数组原型提供的push、pop方法进行区分
-        this.que = que || [];
-    }
-    top() {
-        if (this.que.length) {
-            return this.que[0];
-        } 
-        else {
-            return undefined;
+ var minWindow = function(s, t) {
+    let map = new Map();
+    if(s.length<t.length) return "";
+    else if(s.length===t.length){
+        const map1 = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0,'h':0,'i':0,'j':0,'k':0,'l':0,'m':0,'n':0,'o':0,'p':0,'q':0,'r':0,'s':0,'t':0,'u':0,'v':0,'w':0,'x':0,'y':0,'z':0,'A':0,'B':0,'C':0,'D':0,'E':0,'F':0,'G':0,'H':0,'I':0,'J':0,'K':0,'L':0,'M':0,'N':0,'O':0,'P':0,'Q':0,'R':0,'S':0,'T':0,'U':0,'V':0,'W':0,'X':0,'Y':0,'Z':0 };
+        for(let i=0;i<s.length;i++){
+            map1[s[i]]++;
+            map1[t[i]]--;
         }
-    }
-    push(number) {
-        if (this.que.length) {
-            while (number > this.que[this.que.length - 1]) {
-                //直接删除数组最后一项
-                this.que.pop();
-            }
-            //队列添加最大项到相应位置
-            this.que.push(number);
-        } 
-        else {
-            //队列添加最大项到相应位置
-            this.que[0] = number;
+        for(let key in map1){
+            if(map1[key]!==0) return '';
         }
+        return s;
     }
-    pop(number) {
-        if (this.top() === number) {//得到顶部最大值，观察和需要越界处理的队列的值的大小关系
-            // 若为和最大值相等的情况则去除该值否则该老元素的索引保留在队列中
-            return this.que.shift();
-        }
-        //即使越界也不会对队列中的该值进行操作同时保留其本身的原因在于在此次的pop之后会有一次队列的push
-        //方法调用，故可能会自动清除掉该元素；同时本质结果数组存放的内容只会是队列的顶部的元素，需要pop的元素
-        //如果不在顶部就一直不会result访问到，除非后续顶部元素被清除，但是由于每次循环的第一件事就是pop，故此次越界
-        //元素如果将要被访问也会被去除
-        return undefined;
+    for(let i=0;i<t.length;i++){
+        map.set(t[i],map.get(t[i])?map.get(t[i])+1:1)
     }
-}
-var maxSlidingWindow = function (nums, k) {
+    console.log("参考数组：");
+    console.dir(map);
     const result = [];
-    const window = new MyQueue();
-    // 先遍历nums前k个元素，初始化window
-    for (let i = 0; i < k; i++) {
-        window.push(nums[i]);
+    //定义查看对象所有值是否都为0的方法
+    function panduan_0(map){
+        let sign = true;
+        for(const [key,value] of map){
+            if(value!==0) sign = false;
+        }
+        return sign;
     }
-    // 记得把第一个窗口的最大值存入result
-    result.push(window.top());
-    // 开始滑动窗口
-    for (let i = k; i < nums.length; i++) {
-        //尝试去除老元素--仅在该老元素为队列中的最大值索引的情况下才去除
-        window.pop(nums[i - k]);
-        //尝试添加新的最大值元素
-        window.push(nums[i]);
-        //添加最大项
-        result.push(window.top());
+
+    for(let i=0;i<s.length;i++){
+        if(map.get(s[i])){//开始减的话
+            //第一次先观察是否存在第一项
+            if(result.length===0){
+                const map1 = new Map(map);
+                map1.set(s[i],map.get(s[i])-1);
+                result.push([i,map1]);
+            }
+            //遍历判断查看
+            result.forEach((item,index)=>{
+                if(panduan_0(item[1])&&item.length!==3){
+                    console.log("11111111111111");
+                    //记录下标了
+                    item.push(i);
+                }else if(!panduan_0(item[1])&&item.length!==3&&result.length!==1){//开减
+                    //若已经是0则不减
+                    if(item[1].get(s[i])!==0){
+                        item[1].set(s[i],item[1].get(s[i])-1);
+                        //减完再加一次判断
+                        if(panduan_0(item[1])&&item.length!==3){
+                            console.log("22222222");
+                            //记录下标了
+                            item.push(i);
+                        }
+                    }
+                }
+            })
+            const map1 = new Map(map);
+            map1.set(s[i],map.get(s[i])-1);
+            result.push([i,map1]);
+        }
     }
-    return result;
+    //遍历结果array
+    //定义最小值index
+    let min_index;
+    let min_value;
+    console.log("result_array:");
+    console.dir(result);
+    if(result.length===0) return '';
+    let sign = true;
+    result.forEach((item,index)=>{
+        if(!min_index&&item.length!==2){//只对结束的数组进行获取
+            min_value = item[2]-item[0];
+            min_index = index;
+        }
+        else if(min_index&&item.length-2){//有值并且已经赋值过了min_index
+            if(item[2]-item[0]<min_value){
+                min_value = item[2] - item[0];
+                min_index = index;
+            }
+        }
+        if(item.length===3) sign = false;
+    })
+    if(sign) return '';
+    return s.slice(result[min_index][0],result[min_index][2]+1);
 };
 
-const nums = [1,3,-1,-3,5,3,6,7];
-const k = 3;
-console.log("result:" + maxSlidingWindow(nums,k));
+const s = "abbbb";
+const t = "aa"
+console.log("test:"+minWindow(s,t));

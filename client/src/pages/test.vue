@@ -345,8 +345,6 @@ async function print() {
   }
 }
 
-
-
 //建立websocket连接，完成实时的图像内容填充
 //全局建立websocket连接，使得告警内容被实时推送到页面的全局
 const socket = new WebSocket('ws://localhost:8081');

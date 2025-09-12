@@ -88,6 +88,8 @@ function startStreamProcessing(camIndex, url) {
 // 视频流接口 - 提供MJPEG流
 app.get('/stream/:camIndex', (req, res) => {
   const camIndex = parseInt(req.params.camIndex);
+
+  console.log('摄像头');
   
   // 验证摄像头索引
   if (isNaN(camIndex) || camIndex < 0 || camIndex >= RTSP_URLS.length) {
@@ -193,19 +195,15 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
 app.get('/screenshot/:camIndex', (req, res) => {
   try {
     const camIndex = parseInt(req.params.camIndex);
-    
     // 验证摄像头索引
     if (isNaN(camIndex) || camIndex < 0 || camIndex >= RTSP_URLS.length) {
       return res.status(400).send(`无效的摄像头索引，有效范围: 0-${RTSP_URLS.length - 1}`);
     }
-
     const frame = latestFrames[camIndex];
-    
     // 检查是否有可用帧
     if (!frame) {
       return res.status(503).send('当前无可用画面，请稍后重试');
     }
-
     // --------------------------
     // 核心：保存图片到服务器本地
     // --------------------------
@@ -223,7 +221,6 @@ app.get('/screenshot/:camIndex', (req, res) => {
         console.log(`[摄像头${camIndex + 1}] 截图已保存: ${savePath}`);
       }
     });
-
     // --------------------------
     // 原有逻辑：返回图片给前端
     // --------------------------
@@ -232,7 +229,6 @@ app.get('/screenshot/:camIndex', (req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.send(frame);
-
   } catch (error) {
     console.error('截图接口错误:', error);
     res.status(500).send('获取截图失败');

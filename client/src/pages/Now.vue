@@ -18,7 +18,7 @@
       </template>
     </el-dropdown>
     <div class="only" v-if="type_len <= 1">
-      {{ Pinia.signzhi }}</div>
+      {{ signzhi }}</div>
 
     <div class="jiance_text">全局自动检测</div>
     <div class="jiance_container">
@@ -247,6 +247,10 @@ const result_person = ref();
 
 const router = useRouter();
 
+//定义button样式缓存记录变量
+const huancun_array = [0,0,0];//0/1表示当前工位下的单工位自动检测切换button的样式分配是手动还是自动的active_button的className的add
+
+
 
 //定义额外的维度变量用于内容的扩展
 // const alarm = ref();
@@ -258,13 +262,17 @@ let b_length = ref();//行为数组长度记录变量
 let c_length = ref();//记录设备映射变量
 let d_length = ref();//记录行为映射变量
 
+//定义工位数组
+const gongwei_array = ['工位1','工位2','工位3'];
+
 //定义临时变量用于存储点击之后的signzhi
-let signzhi = Pinia.signzhi;
-let signzhi1 = Pinia.signzhi;
+let signzhi = ref(gongwei_array[0]);
+let signzhi1 = ref(gongwei_array[0]);
 
 //定义检测当前切换图像状态的变量 
 let zhexian_device = ref(true);
 let zhexian_action = ref(true);
+
 
 //定义单位数组变量
 let unit_array = ref();
@@ -272,6 +280,9 @@ let unit_action_array = ref();
 
 //存储渲染块的变量
 let xuanran_block_device = ref();
+
+//声明重置样式的方法
+let repeat_style = (value)=>{};
 
 //定义全局检测button事件
 let start_all_jiance = ()=>{};
@@ -391,7 +402,7 @@ function y_zhi(value1, value2) {
           sum += parseFloat(record[j]); // 计算当前列的总和
         });
         let avg = sum / relevantRecords.length; // 计算平均值
-        avg_values.push(avg);
+        avg_values.push(avg.toFixed(2));
       } else {
         console.log("判断条件不合理");
         avg_values.push(null); // 没有数据时填充 null，避免影响图表
@@ -434,7 +445,7 @@ function y_zhi0(value1, value2) {
           sum += parseFloat(record[j]); // 计算当前列的总和
         });
         let avg = sum; // 计算平均值
-        avg_values.push(avg);
+        avg_values.push(avg.toFixed(2));
       } else {
         avg_values.push(null); // 没有数据时填充 null，避免影响图表
       }
@@ -453,41 +464,63 @@ function y_zhi0(value1, value2) {
 let x: any = 0;
 //定义定时器类全局id变量--控制行为信息
 let y: any = 0;
-
 //定义检测定时器变量
 let z: any = 0;
 
-//机房修改函数
-function change_jifang(value){
-  //全局变量修改
-  Pinia.change(value);
-  //当前页面的重置(携带上Pinia.signzhi)
-  //页面重置,先跳到一个空路由，再跳回来
+//定义定时器存放数组
+const Interval_array = new Array(3);
+//定义相同维度下的定时器是否存在的数组
+const have_array = [false,false,false];
 
-  //优先清除定时器
-  clearInterval(z);
-  clearInterval(x);
-  clearInterval(y);
-  clearInterval(auto_x);
-  clearInterval(auto_y);
-  clearInterval(auto_z);
 
-  router.replace('/empty').then(() => {
-    router.replace('/New');
-  })
-  console.log("当前机房:"+Pinia.signzhi);
+//封装摄像头显示在盒子上的逻辑
+function show_camera(){
+  //监控相关内容
+  const cameras = [
+    {
+      id: 'camera_1',           // 摄像头的唯一标识符
+      name: '工位1',            // 摄像头名称
+      url: 'http://192.168.1.102:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
+    },
+    {
+      id: 'camera_2',           // 摄像头的唯一标识符
+      name: '工位2',            // 摄像头名称
+      url: 'http://192.168.1.102:5000/stream/1',  // 1表示第二个摄像头
+    },
+    {
+      id: 'camera_3',           // 摄像头的唯一标识符
+      name: '工位3',            // 摄像头名称
+      url: 'http://192.168.1.102:5000/stream/2',  // 2表示第三个摄像头
+    }
+  ];
+  cameras.forEach((item)=>{
+    if(item.name===signzhi.value) src0.value = item.url;
+  });
 }
 
+//机房修改函数
+function change_jifang(value){
+  //当前页面的重置(携带上Pinia.signzhi)
+  //页面重置,先跳到一个空路由，再跳回来
+  signzhi.value = value;
+  signzhi1.value = value;
 
+  //重置摄像头显示逻辑
+  show_camera();
+
+  //重置button状态
+  repeat_style(Number(signzhi.value.split("工位")[1])-1);
+  console.log("当前机房:"+signzhi.value);
+}
 
 //定义检测方法--单工位
 async function jiance(value){
-  console.log("触发检测事件");
+  console.log("触发检测事件"+value);
   let waibu;
-  if(Pinia.signzhi==='工位1'){
+  if(value==='工位1'){
     waibu = "0";
   }
-  else if(Pinia.signzhi==='工位2'){
+  else if(value==='工位2'){
     waibu = "1";
   }
   else{
@@ -520,32 +553,32 @@ async function jiance(value){
     //存到数据库中--原图和结果图
     const result_insert = await axios.post('/api/insert_img',{
       image: [imageData,result.data['processed_image']],
-      d_no: Pinia.signzhi,
+      d_no: value,
       person: result.data['inference_results'][index1]['class'],
       confidence: result.data['inference_results'][index1]['confidence']
     }) 
     //检测到了人的分支下请求后端是否进行设备的管控
-    await axios.get(`/api/operate_device?d_no=${Pinia.signzhi}`);
+    await axios.get(`/api/operate_device?d_no=${signzhi.value}`);
   }else{
     if(result.data['inference_results']&&result.data['inference_results'].length>0){//没人但是存在物品时
       //存到数据库中--原图和结果图
       const result_insert = await axios.post('/api/insert_img',{
         image: [imageData,result.data['processed_image']],
-        d_no: Pinia.signzhi,
+        d_no: value,
         person: result.data['inference_results'][0]['class'],
         confidence: result.data['inference_results'][0]['confidence']
       }) 
     }else{
       await axios.post(`/api/insert_img`,{
         image: [imageData,imageData],
-        d_no: Pinia.signzhi
+        d_no: value
       });
     }
     //没人情况下主动发送关灯指令
-    await axios.get(`/api/zhiling/led?d_no=${Pinia.signzhi}&content=关`);
+    await axios.get(`/api/zhiling/led?d_no=${value}&content=关`);
   }
   //获取库中最新记录
-  const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
+  const result_newest = await axios.get(`/api/recent/img?d_no=${value}`);
   //实时更新图片内容--在当前机房的情况下
   src1.value = "../../public/" + result_newest.data.field1;
   src2.value = "../../public/" + result_newest.data.field2;
@@ -555,15 +588,13 @@ async function jiance(value){
   time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
   REF.value = result_newest.data.result;
   REF_confidence.value = result_newest.data.confidence;
-  alert("成功完成本次的检测");
+  // alert("成功完成本次的检测");
 }
-
 
 //定义自动检测的定时器变量--三者
 let auto_x;
 let auto_y;
 let auto_z;
-
 
 //定义检测方法--全工位
 async function start_jiance_all(){
@@ -571,7 +602,7 @@ async function start_jiance_all(){
   //封装三个维度通用的公共检测代码--自动模式下
   async function all_auto_jiance(value){//返回自定义的定时器
     //截图
-    const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+value.split("工位")[1]);
+    const result1 = await axios.get('http://192.168.1.102:5000/api/screenshot/'+`${Number(value.split("工位")[1])-1}`);
     const imageData = result1.data['screenshot'];
     //发出检测请求
     const result = await axios.post('http://192.168.1.102:5000/infer', {
@@ -592,13 +623,13 @@ async function start_jiance_all(){
       //存到数据库中--原图和结果图
       const result_insert = await axios.post('/api/insert_img',{
         image: [imageData,result.data['processed_image']],
-        d_no: Pinia.signzhi,
+        d_no: signzhi.value,
         person: result.data['inference_results'][index1]['class'],
         confidence: result.data['inference_results'][index1]['confidence']
       }) 
       //更新面板状态
       //获取库中最新记录
-      const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
+      const result_newest = await axios.get(`/api/recent/img?d_no=${signzhi.value}`);
       //实时更新图片内容--在当前机房的情况下
       src1.value = "../../public/" + result_newest.data.field1;
       src2.value = "../../public/" + result_newest.data.field2;
@@ -655,8 +686,8 @@ async function end_jiance_all() {
   action_Array.value = result11.data;
   date_Array.value.forEach((item, index) => {
     console.log("item[0]:"+item[0]);
-    console.log("signzhi:"+signzhi);
-    if (item[0] === signzhi) {
+    console.log("signzhi:"+signzhi.value);
+    if (item[0] === signzhi.value) {
       nowArray.value = item;
     }
   })
@@ -668,7 +699,7 @@ async function end_jiance_all() {
     tem_array.value[1].push(item);
   })
   action_Array.value.forEach((item, index) => {
-    if (item[0] === signzhi1) {
+    if (item[0] === signzhi1.value) {
       nowArray1.value = item;
     }
   })
@@ -963,6 +994,7 @@ async function end_jiance_all() {
   y_zhi0(OneMinute(time_array, "0"), "action");
 })()
 
+
 //定义手动自动模式修改的方法变量
 let change_to_auto:any = ()=>{};
 let change_to_no_auto:any = ()=>{};
@@ -977,6 +1009,21 @@ onMounted(async () => {
   //获取全局自动检测button
   const start_all_button = document.querySelector(".jiance_container>button:nth-child(1)") as HTMLElement;
   const end_all_button = document.querySelector(".jiance_container>button:nth-child(2)") as HTMLElement;
+  //封装重置样式的方法
+  repeat_style=(value)=>{
+    if(huancun_array[value]===0){
+      no_auto_button.classList.add('button_active');
+      auto_button.classList.remove('button_active');
+      jiance_button.style.display = 'block';
+    }else{
+      no_auto_button.classList.remove('button_active');
+      auto_button.classList.add('button_active');
+      jiance_button.style.display = 'none';
+    }
+    // //启用所有button
+    // auto_button.disabled = false;
+    // no_auto_button.disabled = false;
+  }
   //定义手动自动切换方法
   change_to_auto = () => {
     //隐藏检测按钮
@@ -986,30 +1033,66 @@ onMounted(async () => {
     start_all_button.disabled = true;
     end_all_button.disabled = true;
 
+    //记录当前工位下的button样式状态
+    huancun_array[Number(signzhi.value.split("工位")[1])-1] = 1;
+
     //修改样式
     auto_button.classList.add('button_active');
     no_auto_button.classList.remove('button_active');
-    //清除先前定时器
-    clearInterval(z);
-    //启动检测定时器
-    z = setInterval(()=>{
-      //主动执行检测内容
-      jiance();
-    },5000);
+    //清除定时器
+    if(signzhi.value==='工位1'){
+      clearInterval(Interval_array[0]);
+      //启动检测定时器后定向启动
+      Interval_array[0] = setInterval(()=>{
+        //主动执行检测内容
+        jiance('工位1');
+      },5000);
+      have_array[0] = true;
+    }else if(signzhi.value==='工位2'){
+      clearInterval(Interval_array[1]);
+      //启动检测定时器
+      Interval_array[1] = setInterval(()=>{
+        //主动执行检测内容
+        jiance('工位2');
+      },5000);
+      have_array[1] = true;
+    }else {
+      clearInterval(Interval_array[2]);
+      //启动检测定时器
+      Interval_array[2] = setInterval(()=>{
+        //主动执行检测内容
+        jiance('工位3');
+      },5000);
+      have_array[2] = true;
+    }
   }
   change_to_no_auto = () => {
     console.log('成功触');
-    //启用全局button
-    start_all_button.disabled = false;
-    end_all_button.disabled = false;
+    //清除定时器
+    if(signzhi.value==='工位1'){
+      clearInterval(Interval_array[0]);
+      have_array[0] = false;
+    }else if(signzhi.value==='工位2'){
+      clearInterval(Interval_array[1]);
+      have_array[1] = false;
+    }else {
+      clearInterval(Interval_array[2]);
+      have_array[2] = false;
+    }
+    if(!have_array[0]&&!have_array[1]&&!have_array[2]){
+      //启用全局button
+      start_all_button.disabled = false;
+      end_all_button.disabled = false;
+    }
+    
+    //记录当前工位下的button样式状态
+    huancun_array[Number(signzhi.value.split("工位")[1])-1] = 0;
 
     //显示检测按钮
     jiance_button.style.display = 'block';
     //修改样式
     auto_button.classList.remove('button_active');
     no_auto_button.classList.add('button_active');
-    //清除定时器
-    clearInterval(z);
   }
   //定义全局自动检测button方法
   start_all_jiance = ()=>{
@@ -1017,8 +1100,6 @@ onMounted(async () => {
     auto_button.disabled = true;
     no_auto_button.disabled = true;
     jiance_button.disabled = true;
-
-
     //屏蔽单工位的自动检测button
     start_all_button.style.display = 'hidden';
     end_all_button.style.display = 'span';
@@ -1035,7 +1116,6 @@ onMounted(async () => {
     auto_button.disabled = false;  
     no_auto_button.disabled = false;
     jiance_button.disabled = false;
-
     //显示单工位的自动检测button
     start_all_button.style.display = 'span';
     end_all_button.style.display = 'hidden';
@@ -1048,27 +1128,30 @@ onMounted(async () => {
 
 
 
-  //监控相关内容
-  const cameras = [
-    {
-      id: 'camera_1',           // 摄像头的唯一标识符
-      name: '工位1',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
-    },
-    {
-      id: 'camera_2',           // 摄像头的唯一标识符
-      name: '工位2',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/1',  // 1表示第二个摄像头
-    },
-    {
-      id: 'camera_3',           // 摄像头的唯一标识符
-      name: '工位3',            // 摄像头名称
-      url: 'http://192.168.1.102:5000/stream/2',  // 2表示第三个摄像头
-    }
-  ];
-  cameras.forEach((item)=>{
-    if(item.name===Pinia.signzhi) src0.value = item.url;
-  });
+  // //监控相关内容
+  // const cameras = [
+  //   {
+  //     id: 'camera_1',           // 摄像头的唯一标识符
+  //     name: '工位1',            // 摄像头名称
+  //     url: 'http://192.168.1.102:5000/stream/0',  // 摄像头视频流对象，0表示默认摄像头
+  //   },
+  //   {
+  //     id: 'camera_2',           // 摄像头的唯一标识符
+  //     name: '工位2',            // 摄像头名称
+  //     url: 'http://192.168.1.102:5000/stream/1',  // 1表示第二个摄像头
+  //   },
+  //   {
+  //     id: 'camera_3',           // 摄像头的唯一标识符
+  //     name: '工位3',            // 摄像头名称
+  //     url: 'http://192.168.1.102:5000/stream/2',  // 2表示第三个摄像头
+  //   }
+  // ];
+  // cameras.forEach((item)=>{
+  //   if(item.name===signzhi.value) src0.value = item.url;
+  // });
+
+  //调用摄像头显示逻辑函数
+  show_camera();
   
   x = setInterval(async () => {
     const result_alarm = await axios.get("/api/alarm");
@@ -1079,13 +1162,11 @@ onMounted(async () => {
     date_Array.value = result1.data;
     a_length.value = date_Array.value.length;
     date_Array.value.forEach((item, index) => {
-      if (item[0] === signzhi) {
+      if (item[0] === signzhi.value) {
         nowArray.value = item;
       }
     })
     
-
-
     tem_array.value = [, []];
     tem_array.value[0] = nowArray.value[0];
     nowArray.value[1].forEach((item, index) => {
@@ -1109,12 +1190,13 @@ onMounted(async () => {
     }
     y_zhi(OneMinute(time_array, "0"), "device");
   }, 2000);
+
   y = setInterval(async () => {
     const result1 = await axios.get("/api/recent/action");
     action_Array.value = result1.data;
     b_length.value = action_Array.value.length;
     action_Array.value.forEach((item, index) => {
-    if (item[0] === signzhi1) {
+    if (item[0] === signzhi1.value) {
         nowArray1.value = item;
       }
     })
@@ -1142,6 +1224,7 @@ onMounted(async () => {
 
     y_zhi(OneMinute(time_array, "0"), "action");
   }, 2000);
+
   // 设备信息图像切换按钮
   change = async (value) => {
     const zhexian_btn = document.querySelector("#zhexian") as HTMLElement;
@@ -1158,7 +1241,7 @@ onMounted(async () => {
       a_length.value = date_Array.value.length;
       nowArray.value = [];
       date_Array.value.forEach((item, index) => {
-        if (item[0] === signzhi) {
+        if (item[0] === signzhi.value) {
           nowArray.value = item;
         }
       })
@@ -1197,7 +1280,7 @@ onMounted(async () => {
         a_length.value = date_Array.value.length;
         nowArray.value = [];
         date_Array.value.forEach((item, index) => {
-          if (item[0] === signzhi) {
+          if (item[0] === signzhi.value) {
             nowArray.value = item;
           }
         })
@@ -1242,7 +1325,7 @@ onMounted(async () => {
       a_length.value = date_Array.value.length;
       nowArray.value = [];
       date_Array.value.forEach((item, index) => {
-        if (item[0] === signzhi) {
+        if (item[0] === signzhi.value) {
           nowArray.value = item;
         }
       })
@@ -1287,7 +1370,7 @@ onMounted(async () => {
         a_length.value = date_Array.value.length;
         nowArray.value = [];
         date_Array.value.forEach((item, index) => {
-          if (item[0] === signzhi) {
+          if (item[0] === signzhi.value) {
             nowArray.value = item;
           }
         })
@@ -1343,7 +1426,7 @@ onMounted(async () => {
       b_length.value = action_Array.value.length;
       nowArray1.value = [];
       action_Array.value.forEach((item, index) => {
-        if (item[0] === signzhi1) {
+        if (item[0] === signzhi1.value) {
           nowArray1.value = item;
         }
       })
@@ -1381,7 +1464,7 @@ onMounted(async () => {
         b_length.value = action_Array.value.length;
         nowArray1.value = [];
         action_Array.value.forEach((item, index) => {
-          if (item[0] === signzhi1) {
+          if (item[0] === signzhi1.value) {
             nowArray1.value = item;
           }
         })
@@ -1425,7 +1508,7 @@ onMounted(async () => {
       b_length.value = action_Array.value.length;
       nowArray1.value = [];
       action_Array.value.forEach((item, index) => {
-        if (item[0] === signzhi1) {
+        if (item[0] === signzhi1.value) {
           nowArray1.value = item;
         }
       })
@@ -1464,7 +1547,7 @@ onMounted(async () => {
         b_length.value = action_Array.value.length;
         nowArray1.value = [];
         action_Array.value.forEach((item, index) => {
-          if (item[0] === signzhi1) {
+          if (item[0] === signzhi1.value) {
             nowArray1.value = item;
           }
         })
@@ -1497,11 +1580,9 @@ onMounted(async () => {
       }, 2000);
     }
   }
-
-
   //初始化对照资源src1、src2、time
   //获取库中最新记录
-  const result_newest = await axios.get(`/api/recent/img?d_no=${Pinia.signzhi}`);
+  const result_newest = await axios.get(`/api/recent/img?d_no=${signzhi.value}`);
   //实时更新图片内容--在当前机房的情况下
   src1.value = "../../public/" + result_newest.data.field1;
   src2.value = "../../public/" + result_newest.data.field2;
@@ -1511,8 +1592,6 @@ onMounted(async () => {
   time.value = result_newest.data.c_time;//最后元素规定为时间值的情况
   REF.value = result_newest.data.result;
   REF_confidence.value = result_newest.data.confidence;
-
-
 });
 // 上述代码需要注意的是：这个语句（setup语法糖的部分中包含了onMounted()和onUpdated()的情况）中，在多次的标签元素的动态修改的时候
 //(由外部互动产生的标签元素),在onUpdated这个钩子会因每次的标签元素发生动态的改变而多次执行而setup()本身的内容(例如let i=0)和onMOounted仅执行一次,并且需要注意的是每次onUpdated执行的位置发生在原先的位置的地方进行叠加

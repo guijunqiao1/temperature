@@ -86,3 +86,8 @@ App.vue页面：
 /sensor_set==>sensor_set>传感设置页面
 /ex==>ex>实验页面
 /==>/Device>导航页面
+
+
+
+
+注意历史数据查询需要和times联动的删改问题

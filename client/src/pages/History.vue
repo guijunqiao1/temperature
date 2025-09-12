@@ -28,7 +28,7 @@
 
       <!-- 测试次数 -->
       <el-dropdown class="control-dropdown">
-        <el-button type="primary" v-if="Pinia.test_type_len > 1" class="control-btn">
+        <el-button type="primary"  class="control-btn">
           测试次数<el-icon class="el-icon--right"><arrow-down /></el-icon>
         </el-button>
         <template #dropdown>
@@ -43,7 +43,7 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <div class="only1" v-if="Pinia.test_type_len < 1">
+      <div class="only1">
         当前选中的测试次数：{{ Pinia.times }}
       </div>
     </div>
@@ -478,14 +478,14 @@ function enough() {
           sum8 += Number(device_array.value[i][8]);
         }
         //设备赋值
-        chartOption1.value.series[0].data.push(sum1);
-        chartOption1.value.series[0].data.push(sum2);
-        chartOption1.value.series[0].data.push(sum3);
-        chartOption1.value.series[0].data.push(sum4);
-        chartOption1.value.series[0].data.push(sum5);
-        chartOption1.value.series[0].data.push(sum6);
-        chartOption1.value.series[0].data.push(sum7);
-        chartOption1.value.series[0].data.push(sum8);
+        chartOption1.value.series[0].data.push(sum1.toFixed(2));
+        chartOption1.value.series[0].data.push(sum2.toFixed(2));
+        chartOption1.value.series[0].data.push(sum3.toFixed(2));
+        chartOption1.value.series[0].data.push(sum4.toFixed(2));
+        chartOption1.value.series[0].data.push(sum5.toFixed(2));
+        chartOption1.value.series[0].data.push(sum6.toFixed(2));
+        chartOption1.value.series[0].data.push(sum7.toFixed(2));
+        chartOption1.value.series[0].data.push(sum8.toFixed(2));
 
         //修改柱状图标题
         //设备判断
@@ -1226,6 +1226,7 @@ onMounted(async () => {
 
 .control-dropdown {
   margin: 0;
+  left:50px;
 }
 
 .control-btn {

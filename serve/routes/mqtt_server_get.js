@@ -139,7 +139,7 @@ let tem = 0;
 // 方式：传感器直接支持MQTT 
 // 控制台客户端对象         192.168.218.141'
 
-export const client = mqtt.connect('mqtt://192.168.1.102',{
+export const client = mqtt.connect('mqtt://127.0.0.1',{
   clientId:"client_control",//唯一标识符
 });
 
@@ -250,6 +250,8 @@ export async function beifen(value1,value2){//一号位参数用于确定发送�
   client.publish(value2[0],JSON.stringify(value2[1]),{qos:1});
   await delay(1000);//单位为ms 
   client.publish(value2[0],JSON.stringify(value2[1]),{qos:1});
+
+  //首先进行指令发送 
 
   // 多设备指令备份
   // active_array.forEach((item,index)=>{
@@ -422,7 +424,7 @@ client.on('message',async (topic, message)=>{
     reflect['humility1'] = sensorTolittle(humility1);
     reflect['humility2'] = sensorTolittle(humility2);
     reflect['humility3'] = sensorTolittle(humility3);
-    reflect['light1'] = light1;
+    reflect['light1'] = light1; 
     reflect['light2'] = light2;
     reflect['light3'] = light3;
     reflect['I1'] = I1;
@@ -591,57 +593,49 @@ client.on('message',async (topic, message)=>{
     }
 
     console.log("条件就差一点点:");
-    console.log("gongwei:"+gongwei);
     console.log("test:"+test);
     //首先判断值是否合法后进行插入
-    if(gongwei==='工位1'){
-      console.log("进入啦啦啦啦");
-      //当处于test的过程的情况下
-      if(!temperature_panduan(temperature1)&&!smoke_panduan(humility1)&&!shuiwei_panduan(light1)){ 
-        gong_right(1);
-      }else{
-        //插入告警表，最后发送错误消息到前端监听的路由中
-        if(temperature_panduan(temperature1)){//温度出错
-          gong_tem(1,temperature_panduan(temperature1));
-        }
-        if(smoke_panduan(humility1)){//烟雾出错
-          gong_smo(1,smoke_panduan(humility1));
-        }
-        if(shuiwei_panduan(light1)){//水位出错
-          gong_wat(1,shuiwei_panduan(light1));
-        }
+    //当处于test的过程的情况下
+    if(!temperature_panduan(temperature1)&&!smoke_panduan(humility1)&&!shuiwei_panduan(light1)){ 
+      gong_right(1);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(temperature_panduan(temperature1)){//温度出错
+        gong_tem(1,temperature_panduan(temperature1));
+      }
+      if(smoke_panduan(humility1)){//烟雾出错
+        gong_smo(1,smoke_panduan(humility1));
+      }
+      if(shuiwei_panduan(light1)){//水位出错
+        gong_wat(1,shuiwei_panduan(light1));
       }
     }
-    if(gongwei==='工位2'){
-      if(!temperature_panduan(temperature2)&&!smoke_panduan(humility2)&&!shuiwei_panduan(light2)){
-        gong_right(2);
-      }else{
-        //插入告警表，最后发送错误消息到前端监听的路由中
-        if(temperature_panduan(temperature2)){//温度出错
-          gong_tem(2,temperature_panduan(temperature2));
-        }
-        if(smoke_panduan(humility2)){//烟雾出错
-          gong_smo(2,smoke_panduan(humility2));
-        }
-        if(shuiwei_panduan(light2)){//水位出错
-          gong_wat(2,shuiwei_panduan(light2));
-        }
+    if(!temperature_panduan(temperature2)&&!smoke_panduan(humility2)&&!shuiwei_panduan(light2)){
+      gong_right(2);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(temperature_panduan(temperature2)){//温度出错
+        gong_tem(2,temperature_panduan(temperature2));
+      }
+      if(smoke_panduan(humility2)){//烟雾出错
+        gong_smo(2,smoke_panduan(humility2));
+      }
+      if(shuiwei_panduan(light2)){//水位出错
+        gong_wat(2,shuiwei_panduan(light2));
       }
     }
-    if(gongwei==='工位3'){
-      if(!temperature_panduan(temperature3)&&!smoke_panduan(humility3)&&!shuiwei_panduan(light3)){
-        gong_right(3);
-      }else{
-        //插入告警表，最后发送错误消息到前端监听的路由中
-        if(temperature_panduan(temperature3)){//温度出错
-          gong_tem(3,temperature_panduan(temperature3));
-        }
-        if(smoke_panduan(humility3)){//烟雾出错
-          gong_smo(3,smoke_panduan(humility3));
-        }
-        if(shuiwei_panduan(light3)){//水位出错
-          gong_wat(3,shuiwei_panduan(light3));
-        }
+    if(!temperature_panduan(temperature3)&&!smoke_panduan(humility3)&&!shuiwei_panduan(light3)){
+      gong_right(3);
+    }else{
+      //插入告警表，最后发送错误消息到前端监听的路由中
+      if(temperature_panduan(temperature3)){//温度出错
+        gong_tem(3,temperature_panduan(temperature3));
+      }
+      if(smoke_panduan(humility3)){//烟雾出错
+        gong_smo(3,smoke_panduan(humility3));
+      }
+      if(shuiwei_panduan(light3)){//水位出错
+        gong_wat(3,shuiwei_panduan(light3));
       }
     }
   }
@@ -754,13 +748,11 @@ client.on('message',async (topic, message)=>{
     WHERE d_no = '工位${current.split("n")[1][0]}';
     `);
 
-
     //设备修改记录添加
     const [rows1] = await connection1.execute(`
     INSERT INTO operate_history(place,operate,ctime,device)
     VALUES ('工位${current.split("n")[1][0]}','修改为${(current.split('_')[1])==='0'?'关':'开'}','${getFormattedDate1()}','电磁阀开关')
     `);
-
   }
   // else if (topic==="alarm"){
   //   const { Vstatus } = JSON.parse(message);
@@ -830,6 +822,6 @@ client.on('message',async (topic, message)=>{
 
 
 //模拟发送传感器数据的客户端
-// setInterval(async()=>{
-//   client.publish("sensorData",JSON.stringify({ temperature1:1,temperature2:2,temperature3:3,humility1:1,humility2:2,humility3:3,light1:1,light2:2,light3:3,I:1,V:2,type:"实时数据"}),{qos:1});
-// },1000);
+setInterval(async()=>{
+  client.publish("sensorData",JSON.stringify({ temperature1:27,temperature2:27,temperature3:27,humility1:35,humility2:35,humility3:35,light1:1,light2:2,light3:3,I1:1,V1:2,I2:1,V2:2,I3:1,V3:2,type:"实时数据"}),{qos:1});
+},1000);

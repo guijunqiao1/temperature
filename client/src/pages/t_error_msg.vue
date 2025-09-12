@@ -276,9 +276,9 @@ async function xuanran(value){
   const result_array = [0,0,0];//分别表示的是温度、湿度、光照过界
   //进行配置变量的维度分配
   value.forEach((item,index)=>{
-    if(item.e_msg==='光照过界'){
+    if(item[1][0]==='光'){
       result_array[2]++;
-    }else if(item.e_msg==='温度过界'){
+    }else if(item[1][0]==='温'){
       result_array[0]++;
     }else{
       result_array[1]++;
